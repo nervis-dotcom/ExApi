@@ -1,0 +1,89 @@
+package ex.nervisking.config;
+
+import ex.nervisking.ExApi;
+import ex.nervisking.ModelManager.Configurate;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+public abstract class FolderConfigLoand {
+
+    protected JavaPlugin plugin;
+    protected String folderName;
+    protected ArrayList<CustomConfig> configFiles;
+
+    public FolderConfigLoand() {
+        this.configFiles = new ArrayList<>();
+        this.plugin = ExApi.getPlugin();
+        this.folderName = folderName();
+        this.create();
+        this.createFolder();
+        this.registerConfigFiles();
+    }
+
+    public void reloadConfigs() {
+        this.configFiles.clear();
+        this.registerConfigFiles();
+        this.loadConfigs();
+    }
+
+    private void createFolder() {
+        File folder;
+        try {
+            folder = new File(plugin.getDataFolder() + File.separator + folderName);
+            if (!folder.exists()) {
+                folder.mkdirs();
+            }
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public ArrayList<CustomConfig> getConfigs() {
+        return this.configFiles;
+    }
+
+    public CustomConfig getConfigFile(String pathName) {
+        for (CustomConfig configFile : configFiles) {
+            if (configFile.getPath().equals(pathName)) {
+                return configFile;
+            }
+        }
+        return null;
+    }
+
+    private void registerConfigFiles() {
+        String path = plugin.getDataFolder() + File.separator + folderName;
+        File folder = new File(path);
+        File[] listOfFiles = folder.listFiles();
+        for (File file : Objects.requireNonNull(listOfFiles)) {
+            if (file.isFile()) {
+                registerConfigFile(file.getName());
+            }
+        }
+    }
+
+    public CustomConfig registerConfigFile(String pathName) {
+        CustomConfig config = new CustomConfig(pathName, folderName, plugin, true);
+        config.registerConfig();
+        configFiles.add(config);
+
+        return config;
+    }
+
+    private void create() {
+        for (Configurate files : createConfigFiles()) {
+            CustomConfig configFile = new CustomConfig(files.fileName(), files.folderName(), plugin, false);
+            configFile.registerConfig();
+        }
+    }
+
+    public abstract void loadConfigs();
+    public abstract String folderName();
+    public List<Configurate> createConfigFiles() {
+        return List.of();
+    }
+}
