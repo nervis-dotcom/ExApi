@@ -110,7 +110,7 @@ public class PyfigletMessage {
     public void build() {
         ConsoleCommandSender console = Bukkit.getConsoleSender();
         for (String line : pyfiglet) {
-            line = utilsManagers.applyGradient(line.replace("%server%", ExApi.getServerVersion())
+            line = utilsManagers.applyGradient(line.replace("%server%", ExApi.getServerversion())
                     .replace("%version%", ExApi.getPluginVersion())
                     .replace("%autor%", ExApi.getPluginAuthor())
                     .replace("%status%", status ? "Iniciado" : "Apagado")

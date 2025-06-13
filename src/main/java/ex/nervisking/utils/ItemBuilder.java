@@ -42,6 +42,7 @@ public class ItemBuilder {
     private final ItemStack item;
     private final ItemMeta meta;
     private final PersistentDataContainer container;
+    private String texture = null;
     private Player player = null;
     private static boolean error = false;
     public final static String CLOSE = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDM0NWU1ZmNlMmZjZmZmNzhjZGFjNjVlZDg4MTkxOGM3OWMzOGU4NTVlYmJjMTkyYzk3YzU3ODRjMzJkMzc4In19fQ==";
@@ -117,7 +118,8 @@ public class ItemBuilder {
         if (material != Material.AIR) {
             this.item = new ItemStack(material, count);
         } else if (value.startsWith("ey") || value.startsWith("[texture]")){
-            this.item = ItemUtils.createCustomHeadItem(value.substring("[texture]".length()).trim(), 1);
+            this.texture = value.substring("[texture]".length()).trim();
+            this.item = new ItemStack(Material.PLAYER_HEAD, 1);
         } else if (value.startsWith("[user]")){
             this.item = createSkullFromUsername(value.substring("[user]".length()).trim());
         } else if (value.toLowerCase().startsWith("[random]")){
@@ -137,6 +139,9 @@ public class ItemBuilder {
 
         this.meta = item.getItemMeta();
         this.container = meta.getPersistentDataContainer();
+        if (texture != null && !texture.isEmpty()) {
+            this.SkullTexture(texture);
+        }
     }
 
     public ItemBuilder(String value) {
@@ -151,7 +156,8 @@ public class ItemBuilder {
         if (material != Material.AIR) {
             this.item = new ItemStack(material, 1);
         } else if (value.startsWith("ey") || value.startsWith("[texture]")){
-            this.item = ItemUtils.createCustomHeadItem(value.substring("[texture]".length()).trim(), 1);
+            this.texture = value.substring("[texture]".length()).trim();
+            this.item = new ItemStack(Material.PLAYER_HEAD, 1);
         } else if (value.startsWith("[user]")){
             this.item = createSkullFromUsername(value.substring("[user]".length()).trim());
         } else if (value.toLowerCase().startsWith("[random]")){
@@ -171,6 +177,9 @@ public class ItemBuilder {
 
         this.meta = item.getItemMeta();
         this.container = meta.getPersistentDataContainer();
+        if (texture != null && !texture.isEmpty()) {
+            this.SkullTexture(texture);
+        }
     }
 
     public ItemBuilder(Player player, String value) {
@@ -184,8 +193,9 @@ public class ItemBuilder {
         Material material = getMaterial(value);
         if (material != Material.AIR) {
             this.item = new ItemStack(material, 1);
-        } else if (value.startsWith("ey")) {
-            this.item = ItemUtils.createCustomHeadItem(value, 1);
+        } else if (value.startsWith("ey") || value.startsWith("[texture]")) {
+            this.texture = value.substring("[texture]".length()).trim();
+            this.item = new ItemStack(Material.PLAYER_HEAD, 1);
         } else if (value.toLowerCase().startsWith("random=")){
             RDMaterial type = RDMaterial.fromString(value.split("=")[1]);
             if (type != null) {
@@ -203,6 +213,9 @@ public class ItemBuilder {
         this.player = player;
         this.meta = item.getItemMeta();
         this.container = meta.getPersistentDataContainer();
+        if (texture != null && !texture.isEmpty()) {
+            this.SkullTexture(texture);
+        }
     }
 
     public ItemBuilder(UUID uuid) {
@@ -242,7 +255,7 @@ public class ItemBuilder {
                 if (offlinePlayer.isOnline()) {
                     skullMeta.setPlayerProfile(offlinePlayer.getPlayerProfile());
                 } else {
-                    return ItemUtils.createCustomHeadItem(OFFLINE, 1);
+                    return createCustomHeadItem(OFFLINE, 1);
                 }
             } else {
                 return createErrorItem();
@@ -262,11 +275,53 @@ public class ItemBuilder {
                 if (offlinePlayer.isOnline()) {
                     skullMeta.setPlayerProfile(offlinePlayer.getPlayerProfile());
                 } else {
-                    return ItemUtils.createCustomHeadItem(OFFLINE, 1);
+                    return createCustomHeadItem(OFFLINE, 1);
                 }
             } else {
                 return createErrorItem();
             }
+            head.setItemMeta(skullMeta);
+        }
+        return head;
+    }
+
+    public static ItemStack createCustomHeadItem(String texture, int amount) {
+        ItemStack head = new ItemStack(Material.PLAYER_HEAD);
+        head.setAmount(amount);
+        if (head.getItemMeta() instanceof SkullMeta skullMeta) {
+            ServerVersion serverVersion = ExApi.serverVersion;
+            if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_20_R2)){
+                PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID());
+                PlayerTextures textures = profile.getTextures();
+                URL url;
+                try {
+                    String decoded = new String(Base64.getDecoder().decode(texture));
+                    String decodedFormatted = decoded.replaceAll("\\s", "");
+                    JsonObject jsonObject = new Gson().fromJson(decodedFormatted, JsonObject.class);
+                    String urlText = jsonObject.get("textures").getAsJsonObject().get("SKIN").getAsJsonObject().get("url").getAsString();
+
+                    url = new URL(urlText);
+                } catch (Exception error) {
+                    error.printStackTrace();
+                    return head;
+                }
+                textures.setSkin(url);
+                profile.setTextures(textures);
+
+                skullMeta.setOwnerProfile(profile);
+            } else {
+                GameProfile profile = new GameProfile(UUID.randomUUID(), "");
+                profile.getProperties().put("textures", new Property("textures", texture));
+
+                try {
+                    Field profileField = skullMeta.getClass().getDeclaredField("profile");
+                    profileField.setAccessible(true);
+                    profileField.set(skullMeta, profile);
+                } catch (IllegalArgumentException | NoSuchFieldException | SecurityException |
+                         IllegalAccessException ignored) {
+                }
+            }
+
             head.setItemMeta(skullMeta);
         }
         return head;
@@ -547,7 +602,7 @@ public class ItemBuilder {
                 if (offlinePlayer.isOnline()) {
                     skullMeta.setPlayerProfile(offlinePlayer.getPlayerProfile());
                 } else {
-                    return SkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTBkZjU2NDM3MDA1Nzk1Njc5NDk5NTQ4NDk2ODM4ZGJhY2NlYWY3MDVjZmNhZDk5NGFiMjk0YmZmODRlMjk5ZiJ9fX0=");
+                    return SkullTexture(OFFLINE);
                 }
             }
         }
@@ -564,7 +619,7 @@ public class ItemBuilder {
                 if (offlinePlayer.isOnline()) {
                     skullMeta.setPlayerProfile(offlinePlayer.getPlayerProfile());
                 } else {
-                    return SkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTBkZjU2NDM3MDA1Nzk1Njc5NDk5NTQ4NDk2ODM4ZGJhY2NlYWY3MDVjZmNhZDk5NGFiMjk0YmZmODRlMjk5ZiJ9fX0=");
+                    return SkullTexture(OFFLINE);
                 }
             }
         }
@@ -576,8 +631,8 @@ public class ItemBuilder {
             return this;
         }
         if (meta instanceof SkullMeta skullMeta) {
-            //if (ExApi.getServerVersion().startsWith("1.21")) {
-            if (ExApi.equalOrGreaterVersion("1.21")) {
+            ServerVersion serverVersion = ExApi.serverVersion;
+            if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_20_R2)){
                 PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID());
                 PlayerTextures textures = profile.getTextures();
                 URL url;
@@ -588,7 +643,8 @@ public class ItemBuilder {
                     String urlText = jsonObject.get("textures").getAsJsonObject().get("SKIN").getAsJsonObject().get("url").getAsString();
 
                     url = new URL(urlText);
-                } catch (Exception ignored) {
+                } catch (Exception error) {
+                    error.printStackTrace();
                     return this;
                 }
                 textures.setSkin(url);
@@ -821,62 +877,6 @@ public class ItemBuilder {
         throw new IllegalArgumentException("Enchantment '" + name + "' does not exist");
 
     }
-
-//    // itemedit banner color id color
-//    private ItemBuilder colorPattern(String[] args) {
-//            BannerMeta meta = (BannerMeta) item.getItemMeta();
-//            int id = Integer.parseInt(args[2]) - 1;
-//            PatternType type = meta.getPattern(id).getPattern();
-//            DyeColor color = Aliases.COLOR.convertAlias(args[3]);
-//            if (color == null) {
-//                return this;
-//            }
-//            meta.setPattern(id, new Pattern(color, type));
-//            item.setItemMeta(meta);
-//
-//            return this;
-//    }
-//
-//    private void removePattern(String[] args) {
-//        try {
-//            BannerMeta meta = (BannerMeta) item.getItemMeta();
-//            int id = Integer.parseInt(args[2]) - 1;
-//            List<Pattern> list = new ArrayList<>(meta.getPatterns());
-//            list.remove(id);
-//            meta.setPatterns(list);
-//            item.setItemMeta(meta);
-//        } catch (Exception e) {
-//        }
-//    }
-//
-//    private void setPattern(String alias, String[] args) {
-//        try {
-//            BannerMeta meta = (BannerMeta) item.getItemMeta();
-//            PatternType type = Aliases.PATTERN_TYPE.convertAlias(args[2]);
-//            DyeColor color = Aliases.COLOR.convertAlias(args[3]);
-//            if (type == null || color == null) {
-//                return;
-//            }
-//            int id = Integer.parseInt(args[4]) - 1;
-//            meta.setPattern(id, new Pattern(color, type));
-//            item.setItemMeta(meta);
-//        } catch (Exception e) {
-//        }
-//    }
-//
-//    private void addPattern(String[] args) {
-//        try {
-//            BannerMeta meta = (BannerMeta) item.getItemMeta();
-//            PatternType type = Aliases.PATTERN_TYPE.convertAlias(args[2]);
-//            DyeColor color = Aliases.COLOR.convertAlias(args[3]);
-//            if (type == null || color == null) {
-//                return;
-//            }
-//            meta.addPattern(new Pattern(color, type));
-//            item.setItemMeta(meta);
-//        } catch (Exception e) {
-//        }
-//    }
 
     // ======= Finalizer =======
 

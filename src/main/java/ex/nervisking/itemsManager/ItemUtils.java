@@ -1,12 +1,12 @@
 package ex.nervisking.itemsManager;
 
 import java.lang.reflect.Field;
-import java.util.HashSet;
 import java.util.UUID;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import ex.nervisking.ExApi;
+import ex.nervisking.utils.ServerVersion;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -90,8 +90,8 @@ public class ItemUtils {
         ItemStack item = new ItemStack(Material.PLAYER_HEAD);
         item.setAmount(amount);
         if(item.getItemMeta() instanceof SkullMeta skullMeta && texture != null){
-            // Verificar versión del servidor
-            if (ExApi.getServerVersion().startsWith("1.21")) {
+            ServerVersion serverVersion = ExApi.serverVersion;
+            if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_20_R2)){
                 PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID());
                 PlayerTextures textures = profile.getTextures();
                 URL url;
@@ -118,8 +118,8 @@ public class ItemUtils {
                     Field profileField = skullMeta.getClass().getDeclaredField("profile");
                     profileField.setAccessible(true);
                     profileField.set(skullMeta, profile);
-                } catch (IllegalArgumentException | NoSuchFieldException | SecurityException | IllegalAccessException error) {
-                    error.printStackTrace();
+                } catch (IllegalArgumentException | NoSuchFieldException | SecurityException |
+                         IllegalAccessException ignored) {
                 }
             }
             item.setItemMeta(skullMeta);
@@ -132,7 +132,7 @@ public class ItemUtils {
     public static void createCustomHeadItem(ItemStack item, String texture) {
         if (item.getItemMeta() instanceof SkullMeta skullMeta && texture != null) {
             // Verificar versión del servidor
-            if (ExApi.getServerVersion().startsWith("1.21")) {
+            if (ExApi.getServerversion().startsWith("1.21")) {
                 PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID());
                 PlayerTextures textures = profile.getTextures();
                 URL url;

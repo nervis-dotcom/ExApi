@@ -18,7 +18,7 @@ public abstract class ExPlugin extends JavaPlugin {
     private Utils utils;
     public CommandManager commandManager;
 
-    protected abstract void Load();
+    protected void Load() {}
     protected abstract void Enabled();
     protected abstract void Disable();
     protected abstract boolean menu();

@@ -5,8 +5,10 @@ import ex.nervisking.ModelManager.Plugins;
 import ex.nervisking.exceptions.MenuManagerException;
 import ex.nervisking.exceptions.MenuManagerNotSetupException;
 import ex.nervisking.menuManager.*;
+import ex.nervisking.utils.ServerVersion;
 import ex.nervisking.utils.Utils;
 import ex.nervisking.utils.UtilsManagers;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
@@ -23,11 +25,12 @@ public class ExApi {
     private static JavaPlugin plugin;
     private static UtilsManagers utilsManagers;
     private static Utils utils;
+    public static ServerVersion serverVersion;
 
     private static final HashMap<Player, PlayerMenuUtility> playerMenuUtilityMap = new HashMap<>();
     private static boolean isMenu = false;
 
-    private static String serverVersion = "0";
+    private static String serverversion = "0";
     private static PluginDescriptionFile descriptionFile;
 
     private static String prefix = "&#ffeb00&lᴇ&#ffe535&lx&#fedf6a&lᴀ&#fed99e&lᴘ&#fdd3d3&lɪ &8»";
@@ -46,10 +49,11 @@ public class ExApi {
 
     @SuppressWarnings("deprecation")
     public ExApi(JavaPlugin plugin, boolean menu) {
+        this.setVersion();
         ExApi.plugin = plugin;
         utilsManagers = new UtilsManagers();
         utils = new Utils();
-        serverVersion = plugin.getServer().getBukkitVersion().split("-")[0];
+        serverversion = plugin.getServer().getBukkitVersion().split("-")[0];
         descriptionFile = plugin.getDescription();
 
         if (menu) {
@@ -134,12 +138,39 @@ public class ExApi {
         return playerMenuUtilityMap;
     }
 
+    public void setVersion() {
+        String packageName = Bukkit.getServer().getClass().getPackage().getName();
+        String bukkitVersion = Bukkit.getServer().getBukkitVersion().split("-")[0];
+        switch(bukkitVersion){
+            case "1.20.5":
+            case "1.20.6":
+                serverVersion = ServerVersion.v1_20_R4;
+                break;
+            case "1.21":
+            case "1.21.1":
+                serverVersion = ServerVersion.v1_21_R1;
+                break;
+            case "1.21.2":
+            case "1.21.3":
+                serverVersion = ServerVersion.v1_21_R2;
+                break;
+            case "1.21.4":
+                serverVersion = ServerVersion.v1_21_R3;
+                break;
+            case "1.21.5":
+                serverVersion = ServerVersion.v1_21_R4;
+                break;
+            default:
+                serverVersion = ServerVersion.valueOf(packageName.replace("org.bukkit.craftbukkit.", ""));
+        }
+    }
+
     public static boolean isServerVersion(String version) {
-        return serverVersion.equals(version);
+        return serverversion.equals(version);
     }
 
     public static boolean equalOrGreaterVersion(String version) {
-        int vs = Integer.parseInt(serverVersion.replace(".", ""));
+        int vs = Integer.parseInt(serverversion.replace(".", ""));
         int vp = Integer.parseInt(version.replace(".", ""));
         return vs >= vp;
     }
@@ -263,7 +294,7 @@ public class ExApi {
         ExApi.neverConnected = neverConnected;
     }
 
-    public static String getServerVersion() {
-        return serverVersion;
+    public static String getServerversion() {
+        return serverversion;
     }
 }
