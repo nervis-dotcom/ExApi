@@ -42,7 +42,6 @@ public class ItemBuilder {
     private final ItemStack item;
     private final ItemMeta meta;
     private final PersistentDataContainer container;
-    private String texture = null;
     private Player player = null;
     private static boolean error = false;
     public final static String CLOSE = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDM0NWU1ZmNlMmZjZmZmNzhjZGFjNjVlZDg4MTkxOGM3OWMzOGU4NTVlYmJjMTkyYzk3YzU3ODRjMzJkMzc4In19fQ==";
@@ -118,8 +117,7 @@ public class ItemBuilder {
         if (material != Material.AIR) {
             this.item = new ItemStack(material, count);
         } else if (value.startsWith("ey") || value.startsWith("[texture]")){
-            this.texture = value.substring("[texture]".length()).trim();
-            this.item = new ItemStack(Material.PLAYER_HEAD, 1);
+            this.item = texture(value.startsWith("[texture]") ? value.substring("[texture]".length()).trim() : value, count);
         } else if (value.startsWith("[user]")){
             this.item = createSkullFromUsername(value.substring("[user]".length()).trim());
         } else if (value.toLowerCase().startsWith("[random]")){
@@ -139,9 +137,6 @@ public class ItemBuilder {
 
         this.meta = item.getItemMeta();
         this.container = meta.getPersistentDataContainer();
-        if (texture != null && !texture.isEmpty()) {
-            this.SkullTexture(texture);
-        }
     }
 
     public ItemBuilder(String value) {
@@ -156,8 +151,7 @@ public class ItemBuilder {
         if (material != Material.AIR) {
             this.item = new ItemStack(material, 1);
         } else if (value.startsWith("ey") || value.startsWith("[texture]")){
-            this.texture = value.substring("[texture]".length()).trim();
-            this.item = new ItemStack(Material.PLAYER_HEAD, 1);
+            this.item = texture(value.startsWith("[texture]") ? value.substring("[texture]".length()).trim() : value, 1);
         } else if (value.startsWith("[user]")){
             this.item = createSkullFromUsername(value.substring("[user]".length()).trim());
         } else if (value.toLowerCase().startsWith("[random]")){
@@ -177,9 +171,6 @@ public class ItemBuilder {
 
         this.meta = item.getItemMeta();
         this.container = meta.getPersistentDataContainer();
-        if (texture != null && !texture.isEmpty()) {
-            this.SkullTexture(texture);
-        }
     }
 
     public ItemBuilder(Player player, String value) {
@@ -194,10 +185,11 @@ public class ItemBuilder {
         if (material != Material.AIR) {
             this.item = new ItemStack(material, 1);
         } else if (value.startsWith("ey") || value.startsWith("[texture]")) {
-            this.texture = value.substring("[texture]".length()).trim();
-            this.item = new ItemStack(Material.PLAYER_HEAD, 1);
-        } else if (value.toLowerCase().startsWith("random=")){
-            RDMaterial type = RDMaterial.fromString(value.split("=")[1]);
+            this.item = texture(value.startsWith("[texture]") ? value.substring("[texture]".length()).trim() : value, 1);
+        } else if (value.startsWith("[user]")){
+            this.item = createSkullFromUsername(value.substring("[user]".length()).trim());
+        } else if (value.toLowerCase().startsWith("[random]")){
+            RDMaterial type = RDMaterial.fromString(value.substring("[random]".length()).trim());
             if (type != null) {
                 Material mat = type.getRandom();
                 this.item = new ItemStack(mat, 1);
@@ -213,9 +205,6 @@ public class ItemBuilder {
         this.player = player;
         this.meta = item.getItemMeta();
         this.container = meta.getPersistentDataContainer();
-        if (texture != null && !texture.isEmpty()) {
-            this.SkullTexture(texture);
-        }
     }
 
     public ItemBuilder(UUID uuid) {
@@ -255,7 +244,7 @@ public class ItemBuilder {
                 if (offlinePlayer.isOnline()) {
                     skullMeta.setPlayerProfile(offlinePlayer.getPlayerProfile());
                 } else {
-                    return createCustomHeadItem(OFFLINE, 1);
+                    return texture(OFFLINE, 1);
                 }
             } else {
                 return createErrorItem();
@@ -275,7 +264,7 @@ public class ItemBuilder {
                 if (offlinePlayer.isOnline()) {
                     skullMeta.setPlayerProfile(offlinePlayer.getPlayerProfile());
                 } else {
-                    return createCustomHeadItem(OFFLINE, 1);
+                    return texture(OFFLINE, 1);
                 }
             } else {
                 return createErrorItem();
@@ -285,10 +274,10 @@ public class ItemBuilder {
         return head;
     }
 
-    public static ItemStack createCustomHeadItem(String texture, int amount) {
+    private static ItemStack texture(String texture, int amount) {
         ItemStack head = new ItemStack(Material.PLAYER_HEAD);
         head.setAmount(amount);
-        if (head.getItemMeta() instanceof SkullMeta skullMeta) {
+        if(head.getItemMeta() instanceof SkullMeta skullMeta && texture != null){
             ServerVersion serverVersion = ExApi.serverVersion;
             if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_20_R2)){
                 PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID());
@@ -303,7 +292,7 @@ public class ItemBuilder {
                     url = new URL(urlText);
                 } catch (Exception error) {
                     error.printStackTrace();
-                    return head;
+                    return createErrorItem();
                 }
                 textures.setSkin(url);
                 profile.setTextures(textures);
@@ -317,12 +306,12 @@ public class ItemBuilder {
                     Field profileField = skullMeta.getClass().getDeclaredField("profile");
                     profileField.setAccessible(true);
                     profileField.set(skullMeta, profile);
-                } catch (IllegalArgumentException | NoSuchFieldException | SecurityException |
-                         IllegalAccessException ignored) {
+                } catch (IllegalArgumentException | NoSuchFieldException | SecurityException | IllegalAccessException ignored) {
                 }
             }
 
             head.setItemMeta(skullMeta);
+
         }
         return head;
     }
@@ -372,7 +361,7 @@ public class ItemBuilder {
             if (player != null) {
                 coloredLore.add(ExApi.getUtils().setPlaceholders(player, line));
             } else {
-            coloredLore.add(ExApi.getUtils().setColoredMessage(line));
+                coloredLore.add(ExApi.getUtils().setColoredMessage(line));
             }
         }
         meta.setLore(coloredLore);
