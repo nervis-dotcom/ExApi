@@ -22,6 +22,7 @@ public class TeleportManager {
     private final Location destination;
     private String message;
     private String messageInTeleport;
+    private String messageSuccess;
     private String noDelayPermission = null; // permiso para no esperar delay
     private TeleportSound sound;
     private TeleportSound soundInTeleport;
@@ -55,8 +56,9 @@ public class TeleportManager {
         return this;
     }
 
-    public TeleportManager setMessageInTeleport(String messageInTeleport) {
+    public TeleportManager setMessageInTeleport(String messageInTeleport, String messageSuccess) {
         this.messageInTeleport = messageInTeleport;
+        this.messageSuccess = messageSuccess;
         return this;
     }
 
@@ -179,7 +181,7 @@ public class TeleportManager {
 
                 if (ticksLeft-- <= 0) {
                     if (messageInTeleport != null) {
-                        utilsManagers.actionBar(player, "&aTeletransportando...");
+                        utilsManagers.actionBar(player, messageSuccess != null ? messageSuccess : " ");
                     }
 
                     teleportingPlayers.remove(player.getUniqueId()); // <- limpiar

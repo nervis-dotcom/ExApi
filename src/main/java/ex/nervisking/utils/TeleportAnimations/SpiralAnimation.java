@@ -11,10 +11,16 @@ public class SpiralAnimation extends BukkitRunnable implements TeleportAnimation
 
     private final Player player;
     private TeleportParticle particleEffect;
+
     private double angle = 0;
     private double height = 0;
-    private final  double maxHeight = 3;
-    private final double radius = 1.0;
+
+    // Configurables
+    private final double maxHeight = 2.0;
+    private final double verticalStep = 0.10;
+    private final long resetEveryTicks = (long) (maxHeight / verticalStep); // ticks hasta alcanzar altura
+
+    private long ticksElapsed = 0;
 
     public SpiralAnimation(Player player) {
         this.player = player;
@@ -27,31 +33,33 @@ public class SpiralAnimation extends BukkitRunnable implements TeleportAnimation
             return;
         }
 
-        Location baseLoc = player.getLocation().add(0, 1, 0);
+        Location baseLoc = player.getLocation().add(0, 0, 0);
 
-        double x = radius * Math.cos(angle);
-        double z = radius * Math.sin(angle);
+        double x = Math.cos(angle);
+        double z = Math.sin(angle);
+
         Location particleLoc = baseLoc.clone().add(x, height, z);
-
         player.getWorld().spawnParticle(particleEffect.getParticle(), particleLoc, 1, 0, 0, 0, 0);
 
         angle += Math.PI / 8;
-        height += 0.05;
+        height += verticalStep;
+        ticksElapsed++;
 
-        if (height > maxHeight) {
-            height = 0;
+        // Reinicia la espiral cada vez que alcanza la altura máxima
+        if (ticksElapsed >= resetEveryTicks) {
             angle = 0;
+            height = 0;
+            ticksElapsed = 0;
         }
     }
-
 
     @Override
     public void start(TeleportParticle particleEffect) {
         if (this.particleEffect != null) {
-            this.cancel(); // Stop any previous animation
+            this.cancel();
         }
         this.particleEffect = particleEffect;
-        this.runTaskTimer(ExApi.getPlugin(), 0L, 2L);
+        this.runTaskTimer(ExApi.getPlugin(), 0L, 1L); // Cada tick
     }
 
     @Override
