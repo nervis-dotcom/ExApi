@@ -157,15 +157,19 @@ public abstract class Command extends UtilsManagers implements BaseCommand {
         return this.onCommand(sender, new Arguments(args));
     }
 
-    @Override
-    public final List<String> onTabComplete(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command command, @NotNull String alias, String @NotNull [] args) {
-        return this.onTab(sender, new Arguments(args));
-    }
-
     public abstract boolean onCommand(CommandSender sender, Arguments args);
 
+    @Override
+    public final List<String> onTabComplete(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command command, @NotNull String alias, String @NotNull [] args) {
+        return this.onTab(sender, new Arguments(args), new ArrayList<>());
+    }
+
     public List<String> onTab(CommandSender sender, Arguments args) {
-        return List.of();
+        return onTab(sender, args, new ArrayList<>());
+    }
+
+    public List<String> onTab(CommandSender sender, Arguments args, List<String> completions) {
+        return completions;
     }
 
 }

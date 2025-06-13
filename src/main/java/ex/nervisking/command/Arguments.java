@@ -214,6 +214,10 @@ public class Arguments {
         return size() < minCount;
     }
 
+    public boolean hasMinimumArgs(int required) {
+        return args.length >= required;
+    }
+
     /**
      * Devuelve el último argumento si existe, o null si no hay argumentos.
      *
