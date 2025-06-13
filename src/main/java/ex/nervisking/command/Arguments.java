@@ -214,6 +214,12 @@ public class Arguments {
         return size() < minCount;
     }
 
+    /**
+     * Verifica si la cantidad de argumentos es igual o mayor al mínimo requerido.
+     *
+     * @param required la cantidad mínima de argumentos necesarios
+     * @return true si hay al menos {@code required} argumentos, false en caso contrario
+     */
     public boolean hasMinimumArgs(int required) {
         return args.length >= required;
     }
