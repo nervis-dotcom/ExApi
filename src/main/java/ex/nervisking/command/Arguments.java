@@ -40,6 +40,10 @@ public class Arguments {
      * @return true si existe argumento en ese índice, false en caso contrario.
      */
     public boolean has(int index) {
+        return !isEmpty() && args.length == index;
+    }
+
+    private boolean h(int index) {
         return index >= 0 && index < args.length;
     }
 
@@ -50,7 +54,7 @@ public class Arguments {
      * @return El argumento en forma de String, o null si no existe.
      */
     public String get(int index) {
-        return has(index) ? args[index] : null;
+        return h(index) ? args[index] : null;
     }
 
     /**
