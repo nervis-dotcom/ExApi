@@ -1,10 +1,7 @@
 package ex.nervisking;
 
-import ex.nervisking.Event.ArmorEquipListener;
 import ex.nervisking.ModelManager.ExPl;
 import ex.nervisking.ModelManager.Plugins;
-import ex.nervisking.ModelManager.Scheduler;
-import ex.nervisking.ModelManager.Task;
 import ex.nervisking.exceptions.MenuManagerException;
 import ex.nervisking.exceptions.MenuManagerNotSetupException;
 import ex.nervisking.menuManager.*;
@@ -24,12 +21,10 @@ import java.util.HashMap;
 public class ExApi {
 
     private static JavaPlugin plugin;
-    private static Task task;
     private static UtilsManagers utilsManagers;
     private static Utils utils;
 
     private static final HashMap<Player, PlayerMenuUtility> playerMenuUtilityMap = new HashMap<>();
-    private static boolean isSetup = false;
     private static boolean isMenu = false;
 
     private static String serverVersion = "0";
@@ -50,24 +45,16 @@ public class ExApi {
     private static String neverConnected = "%prefix% &cEl jugador &7%player% &cNunca se a conectado.";
 
     @SuppressWarnings("deprecation")
-    public static void setup(JavaPlugin plugin, boolean menu) {
+    public ExApi(JavaPlugin plugin, boolean menu) {
         ExApi.plugin = plugin;
         utilsManagers = new UtilsManagers();
         utils = new Utils();
         serverVersion = plugin.getServer().getBukkitVersion().split("-")[0];
         descriptionFile = plugin.getDescription();
-        isSetup = true;
 
         if (menu) {
             registerMenuListener(plugin);
             isMenu = true;
-            task = Scheduler.runTimer(new updateMenus(), 0, 20);
-        }
-    }
-
-    public static void stopTask() {
-        if (task != null) {
-            task.cancel();
         }
     }
 
@@ -85,7 +72,7 @@ public class ExApi {
         return descriptionFile;
     }
 
-    public static void registerMenuListener(JavaPlugin plugin) {
+    private void registerMenuListener(JavaPlugin plugin) {
         boolean isAlreadyRegistered = false;
         RegisteredListener[] var3 = InventoryClickEvent.getHandlerList().getRegisteredListeners();
 
@@ -170,10 +157,6 @@ public class ExApi {
     public static boolean isPlugin(Plugins plugins) {
         Plugin wgPlugin = ExApi.plugin.getServer().getPluginManager().getPlugin(plugins.getName());
         return wgPlugin != null && wgPlugin.isEnabled();
-    }
-
-    public static boolean isIsSetup() {
-        return isSetup;
     }
 
     public static void setIsMenu(boolean isMenu) {

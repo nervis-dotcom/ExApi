@@ -4,19 +4,12 @@ import ex.nervisking.ModelManager.ExPl;
 import ex.nervisking.ModelManager.Plugins;
 import ex.nervisking.ModelManager.Scheduler;
 import ex.nervisking.ModelManager.Task;
-import ex.nervisking.exceptions.MenuManagerException;
-import ex.nervisking.exceptions.MenuManagerNotSetupException;
+import ex.nervisking.command.CommandManager;
 import ex.nervisking.menuManager.*;
 import ex.nervisking.utils.Utils;
 import ex.nervisking.utils.UtilsManagers;
-import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.plugin.RegisteredListener;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 
 public abstract class ExPlugin extends JavaPlugin {
 
@@ -37,11 +30,12 @@ public abstract class ExPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        this.utilsManagers = new UtilsManagers();
-        this.utils = new Utils();
+        new ExApi(this, menu());
+        this.utilsManagers = ExApi.getUtilsManagers();
+        this.utils = ExApi.getUtils();
+        this.commandManager = new CommandManager(this);
 
         if (menu()) {
-            registerMenuListener();
             this.gui = Scheduler.runTimer(new updateMenus(), 0, 20);
         }
         this.Enabled();
@@ -55,62 +49,19 @@ public abstract class ExPlugin extends JavaPlugin {
         this.Disable();
     }
 
-    private void registerMenuListener() {
-        boolean isAlreadyRegistered = false;
-        RegisteredListener[] var3 = InventoryClickEvent.getHandlerList().getRegisteredListeners();
-
-        for (RegisteredListener rl : var3) {
-            if (rl.getListener() instanceof MenuListener) {
-                isAlreadyRegistered = true;
-                break;
-            }
-        }
-
-        if (!isAlreadyRegistered) {
-            getServer().getPluginManager().registerEvents(new MenuListener(this), this);
-        }
+    public boolean isPlugin(String plugin) {
+        Plugin wgPlugin = getServer().getPluginManager().getPlugin(plugin);
+        return wgPlugin != null && wgPlugin.isEnabled();
     }
 
-    public void removePlayerMenuUtility(Player p) {
-        if (!menu()) return;
-        playerMenuUtility.remove(p);
+    public boolean isPlugin(ExPl exPl) {
+        Plugin wgPlugin = getServer().getPluginManager().getPlugin(exPl.getName());
+        return wgPlugin != null && wgPlugin.isEnabled();
     }
 
-    public void closeInventorys() {
-        if (!menu()) return;
-        for (Player player : getServer().getOnlinePlayers()) {
-            Inventory topInventory = InventoryUtils.getTopInventory(player);
-            if (topInventory.getHolder() instanceof Menu) {
-                player.closeInventory();
-                playerMenuUtility.remove(player);
-            }
-        }
-    }
-
-    public void openMenu(Class<? extends Menu> menuClass, Player player) throws MenuManagerException, MenuManagerNotSetupException {
-        try {
-            menuClass.getConstructor(PlayerMenuUtility.class).newInstance(getPlayerMenuUtility(player)).open();
-        } catch (InstantiationException var3) {
-            throw new MenuManagerException("No se pudo crear una instancia de la clase de menú", var3);
-        } catch (IllegalAccessException var4) {
-            throw new MenuManagerException("Acceso ilegal al intentar instanciar la clase de menú", var4);
-        } catch (InvocationTargetException var5) {
-            throw new MenuManagerException("Se produjo un error al intentar invocar el constructor de la clase de menú", var5);
-        } catch (NoSuchMethodException var6) {
-            throw new MenuManagerException("No se pudo encontrar el constructor de la clase de menú", var6);
-        }
-    }
-
-    public PlayerMenuUtility getPlayerMenuUtility(Player player) throws MenuManagerNotSetupException {
-        if (!menu()) {
-            throw new MenuManagerNotSetupException();
-        } else if (!playerMenuUtility.containsKey(player)) {
-            PlayerMenuUtility playerMenuUtility = new PlayerMenuUtility(player);
-            this.playerMenuUtility.put(player, playerMenuUtility);
-            return playerMenuUtility;
-        } else {
-            return playerMenuUtility.get(player);
-        }
+    public boolean isPlugin(Plugins plugins) {
+        Plugin wgPlugin = getServer().getPluginManager().getPlugin(plugins.getName());
+        return wgPlugin != null && wgPlugin.isEnabled();
     }
 
     public UtilsManagers getUtilsManagers() {
