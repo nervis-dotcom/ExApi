@@ -1,5 +1,7 @@
 package ex.nervisking;
 
+import ex.nervisking.ModelManager.ExPl;
+import ex.nervisking.ModelManager.Plugins;
 import ex.nervisking.ModelManager.Scheduler;
 import ex.nervisking.ModelManager.Task;
 import ex.nervisking.exceptions.MenuManagerException;
@@ -21,7 +23,7 @@ public abstract class ExPlugin extends JavaPlugin {
     private Task gui;
     private UtilsManagers utilsManagers;
     private Utils utils;
-    private final HashMap<Player, PlayerMenuUtility> playerMenuUtility = new HashMap<>();
+    public CommandManager commandManager;
 
     protected abstract void Load();
     protected abstract void Enabled();
