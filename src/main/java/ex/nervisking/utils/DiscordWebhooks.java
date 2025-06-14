@@ -2,6 +2,7 @@ package ex.nervisking.utils;
 
 import ex.nervisking.ExApi;
 import ex.nervisking.ModelManager.Logger;
+import ex.nervisking.ModelManager.Scheduler;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -224,86 +225,88 @@ public class DiscordWebhooks {
     }
 
     public void build() {
-        HttpURLConnection connection = null;
-        OutputStream os = null;
+        Scheduler.runAsync(() -> {
+            HttpURLConnection connection = null;
+            OutputStream os = null;
 
-        try {
-            URL url = new URL(discordHook);
-            connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("Content-Type", "application/json; utf-8");
-            connection.setRequestProperty("Accept", "application/json");
-            connection.setDoOutput(true);
+            try {
+                URL url = new URL(discordHook);
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("POST");
+                connection.setRequestProperty("Content-Type", "application/json; utf-8");
+                connection.setRequestProperty("Accept", "application/json");
+                connection.setDoOutput(true);
 
-            // Validación de fields
-            List<Field> limitedFields = fields.size() > 25 ? fields.subList(0, 25) : fields;
+                // Validación de fields
+                List<Field> limitedFields = fields.size() > 25 ? fields.subList(0, 25) : fields;
 
-            StringBuilder jsonPayload = new StringBuilder();
-            jsonPayload.append("{");
+                StringBuilder jsonPayload = new StringBuilder();
+                jsonPayload.append("{");
 
-            if (rootBuilder.length() > 0) {
-                jsonPayload.append(rootBuilder).append(",");
-            }
+                if (rootBuilder.length() > 0) {
+                    jsonPayload.append(rootBuilder).append(",");
+                }
 
-            if (contentBuilder.length() > 0) {
-                jsonPayload.append(contentBuilder).append(",");
-            }
+                if (contentBuilder.length() > 0) {
+                    jsonPayload.append(contentBuilder).append(",");
+                }
 
-            jsonPayload.append("\"embeds\": [{");
+                jsonPayload.append("\"embeds\": [{");
 
-            if (embedBuilder.length() > 0) {
-                jsonPayload.append(embedBuilder).append(",");
-            }
+                if (embedBuilder.length() > 0) {
+                    jsonPayload.append(embedBuilder).append(",");
+                }
 
-            // Fields
-            if (!limitedFields.isEmpty()) {
-                jsonPayload.append("\"fields\": [");
-                for (int i = 0; i < limitedFields.size(); i++) {
-                    Field f = limitedFields.get(i);
-                    jsonPayload.append("{")
-                            .append("\"name\": \"").append(escapeJson(limit(f.name(), 256))).append("\",")
-                            .append("\"value\": \"").append(escapeJson(limit(f.value(), 1024))).append("\",")
-                            .append("\"inline\": ").append(f.inline())
-                            .append("}");
-                    if (i < limitedFields.size() - 1) {
-                        jsonPayload.append(",");
+                // Fields
+                if (!limitedFields.isEmpty()) {
+                    jsonPayload.append("\"fields\": [");
+                    for (int i = 0; i < limitedFields.size(); i++) {
+                        Field f = limitedFields.get(i);
+                        jsonPayload.append("{")
+                                .append("\"name\": \"").append(escapeJson(limit(f.name(), 256))).append("\",")
+                                .append("\"value\": \"").append(escapeJson(limit(f.value(), 1024))).append("\",")
+                                .append("\"inline\": ").append(f.inline())
+                                .append("}");
+                        if (i < limitedFields.size() - 1) {
+                            jsonPayload.append(",");
+                        }
+                    }
+                    jsonPayload.append("]");
+                }
+
+                jsonPayload.append("}]}");
+
+                byte[] input = jsonPayload.toString().getBytes(StandardCharsets.UTF_8);
+                os = connection.getOutputStream();
+                os.write(input, 0, input.length);
+
+                int code = connection.getResponseCode();
+                if (code != HttpURLConnection.HTTP_NO_CONTENT && code != HttpURLConnection.HTTP_OK) {
+                    utilsManagers.sendLogger(Logger.ERROR, "Failed to send message. HTTP error code: " + code);
+                }
+
+            } catch (MalformedURLException e) {
+                utilsManagers.sendLogger(Logger.ERROR, "URL malformada: " + e.getMessage());
+                e.printStackTrace();
+            } catch (IOException e) {
+                utilsManagers.sendLogger(Logger.ERROR, "Error de entrada/salida: " + e.getMessage());
+                e.printStackTrace();
+            } catch (Exception e) {
+                utilsManagers.sendLogger(Logger.ERROR, "Error desconocido: " + e.getMessage());
+                e.printStackTrace();
+            } finally {
+                if (os != null) {
+                    try {
+                        os.close();
+                    } catch (IOException e) {
+                        utilsManagers.sendLogger(Logger.ERROR, "Error al cerrar OutputStream: " + e.getMessage());
                     }
                 }
-                jsonPayload.append("]");
-            }
-
-            jsonPayload.append("}]}");
-
-            byte[] input = jsonPayload.toString().getBytes(StandardCharsets.UTF_8);
-            os = connection.getOutputStream();
-            os.write(input, 0, input.length);
-
-            int code = connection.getResponseCode();
-            if (code != HttpURLConnection.HTTP_NO_CONTENT && code != HttpURLConnection.HTTP_OK) {
-                utilsManagers.sendLogger(Logger.ERROR, "Failed to send message. HTTP error code: " + code);
-            }
-
-        } catch (MalformedURLException e) {
-            utilsManagers.sendLogger(Logger.ERROR, "URL malformada: " + e.getMessage());
-            e.printStackTrace();
-        } catch (IOException e) {
-            utilsManagers.sendLogger(Logger.ERROR, "Error de entrada/salida: " + e.getMessage());
-            e.printStackTrace();
-        } catch (Exception e) {
-            utilsManagers.sendLogger(Logger.ERROR, "Error desconocido: " + e.getMessage());
-            e.printStackTrace();
-        } finally {
-            if (os != null) {
-                try {
-                    os.close();
-                } catch (IOException e) {
-                    utilsManagers.sendLogger(Logger.ERROR, "Error al cerrar OutputStream: " + e.getMessage());
+                if (connection != null) {
+                    connection.disconnect();
                 }
             }
-            if (connection != null) {
-                connection.disconnect();
-            }
-        }
+        });
     }
 
     private String limit(String input, int maxLength) {

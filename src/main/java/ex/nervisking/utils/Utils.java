@@ -180,66 +180,6 @@ public class Utils {
         return builder.toString();
     }
 
-    public String applyGradient(String text, String startColor, String endColor) {
-        StringBuilder gradientText = new StringBuilder();
-
-        // Convertimos colores & y hex a objetos ChatColor
-        ChatColor start = parseColor(startColor);
-        ChatColor end = parseColor(endColor);
-
-        int length = text.length();
-        int rStart = start.getColor().getRed();
-        int gStart = start.getColor().getGreen();
-        int bStart = start.getColor().getBlue();
-
-        int rEnd = end.getColor().getRed();
-        int gEnd = end.getColor().getGreen();
-        int bEnd = end.getColor().getBlue();
-
-        // Genera el degradado para cada carácter
-        for (int i = 0; i < length; i++) {
-            double ratio = (double) i / (length - 1);
-
-            int r = (int) (rStart + ratio * (rEnd - rStart));
-            int g = (int) (gStart + ratio * (gEnd - gStart));
-            int b = (int) (bStart + ratio * (bEnd - bStart));
-
-            String hexColor = String.format("#%02x%02x%02x", r, g, b);
-            gradientText.append(ChatColor.of(hexColor)).append(text.charAt(i));
-        }
-
-        return gradientText.toString();
-    }
-
-    private ChatColor parseColor(String color) {
-        if (color.startsWith("&")) {
-            return switch (color.charAt(1)) {
-                case '0' -> ChatColor.of("#000000"); // Negro
-                case '1' -> ChatColor.of("#0000AA"); // Azul oscuro
-                case '2' -> ChatColor.of("#00AA00"); // Verde oscuro
-                case '3' -> ChatColor.of("#00AAAA"); // Aqua oscuro
-                case '4' -> ChatColor.of("#AA0000"); // Rojo oscuro
-                case '5' -> ChatColor.of("#AA00AA"); // Púrpura oscuro
-                case '6' -> ChatColor.of("#FFAA00"); // Dorado
-                case '7' -> ChatColor.of("#AAAAAA"); // Gris claro
-                case '8' -> ChatColor.of("#555555"); // Gris oscuro
-                case '9' -> ChatColor.of("#5555FF"); // Azul
-                case 'a' -> ChatColor.of("#55FF55"); // Verde claro
-                case 'b' -> ChatColor.of("#55FFFF"); // Aqua
-                case 'c' -> ChatColor.of("#FF5555"); // Rojo claro
-                case 'd' -> ChatColor.of("#FF55FF"); // Púrpura claro
-                case 'e' -> ChatColor.of("#FFFF55"); // Amarillo
-                case 'f' -> ChatColor.of("#FFFFFF"); // Blanco
-                default -> ChatColor.of("#FFFFFF");
-            };
-        } else if (color.startsWith("#") && color.length() == 7) {
-            // Si es un color en formato hex (#RRGGBB)
-            return ChatColor.of(color);
-        } else {
-            return ChatColor.of("#FFFFFF");
-        }
-    }
-
     private String replacePlaceholders(Player player, String message) {
         if (message == null || message.isEmpty()) {
             return ""; // o un mensaje predeterminado

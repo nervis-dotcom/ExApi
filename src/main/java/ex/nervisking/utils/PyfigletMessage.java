@@ -1,20 +1,23 @@
 package ex.nervisking.utils;
 
 import ex.nervisking.ExApi;
+import ex.nervisking.ModelManager.ColorUtil;
+import ex.nervisking.ModelManager.CustomColor;
 import ex.nervisking.ModelManager.ExPl;
 import ex.nervisking.ModelManager.Plugins;
 import org.bukkit.Bukkit;
 import org.bukkit.command.ConsoleCommandSender;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 public class PyfigletMessage {
 
     private final UtilsManagers utilsManagers;
     private boolean status;
-    private String startColor;
-    private String endColor;
-    // Cambiamos a LinkedHashSet para mantener orden y evitar duplicados
+    private Color startColor;
+    private Color endColor;
     private final Set<String> pluginsSet;
     private final List<String> infos;
     private List<String> pyfiglet = List.of(
@@ -36,8 +39,8 @@ public class PyfigletMessage {
     public PyfigletMessage() {
         this.utilsManagers = ExApi.getUtilsManagers();
         this.status = true;
-        this.startColor = "#FFFE00";
-        this.endColor = "#FDFDFD";
+        this.startColor = CustomColor.YELLOW.getColor();
+        this.endColor = CustomColor.WHITE.getColor();
         this.pluginsSet = new LinkedHashSet<>();
         this.infos = new ArrayList<>();
     }
@@ -47,13 +50,23 @@ public class PyfigletMessage {
         return this;
     }
 
+    public PyfigletMessage setStartColor(CustomColor color) {
+        this.startColor = color.getColor();
+        return this;
+    }
+
+    public PyfigletMessage setEndColor(CustomColor color) {
+        this.endColor = color.getColor();
+        return this;
+    }
+
     public PyfigletMessage setStartColor(String color) {
-        this.startColor = color;
+        this.startColor = ColorUtil.parse(color);
         return this;
     }
 
     public PyfigletMessage setEndColor(String color) {
-        this.endColor = color;
+        this.endColor = ColorUtil.parse(color);
         return this;
     }
 
@@ -101,16 +114,21 @@ public class PyfigletMessage {
         return this;
     }
 
-
     public PyfigletMessage clearInfo() {
         this.infos.clear();
+        return this;
+    }
+
+    public PyfigletMessage clear() {
+        this.infos.clear();
+        this.pluginsSet.clear();
         return this;
     }
 
     public void build() {
         ConsoleCommandSender console = Bukkit.getConsoleSender();
         for (String line : pyfiglet) {
-            line = utilsManagers.applyGradient(line.replace("%server%", ExApi.getServerversion())
+            line = CustomColor.applyGradient(line.replace("%server%", ExApi.getServerversion())
                     .replace("%version%", ExApi.getPluginVersion())
                     .replace("%autor%", ExApi.getPluginAuthor())
                     .replace("%status%", status ? "Iniciado" : "Apagado")
