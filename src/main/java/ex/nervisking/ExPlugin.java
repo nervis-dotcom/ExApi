@@ -6,6 +6,7 @@ import ex.nervisking.ModelManager.Scheduler;
 import ex.nervisking.ModelManager.Task;
 import ex.nervisking.command.CommandManager;
 import ex.nervisking.menuManager.*;
+import ex.nervisking.utils.PyfigletMessage;
 import ex.nervisking.utils.Utils;
 import ex.nervisking.utils.UtilsManagers;
 import org.bukkit.plugin.Plugin;
@@ -14,9 +15,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 public abstract class ExPlugin extends JavaPlugin {
 
     private Task gui;
-    private UtilsManagers utilsManagers;
-    private Utils utils;
+    public UtilsManagers utilsManagers;
+    public Utils utils;
     public CommandManager commandManager;
+    public PyfigletMessage pyfigletMessage;
 
     protected void Load() {}
     protected abstract void Enabled();
@@ -34,6 +36,7 @@ public abstract class ExPlugin extends JavaPlugin {
         this.utilsManagers = ExApi.getUtilsManagers();
         this.utils = ExApi.getUtils();
         this.commandManager = new CommandManager(this);
+        this.pyfigletMessage = new PyfigletMessage();
 
         if (menu()) {
             this.gui = Scheduler.runTimer(new updateMenus(), 0, 20);

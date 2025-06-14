@@ -164,10 +164,6 @@ public abstract class Command extends UtilsManagers implements BaseCommand {
         return this.onTab(sender, new Arguments(args), new ArrayList<>());
     }
 
-    public List<String> onTab(CommandSender sender, Arguments args) {
-        return onTab(sender, args, new ArrayList<>());
-    }
-
     public List<String> onTab(CommandSender sender, Arguments args, List<String> completions) {
         return completions;
     }

@@ -5,8 +5,7 @@ import ex.nervisking.ModelManager.AnimationTeleport;
 import ex.nervisking.ModelManager.TeleportAnimation;
 import ex.nervisking.ModelManager.TeleportParticle;
 import ex.nervisking.ModelManager.TeleportSound;
-import ex.nervisking.utils.TeleportAnimations.ExpandingCircleAnimation;
-import ex.nervisking.utils.TeleportAnimations.SpiralAnimation;
+import ex.nervisking.utils.TeleportAnimations.*;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -34,13 +33,34 @@ public class TeleportManager {
     private static final Set<UUID> teleportingPlayers = new HashSet<>();
     private TeleportAnimation teleportAnimation;
 
+    /**
+     * Establece la animación de teletransporte.
+     * @param animation Tipo de animación.
+     * @return Instancia de TeleportManager.
+     */
     public TeleportManager setTeleportAnimation(AnimationTeleport animation) {
         if (animation == null) {
             this.teleportAnimation = null;
-        } else if (animation == AnimationTeleport.SPIRAL) {
-            this.teleportAnimation = new SpiralAnimation(player);
-        } else if (animation == AnimationTeleport.CIRCLE) {
-            this.teleportAnimation = new ExpandingCircleAnimation(player);
+        } else {
+            switch (animation) {
+                case SPIRAL:
+                    this.teleportAnimation = new SpiralAnimation(player);
+                    break;
+                case CIRCLE:
+                    this.teleportAnimation = new ExpandingCircleAnimation(player);
+                    break;
+                case DOUBLE_SPIRAL:
+                    this.teleportAnimation = new DoubleSpiralAnimation(player);
+                    break;
+                case VERTICAL_PULSE:
+                    this.teleportAnimation = new VerticalPulseAnimation(player);
+                    break;
+                case FLOATING_CIRCLE:
+                    this.teleportAnimation = new FloatingCircleAnimation(player);
+                    break;
+                default:
+                    this.teleportAnimation = null;
+            }
         }
         return this;
     }
@@ -129,11 +149,6 @@ public class TeleportManager {
                 onCancel.run();
                 return;
             }
-
-            if (message != null) utilsManagers.sendMessage(player, message);
-            if (sound != null) player.playSound(player.getLocation(), sound.getSound(), 1.0f, 1.0f);
-            if (particle != null) player.getWorld().spawnParticle(particle.getParticle(), player.getLocation(), 30);
-
             onSuccess.run();
             return;
         }

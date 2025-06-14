@@ -12,12 +12,12 @@ public class SpiralAnimation extends BukkitRunnable implements TeleportAnimation
     private final Player player;
     private TeleportParticle particleEffect;
 
-    private double angle = 0;
-    private double height = 0;
+    private double angle = 0; // ángulo actual de la espiral
+    private double height = 0; // altura actual de la espiral
 
     // Configurables
-    private final double maxHeight = 2.0;
-    private final double verticalStep = 0.10;
+    private final double maxHeight = 2.0; // altura máxima de la espiral
+    private final double verticalStep = 0.10; // paso vertical entre cada punto de la espiral
     private final long resetEveryTicks = (long) (maxHeight / verticalStep); // ticks hasta alcanzar altura
 
     private long ticksElapsed = 0;
@@ -28,7 +28,7 @@ public class SpiralAnimation extends BukkitRunnable implements TeleportAnimation
 
     @Override
     public void run() {
-        if (!player.isOnline()) {
+        if (!player.isOnline() || player.isDead()) {
             this.cancel();
             return;
         }

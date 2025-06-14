@@ -3,7 +3,11 @@ package ex.nervisking.ModelManager;
 public enum AnimationTeleport {
 
     SPIRAL(),
-    CIRCLE();
+    CIRCLE(),
+    DOUBLE_SPIRAL(),
+    VERTICAL_PULSE(),
+    FLOATING_CIRCLE();
+
 
     public static AnimationTeleport fromString(String name) {
         try {

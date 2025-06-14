@@ -43,6 +43,11 @@ public enum RDMaterial {
             Material.YELLOW_STAINED_GLASS, Material.LIME_STAINED_GLASS, Material.PINK_STAINED_GLASS, Material.GRAY_STAINED_GLASS,
             Material.LIGHT_GRAY_STAINED_GLASS, Material.CYAN_STAINED_GLASS, Material.PURPLE_STAINED_GLASS, Material.BLUE_STAINED_GLASS,
             Material.BROWN_STAINED_GLASS, Material.GREEN_STAINED_GLASS, Material.RED_STAINED_GLASS, Material.BLACK_STAINED_GLASS
+    )),
+    DYE(Arrays.asList(
+            Material.BLACK_DYE, Material.BLUE_DYE, Material.BROWN_DYE, Material.CYAN_DYE, Material.GRAY_DYE, Material.GREEN_DYE,
+            Material.LIGHT_BLUE_DYE, Material.LIGHT_GRAY_DYE, Material.LIME_DYE, Material.MAGENTA_DYE, Material.ORANGE_DYE,
+            Material.PINK_DYE, Material.PURPLE_DYE, Material.RED_DYE, Material.WHITE_DYE, Material.YELLOW_DYE
     ));
 
     private final List<Material> materials;
@@ -56,6 +61,10 @@ public enum RDMaterial {
         return materials.get(random.nextInt(materials.size()));
     }
 
+    public List<Material> getMaterials() {
+        return materials;
+    }
+
     public static RDMaterial fromString(String input) {
         return switch (input.toLowerCase()) {
             case "wool" -> WOOL;
@@ -64,6 +73,7 @@ public enum RDMaterial {
             case "banner" -> BANNER;
             case "candle" -> CANDLE;
             case "glass" -> GLASS;
+            case "dye" -> DYE;
             default -> null;
         };
     }
