@@ -54,6 +54,10 @@ public abstract class Menu extends UtilsManagers implements InventoryHolder {
         return false;
     }
 
+    public int levelUpdate() {
+        return 0;
+    }
+
     public void open() {
         this.inventory = Bukkit.createInventory(this, Math.max(9, Math.min(54, (this.getSlots() > 0 ? this.getSlots() : 1) * 9)), setPlaceholders(player, this.getMenuName()
                 .replace("%page%", String.valueOf(pages))
@@ -121,6 +125,18 @@ public abstract class Menu extends UtilsManagers implements InventoryHolder {
         }
     }
 
+    public void setFillerGlass(ItemStack itemStack, Integer... list) {
+        for (int i : list) {
+            this.inventory.setItem(i, itemStack);
+        }
+    }
+
+    public void setFillerGlass(ItemBuilder itemBuilder, Integer... list) {
+        for (int i : list) {
+            this.inventory.setItem(i, itemBuilder.build());
+        }
+    }
+
     public void addItem(int slot, ItemStack itemStack) {
         if (slot >= 0 && slot < this.inventory.getSize()) {
             this.inventory.setItem(slot, itemStack);
@@ -132,7 +148,6 @@ public abstract class Menu extends UtilsManagers implements InventoryHolder {
             this.inventory.setItem(slot, itemBuilder.build());
         }
     }
-
 
     public String getSoundForText() {
         return "UI_BUTTON_CLICK;1;1";
