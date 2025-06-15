@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.DecimalFormat;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -28,11 +29,21 @@ public class Utils {
     private final LegacyComponentSerializer LEGACY_SERIALIZER = LegacyComponentSerializer.legacySection();
     private final int SERVER_VERSION = Integer.parseInt(Bukkit.getBukkitVersion().split("-")[0].split("\\.")[1]);
 
+    /**
+     * Obtiene el prefijo del plugin ExApi.
+     * @return El prefijo del plugin.
+     */
     public String getPrefix() {
         return ExApi.getPrefix();
     }
 
-    @SuppressWarnings("deprecation")
+    /**
+     * Convierte un texto con códigos de color a un componente de texto de BungeeCord.
+     * Si el texto contiene códigos de color antiguos (&a, &f, etc.) o hexadecimales (&#ffffff, #ffffff),
+     * los convierte a un formato compatible con MiniMessage y los aplica.
+     * @param text Texto a procesar.
+     * @return Componente de texto de BungeeCord con los colores aplicados.
+     */
     public net.md_5.bungee.api.chat.TextComponent setColoredComponent(@NotNull String text) {
         String colored = setColoredMessage(text);
         net.md_5.bungee.api.chat.TextComponent base = new net.md_5.bungee.api.chat.TextComponent();
@@ -45,6 +56,14 @@ public class Utils {
         return base;
     }
 
+    /**
+     * Convierte un texto con códigos de color a un formato compatible con MiniMessage y los aplica.
+     * Si el texto contiene códigos de color antiguos (&a, &f, etc.) o hexadecimales (&#ffffff, #ffffff),
+     * los convierte a un formato compatible con MiniMessage.
+     *
+     * @param text Texto a procesar.
+     * @return Texto procesado y coloreado.
+     */
     public String setColoredMessage(String text) {
         if (text == null || text.isEmpty()) return "";
 
@@ -71,6 +90,12 @@ public class Utils {
         return HEX_PATTERN.matcher(text).replaceAll(matcher -> "<color:#" + matcher.group(2) + ">");
     }
 
+    /**
+     * Reemplaza los placeholders del texto y los placeholders de PlaceholderAPI.
+     * @param player Jugador al que se le aplican los placeholders.
+     * @param text Texto a procesar.
+     * @return Texto con los placeholders reemplazados.
+     */
     public String setPlaceholders(final Player player, String text) {
         text = replacePlaceholders(player, text);
         text = Placeholder.parsePlaceholders(player, text);
@@ -80,6 +105,11 @@ public class Utils {
         return setColoredMessage(PlaceholderAPI.setPlaceholders(player, text));
     }
 
+    /**
+     * Centra un mensaje en el chat.
+     * @param message Mensaje a centrar.
+     * @return Mensaje centrado.
+     */
     public String getCenteredMessage(String message){
         int CENTER_PX = 154;
         int messagePxSize = 0;
@@ -111,6 +141,13 @@ public class Utils {
         return (sb + message);
     }
 
+    /**
+     * Formatea un número grande a un formato legible con sufijos.
+     * Ejemplos: 1500 -> "1.5K", 2500000 -> "2.5M", 1000000000 -> "1B"
+     *
+     * @param amount Número a formatear.
+     * @return String formateado.
+     */
     public String format(double amount) {
         String[] suffixes = new String[]{"", "K", "M", "B", "T", "P"};
         int index = 0;
@@ -202,8 +239,8 @@ public class Utils {
             placeholders.put("%world%", player.getWorld().getName());
             placeholders.put("%heal%", String.valueOf((int) player.getHealth()));
             placeholders.put("%food%", String.valueOf(player.getFoodLevel()));
-            placeholders.put("%heal_bar%", getHeal(player));
-            placeholders.put("%food_bar%", getFood(player));
+            placeholders.put("%heal_bar%", getBar((int) Math.ceil(player.getHealth()), "❤", "&#b90000", "&#ff4d4d"));
+            placeholders.put("%food_bar%", getBar(player.getFoodLevel(), "🍗", "&#995c00", "&#ff9933"));
             placeholders.put("%kills%", String.valueOf(player.getStatistic(Statistic.PLAYER_KILLS)));
             placeholders.put("%deaths%", String.valueOf(player.getStatistic(Statistic.DEATHS)));
             placeholders.put("%ping%", String.valueOf(player.getPing()));
@@ -213,16 +250,6 @@ public class Utils {
             return placeholders;
         }
         return placeholders;
-    }
-
-    private String getHeal(Player jugador) {
-        int vida = (int) Math.ceil(jugador.getHealth());
-        return getBar(vida, "❤", "&#b90000", "&#ff4d4d");
-    }
-
-    private String getFood(Player jugador) {
-        int hambre = jugador.getFoodLevel();
-        return getBar(hambre, "🍗", "&#995c00", "&#ff9933");
     }
 
     private String getBar(int valor, String symbol, String fullColor, String midColor) {
@@ -244,6 +271,13 @@ public class Utils {
         return bar.toString();
     }
 
+    /**
+     * Formatea un tiempo en segundos a un string legible.
+     * Ejemplos: 60 -> "01:00", 3600 -> "01:00:00", 86400 -> "1 día(s) 00:00:00"
+     *
+     * @param timeSeconds Tiempo en segundos a formatear.
+     * @return String formateado.
+     */
     public String formatTime(long timeSeconds) {
         if (timeSeconds < 0) return "00:00";
         long seconds = timeSeconds;
@@ -265,6 +299,14 @@ public class Utils {
         }
     }
 
+    /**
+     * Convierte un string de tiempo personalizado a milisegundos.
+     * Ejemplos: "1d10m", "5m;35s;4t", "1h 30m 20s", "500ms"
+     *
+     * @param timeString String con el tiempo a convertir.
+     * @return Tiempo en milisegundos.
+     * @throws NumberFormatException Si el formato es inválido.
+     */
     public long parseTime(String timeString) throws NumberFormatException {
         long totalMillis = 0;
         StringBuilder numberBuffer = new StringBuilder();
@@ -296,7 +338,23 @@ public class Utils {
         return totalMillis;
     }
 
-    public boolean evaluateCondition(Player player, String condition) {
+    /**
+     * Verifica si un jugador cumple con las condiciones de visualización.
+     *
+     * @param player El jugador a verificar.
+     * @param condition La condición a evaluar.
+     * @return true si el jugador cumple con la condición, false si no.
+     */
+    public boolean conditions(Player player, String condition) {
+        if (condition == null || condition.isEmpty()) {
+            return true;  // No hay condición, siempre se muestra
+        }
+
+        String[] conditionList = condition.split(";");
+        return Arrays.stream(conditionList).anyMatch(c -> evaluateCondition(player, c));
+    }
+
+    private boolean evaluateCondition(Player player, String condition) {
         // Dividimos la condición usando los posibles operadores: ==, !=, <, >, >=, <=
         String[] operators = {"==", "!=", "<", ">", ">=", "<="};
 

@@ -51,7 +51,7 @@ public abstract class Bar {
                     bossBar.setTitle(utilsManagers.setColoredMessage(getTitle() + " &7(" + timeLeft + "s)"));
                     bossBar.setProgress(Math.max(0, timeLeft / (double) duration));
                 } else {
-                    removeAll();
+                    stop();
                 }
             }
         };
@@ -60,7 +60,7 @@ public abstract class Bar {
 
     public void addPlayer(Player player) {
         if (bossBar == null || getTimeLeft() <= 0) {
-            startBar(30); // tiempo por defecto
+            return;
         }
         if (!bossBar.getPlayers().contains(player)) {
             bossBar.addPlayer(player);
@@ -71,12 +71,12 @@ public abstract class Bar {
         if (bossBar != null) {
             bossBar.removePlayer(player);
             if (bossBar.getPlayers().isEmpty()) {
-                removeAll();
+                stop();
             }
         }
     }
 
-    public void removeAll() {
+    public void stop() {
         if (bossBar != null) {
             bossBar.removeAll();
             bossBar.setVisible(false);
@@ -90,13 +90,11 @@ public abstract class Bar {
         duration = 0;
     }
 
-    // ✅ Devuelve el tiempo restante en segundos
     public long getTimeLeft() {
         long millisLeft = endTime - System.currentTimeMillis();
         return Math.max(0, millisLeft / 1000);
     }
 
-    // ✅ Agrega tiempo en segundos al bossbar
     public void addTime(long seconds) {
         this.endTime += seconds * 1000;
         this.duration = Math.max(duration, getTimeLeft());

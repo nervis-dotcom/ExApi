@@ -88,10 +88,6 @@ public abstract class Menu extends UtilsManagers implements InventoryHolder {
         return this.inventory;
     }
 
-    public void setFILLER_GLASS(ItemBuilder itemBuilder) {
-        this.FILLER_GLASS = itemBuilder.build();
-    }
-
     public void setFillerGlass() {
         for (int i = 0; i < this.inventory.getSize(); ++i) {
             if (this.inventory.getItem(i) == null) {
@@ -99,6 +95,10 @@ public abstract class Menu extends UtilsManagers implements InventoryHolder {
             }
         }
 
+    }
+
+    public void setFILLER_GLASS(ItemBuilder itemBuilder) {
+        this.FILLER_GLASS = itemBuilder.build();
     }
 
     public void setFillerGlass(ItemStack itemStack) {
