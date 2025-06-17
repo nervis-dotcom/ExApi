@@ -11,6 +11,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
+import org.bukkit.Location;
 import org.bukkit.Statistic;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -469,6 +470,12 @@ public class Utils {
         int max = (maxLength != null) ? maxLength : 16;
 
         return (input.length() >= min && input.length() <= max && input.matches(pattern)) ? input : "";
+    }
+
+    public String getLocationString(Location location) {
+        if (location == null) return "no data";
+        return String.format("X: %.2f, Y: %.2f, Z: %.2f, World: %s",
+                location.getX(), location.getY(), location.getZ(), location.getWorld().getName());
     }
 }
 

@@ -58,6 +58,39 @@ public class Arguments {
     }
 
     /**
+     * Obtiene el argumento en el índice indicado como String, o un valor por defecto si no existe.
+     *
+     * @param index Índice del argumento.
+     * @param def Valor por defecto si no existe el argumento.
+     * @return El argumento en forma de String, o el valor por defecto.
+     */
+    public String getOrDefault(int index, String def) {
+        return h(index) ? args[index] : def;
+    }
+
+    /**
+     * Convierte el argumento en el índice dado a minúsculas.
+     *
+     * @param index Índice del argumento.
+     * @return El argumento en minúsculas, o null si no existe.
+     */
+    public String toLowerCase(int index) {
+        String value = get(index);
+        return value != null ? value.toLowerCase() : null;
+    }
+
+    /**
+     * Convierte el argumento en el índice dado a mayúsculas.
+     *
+     * @param index Índice del argumento.
+     * @return El argumento en mayúsculas, o null si no existe.
+     */
+    public String toUpperCase(int index) {
+        String value = get(index);
+        return value != null ? value.toUpperCase() : null;
+    }
+
+    /**
      * Intenta convertir el argumento en el índice dado a entero.
      *
      * @param index Índice del argumento.
@@ -238,5 +271,43 @@ public class Arguments {
             return null;  // No hay argumentos
         }
         return get(size() - 1); // Devuelve el último argumento
+    }
+
+    /**
+     * Verifica si el argumento en el índice dado coincide con alguno de los valores esperados (ignora mayúsculas/minúsculas).
+     *
+     * @param index Índice del argumento.
+     * @param values Valores permitidos a comparar.
+     * @return true si coincide con alguno, false en caso contrario.
+     */
+    public boolean equalsIgnoreCase(int index, String... values) {
+        String value = get(index);
+        if (value == null) return false;
+
+        for (String expected : values) {
+            if (value.equalsIgnoreCase(expected)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Verifica si el argumento en el índice dado coincide con alguno de los valores esperados.
+     *
+     * @param index Índice del argumento.
+     * @param values Valores permitidos a comparar.
+     * @return true si coincide con alguno, false en caso contrario.
+     */
+    public boolean equals(int index, String... values) {
+        String value = get(index);
+        if (value == null) return false;
+
+        for (String expected : values) {
+            if (value.equals(expected)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

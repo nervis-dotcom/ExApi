@@ -49,6 +49,7 @@ public abstract class ExPlugin extends JavaPlugin {
         if (gui != null) {
             this.gui.cancel();
         }
+        ExApi.closeInventorys();
         this.Disable();
     }
 

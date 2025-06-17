@@ -1,9 +1,12 @@
 package ex.nervisking.utils;
 
 import ex.nervisking.ExApi;
+import ex.nervisking.ModelManager.ColorUtil;
+import ex.nervisking.ModelManager.CustomColor;
 import ex.nervisking.ModelManager.Logger;
 import ex.nervisking.ModelManager.Scheduler;
 
+import java.awt.*;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -12,9 +15,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class DiscordWebhooks {
 
@@ -24,29 +25,7 @@ public class DiscordWebhooks {
     private final StringBuilder rootBuilder;
     private final StringBuilder embedBuilder;
     private final StringBuilder contentBuilder;
-
-    // Lista para los campos del embed
     private final List<Field> fields;
-
-    private static final Map<String, Integer> NAMED_COLORS = new HashMap<>();
-
-    static {
-        NAMED_COLORS.put("red", 0xFF0000);
-        NAMED_COLORS.put("green", 0x00FF00);
-        NAMED_COLORS.put("blue", 0x0000FF);
-        NAMED_COLORS.put("yellow", 0xFFFF00);
-        NAMED_COLORS.put("cyan", 0x00FFFF);
-        NAMED_COLORS.put("magenta", 0xFF00FF);
-        NAMED_COLORS.put("black", 0x000000);
-        NAMED_COLORS.put("white", 0xFFFFFF);
-        NAMED_COLORS.put("gray", 0x808080);
-        NAMED_COLORS.put("orange", 0xFFA500);
-        NAMED_COLORS.put("pink", 0xFFC0CB);
-        NAMED_COLORS.put("lime", 0x00FF00);
-        NAMED_COLORS.put("purple", 0x800080);
-        // Agrega más si quieres
-    }
-
 
     public DiscordWebhooks(String discordHook) {
         this.discordHook = discordHook;
@@ -108,31 +87,21 @@ public class DiscordWebhooks {
         return this;
     }
 
-    public DiscordWebhooks setColor(String colorInput) {
-        if (colorInput == null || colorInput.isBlank()) return this;
-
-        colorInput = colorInput.trim().toLowerCase();
-
-        // Si es un color con nombre
-        if (NAMED_COLORS.containsKey(colorInput)) {
-            return setColor(NAMED_COLORS.get(colorInput));
-        }
-
-        // Si es hexadecimal (con o sin #)
-        if (colorInput.startsWith("#")) {
-            colorInput = colorInput.substring(1);
-        }
-
-        try {
-            int color = Integer.parseInt(colorInput, 16);
-            return setColor(color);
-        } catch (NumberFormatException e) {
-            utilsManagers.sendLogger(Logger.ERROR, "Color inválido: " + colorInput);
+    public DiscordWebhooks setColor(CustomColor customColor) {
+        if (customColor != null && customColor.getColor() != null) {
+            Color c = customColor.getColor();
+            int rgb = (c.getRed() << 16) + (c.getGreen() << 8) + c.getBlue();
+            return setColor(rgb);
         }
         return this;
     }
 
-
+    public DiscordWebhooks setColor(String colorInput) {
+        Color color = ColorUtil.parse(colorInput);
+        if (color == null) return this;
+        int rgb = (color.getRed() << 16) + (color.getGreen() << 8) + color.getBlue();
+        return setColor(rgb);
+    }
 
     public DiscordWebhooks setFooter(String text, String iconUrl) {
         if (embedBuilder.length() > 0) embedBuilder.append(",");
