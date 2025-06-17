@@ -44,6 +44,7 @@ public class ItemBuilder {
     private final PersistentDataContainer container;
     private Player player = null;
     private static boolean error = false;
+    private static ServerVersion serverVersion = ExApi.serverVersion;
     public final static String CLOSE = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDM0NWU1ZmNlMmZjZmZmNzhjZGFjNjVlZDg4MTkxOGM3OWMzOGU4NTVlYmJjMTkyYzk3YzU3ODRjMzJkMzc4In19fQ==";
     public final static String BACK = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWQ3M2NmNjZkMzFiODNjZDhiODY0NGMxNTk1OGMxYjczYzhkOTczMjNiODAxMTcwYzFkODg2NGJiNmE4NDZkIn19fQ==";
     public final static String AFTER = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzg2MTg1YjFkNTE5YWRlNTg1ZjE4NGMzNGYzZjNlMjBiYjY0MWRlYjg3OWU4MTM3OGU0ZWFmMjA5Mjg3In19fQ==";
@@ -278,7 +279,6 @@ public class ItemBuilder {
         ItemStack head = new ItemStack(Material.PLAYER_HEAD);
         head.setAmount(amount);
         if(head.getItemMeta() instanceof SkullMeta skullMeta && texture != null){
-            ServerVersion serverVersion = ExApi.serverVersion;
             if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_20_R2)){
                 PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID());
                 PlayerTextures textures = profile.getTextures();
@@ -542,7 +542,7 @@ public class ItemBuilder {
             return this;
         }
         meta.addItemFlags(ItemFlag.values());
-        if (ExApi.equalOrGreaterVersion("1.21.4")) {
+        if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)){
             for (Attribute attribute : Attribute.values()) {
                 meta.removeAttributeModifier(attribute);
             }
@@ -556,7 +556,7 @@ public class ItemBuilder {
         }
         if (value) {
             meta.addItemFlags(ItemFlag.values());
-            if (ExApi.equalOrGreaterVersion("1.21.4")) {
+            if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)){
                 for (Attribute attribute : Attribute.values()) {
                     meta.removeAttributeModifier(attribute);
                 }
@@ -620,7 +620,6 @@ public class ItemBuilder {
             return this;
         }
         if (meta instanceof SkullMeta skullMeta) {
-            ServerVersion serverVersion = ExApi.serverVersion;
             if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_20_R2)){
                 PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID());
                 PlayerTextures textures = profile.getTextures();
@@ -661,7 +660,7 @@ public class ItemBuilder {
         if (error) {
             return this;
         }
-        if (ExApi.equalOrGreaterVersion("1.21.4")) {
+        if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)){
             meta.setMaxStackSize(amount);
         }
         return this;
@@ -671,10 +670,10 @@ public class ItemBuilder {
         if (error) {
             return this;
         }
-        if (ExApi.equalOrGreaterVersion("1.21.4")) {
+        if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)){
             meta.setEnchantmentGlintOverride(true);
         } else {
-            addEnchant(Enchantment.LURE, 1, true);
+            addEnchant(Enchantment.FLAME, 1, true);
             addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }
         return this;
@@ -684,7 +683,7 @@ public class ItemBuilder {
         if (error) {
             return this;
         }
-        if (ExApi.equalOrGreaterVersion("1.21.4")) {
+        if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)){
             meta.setEnchantmentGlintOverride(value);
         } else if (value) {
             addEnchant(Enchantment.LURE, 1, true);
@@ -697,7 +696,7 @@ public class ItemBuilder {
         if (error) {
             return this;
         }
-        if (ExApi.equalOrGreaterVersion("1.21.4")) {
+        if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)){
             meta.setGlider(true);
         } else {
             addEnchant(Enchantment.LURE, 1, true);
@@ -710,7 +709,7 @@ public class ItemBuilder {
         if (error) {
             return this;
         }
-        if (ExApi.equalOrGreaterVersion("1.21.4")) {
+        if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)){
             meta.setGlider(value);
         } else if (value) {
             addEnchant(Enchantment.LURE, 1, true);
@@ -723,7 +722,7 @@ public class ItemBuilder {
         if (error) {
             return this;
         }
-        if (ExApi.equalOrGreaterVersion("1.21.4")) {
+        if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)){
             meta.setHideTooltip(true);
         } else {
             setName(" ");
@@ -735,7 +734,7 @@ public class ItemBuilder {
         if (error) {
             return this;
         }
-        if (ExApi.equalOrGreaterVersion("1.21.4")) {
+        if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)){
             meta.setHideTooltip(value);
         } else if (value){
             setName(" ");
@@ -748,7 +747,7 @@ public class ItemBuilder {
             return this;
         }
         if (meta instanceof FoodComponent foodMeta) {
-            if (ExApi.equalOrGreaterVersion("1.21.4")) {
+            if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)){
                 foodMeta.setNutrition(nutrition);
                 foodMeta.setSaturation(saturationModifier);
                 foodMeta.setCanAlwaysEat(canAlwaysEat);
@@ -763,7 +762,7 @@ public class ItemBuilder {
         if (error) {
             return this;
         }
-        if (ExApi.equalOrGreaterVersion("1.21.4")) {
+        if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)){
             try {
                 meta.setRarity(ItemRarity.valueOf(rarityName.toUpperCase()));
             } catch (IllegalArgumentException e) {
@@ -801,7 +800,7 @@ public class ItemBuilder {
         if (error) {
             return this;
         }
-        if (ExApi.equalOrGreaterVersion("1.19.4")) {
+        if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_9_R2)){
             if (meta instanceof ArmorMeta potionMeta) {
                 if (value) {
                     potionMeta.setTrim(null);
@@ -815,7 +814,7 @@ public class ItemBuilder {
         if (error) {
             return this;
         }
-        if (ExApi.equalOrGreaterVersion("1.19.4")) {
+        if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_9_R2)){
             if (meta instanceof ArmorMeta armorMeta) {
                 armorMeta.setTrim(new ArmorTrim(trimMaterial, trimPattern));
             }
@@ -827,7 +826,7 @@ public class ItemBuilder {
         if (error) {
             return this;
         }
-        if (ExApi.equalOrGreaterVersion("1.19.4")) {
+        if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_9_R2)){
             if (meta instanceof ArmorMeta armorMeta) {
                 TrimMaterial trimMaterial = ItemUtils.getTrimMaterial(Material);
                 if (trimMaterial == null) {
@@ -868,7 +867,6 @@ public class ItemBuilder {
     }
 
     // ======= Finalizer =======
-
     public ItemStack build() {
         item.setItemMeta(meta);
         return item;

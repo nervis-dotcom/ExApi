@@ -63,6 +63,10 @@ public abstract class CustomConfigSave {
 
     private void getUpdate() {
         if (autoSave()) {
+            if (setTime() <= 0) {
+                ExApi.getUtilsManagers().sendLogger(Logger.WARNING, "&cEl tiempo de auto guardado no puede ser menor o igual a 0, se desactivara el auto guardado del archivo: &e" + fileName);
+                return;
+            }
             this.task = Scheduler.runTimer(() -> {
                 this.saveData();
                 if (message()) {
@@ -125,10 +129,16 @@ public abstract class CustomConfigSave {
     public abstract void saveData();
     public abstract String fileName();
     public abstract String folderName();
-    public abstract int setTime();
-    public abstract boolean autoSave();
     public abstract boolean newFile();
-    public abstract boolean message();
+    public int setTime() {
+        return 0;
+    }
+    public boolean autoSave() {
+        return false;
+    }
+    public boolean message() {
+        return false;
+    }
     public String getPath() {
         return this.fileName;
     }

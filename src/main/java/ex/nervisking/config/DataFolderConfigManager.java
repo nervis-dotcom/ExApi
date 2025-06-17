@@ -31,6 +31,10 @@ public abstract class DataFolderConfigManager {
 
     private void getUpdate() {
         if (autoSave()) {
+            if (time() <= 0) {
+                ExApi.getUtilsManagers().sendLogger(Logger.WARNING, "&cEl tiempo de auto guardado debe ser mayor a 0.");
+                return;
+            }
             this.task = Scheduler.runTimer(() -> {
                 this.saveConfigs();
                 if (message()) {
@@ -111,9 +115,15 @@ public abstract class DataFolderConfigManager {
     public abstract void loadConfigs();
     public abstract void saveConfigs();
     public abstract String folderName();
-    public abstract int time();
-    public abstract boolean autoSave();
-    public abstract boolean message();
+    public int time() {
+        return 0;
+    }
+    public boolean autoSave() {
+        return false;
+    }
+    public boolean message() {
+        return false;
+    }
     public List<Configurate> createConfigFiles() {
         return List.of();
     }

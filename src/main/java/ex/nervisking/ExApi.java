@@ -30,7 +30,7 @@ public class ExApi {
     private static final HashMap<Player, PlayerMenuUtility> playerMenuUtilityMap = new HashMap<>();
     private static boolean isMenu = false;
 
-    private static String serverversion = "0";
+    private static String sVar = "0";
     private static PluginDescriptionFile descriptionFile;
 
     private static String prefix = "&#ffeb00&lᴇ&#ffe535&lx&#fedf6a&lᴀ&#fed99e&lᴘ&#fdd3d3&lɪ &8»";
@@ -53,7 +53,7 @@ public class ExApi {
         ExApi.plugin = plugin;
         utilsManagers = new UtilsManagers();
         utils = new Utils();
-        serverversion = plugin.getServer().getBukkitVersion().split("-")[0];
+        sVar = plugin.getServer().getBukkitVersion().split("-")[0];
         descriptionFile = plugin.getDescription();
 
         if (menu) {
@@ -63,7 +63,7 @@ public class ExApi {
     }
 
     public static String getPluginVersion() {
-        return descriptionFile != null ? descriptionFile.getVersion() : "null";
+        return descriptionFile != null ? descriptionFile.getVersion() : "0.0.1-SNAPSHOT";
     }
 
     public static String getPluginAuthor() {
@@ -163,16 +163,6 @@ public class ExApi {
             default:
                 serverVersion = ServerVersion.valueOf(packageName.replace("org.bukkit.craftbukkit.", ""));
         }
-    }
-
-    public static boolean isServerVersion(String version) {
-        return serverversion.equals(version);
-    }
-
-    public static boolean equalOrGreaterVersion(String version) {
-        int vs = Integer.parseInt(serverversion.replace(".", ""));
-        int vp = Integer.parseInt(version.replace(".", ""));
-        return vs >= vp;
     }
 
     public static boolean isPlugin(String plugin) {
@@ -294,7 +284,7 @@ public class ExApi {
         ExApi.neverConnected = neverConnected;
     }
 
-    public static String getServerversion() {
-        return serverversion;
+    public static String getsVar() {
+        return sVar;
     }
 }

@@ -85,8 +85,8 @@ public class PyfigletMessage {
     }
 
     // Sobrecarga para Plugins (varargs)
-    public PyfigletMessage addPlugins(Plugins... pluginsArray) {
-        for (Plugins plugin : pluginsArray) {
+    public PyfigletMessage addPlugins(Plugins... plugins) {
+        for (Plugins plugin : plugins) {
             this.pluginsSet.add(plugin.getName());
         }
         return this;
@@ -128,7 +128,7 @@ public class PyfigletMessage {
     public void build() {
         ConsoleCommandSender console = Bukkit.getConsoleSender();
         for (String line : pyfiglet) {
-            line = CustomColor.applyGradient(line.replace("%server%", ExApi.getServerversion())
+            line = CustomColor.applyGradient(line.replace("%server%", ExApi.getsVar())
                     .replace("%version%", ExApi.getPluginVersion())
                     .replace("%autor%", ExApi.getPluginAuthor())
                     .replace("%status%", status ? "Iniciado" : "Apagado")

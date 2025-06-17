@@ -1,27 +1,8 @@
 package ex.nervisking.itemsManager;
 
-import java.lang.reflect.Field;
-import java.util.UUID;
-
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
-import ex.nervisking.ExApi;
-import ex.nervisking.utils.ServerVersion;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.trim.TrimMaterial;
 import org.bukkit.inventory.meta.trim.TrimPattern;
-import org.bukkit.profile.PlayerProfile;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.profile.PlayerTextures;
 
-import java.net.URL;
-import java.util.Base64;
-
-@SuppressWarnings({"deprecation"})
 public class ItemUtils {
 
     public static TrimMaterial getTrimMaterial(String input) {
@@ -84,84 +65,5 @@ public class ItemUtils {
             return TrimPattern.WILD;
         }
         return null;
-    }
-
-    public static ItemStack createCustomHeadItem(String texture, int amount){
-        ItemStack item = new ItemStack(Material.PLAYER_HEAD);
-        item.setAmount(amount);
-        if(item.getItemMeta() instanceof SkullMeta skullMeta && texture != null){
-            ServerVersion serverVersion = ExApi.serverVersion;
-            if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_20_R2)){
-                PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID());
-                PlayerTextures textures = profile.getTextures();
-                URL url;
-                try {
-                    String decoded = new String(Base64.getDecoder().decode(texture));
-                    String decodedFormatted = decoded.replaceAll("\\s", "");
-                    JsonObject jsonObject = new Gson().fromJson(decodedFormatted, JsonObject.class);
-                    String urlText = jsonObject.get("textures").getAsJsonObject().get("SKIN").getAsJsonObject().get("url").getAsString();
-
-                    url = new URL(urlText);
-                } catch (Exception error) {
-                    error.printStackTrace();
-                    return item;
-                }
-                textures.setSkin(url);
-                profile.setTextures(textures);
-
-                skullMeta.setOwnerProfile(profile);
-            } else {
-                GameProfile profile = new GameProfile(UUID.randomUUID(), "");
-                profile.getProperties().put("textures", new Property("textures", texture));
-
-                try {
-                    Field profileField = skullMeta.getClass().getDeclaredField("profile");
-                    profileField.setAccessible(true);
-                    profileField.set(skullMeta, profile);
-                } catch (IllegalArgumentException | NoSuchFieldException | SecurityException |
-                         IllegalAccessException ignored) {
-                }
-            }
-            item.setItemMeta(skullMeta);
-        }
-        return item;
-    }
-
-
-    @SuppressWarnings("deprecation")
-    public static void createCustomHeadItem(ItemStack item, String texture) {
-        if (item.getItemMeta() instanceof SkullMeta skullMeta && texture != null) {
-            // Verificar versión del servidor
-            if (ExApi.getServerversion().startsWith("1.21")) {
-                PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID());
-                PlayerTextures textures = profile.getTextures();
-                URL url;
-                try {
-                    String decoded = new String(Base64.getDecoder().decode(texture));
-                    String decodedFormatted = decoded.replaceAll("\\s", "");
-                    JsonObject jsonObject = new Gson().fromJson(decodedFormatted, JsonObject.class);
-                    String urlText = jsonObject.get("textures").getAsJsonObject().get("SKIN").getAsJsonObject().get("url").getAsString();
-
-                    url = new URL(urlText);
-                } catch (Exception ignored) {
-                    return;
-                }
-                textures.setSkin(url);
-                profile.setTextures(textures);
-
-                skullMeta.setOwnerProfile(profile);
-            } else {
-                GameProfile profile = new GameProfile(UUID.randomUUID(), "");
-                profile.getProperties().put("textures", new Property("textures", texture));
-
-                try {
-                    Field profileField = skullMeta.getClass().getDeclaredField("profile");
-                    profileField.setAccessible(true);
-                    profileField.set(skullMeta, profile);
-                } catch (IllegalArgumentException | NoSuchFieldException | SecurityException | IllegalAccessException ignored) {}
-            }
-
-            item.setItemMeta(skullMeta);
-        }
     }
 }
