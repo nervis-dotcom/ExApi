@@ -138,7 +138,7 @@ public class ExApi {
         return playerMenuUtilityMap;
     }
 
-    public void setVersion() {
+    private void setVersion() {
         String packageName = Bukkit.getServer().getClass().getPackage().getName();
         String bukkitVersion = Bukkit.getServer().getBukkitVersion().split("-")[0];
         switch(bukkitVersion){

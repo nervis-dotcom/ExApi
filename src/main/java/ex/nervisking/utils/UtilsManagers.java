@@ -23,7 +23,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -38,16 +37,6 @@ public class UtilsManagers extends Utils {
         this.plugin = ExApi.getPlugin();
     }
 
-    /**
-     * Verifica si un identificador está en cooldown.
-     * Si no lo está, lo pone en cooldown por 500ms.
-     *
-     * @param string Identificador del cooldown
-     * @return true si está en cooldown, false si se acaba de poner
-     * <p>
-     * Ejemplo:
-     * {@code if (utilsManagers.getCooldown("chat_delay:" + player.getName())) return;}
-     */
     public boolean getCooldown(String string){
         if (cooldowns.containsKey(string)) {
             long secondsLeft = (cooldowns.get(string) + 500) - System.currentTimeMillis();
@@ -60,16 +49,6 @@ public class UtilsManagers extends Utils {
         return false;
     }
 
-    /**
-     * Verifica si el sender tiene el permiso con el prefijo del plugin.
-     *
-     * @param sender    Comando o jugador
-     * @param permission Permiso sin prefijo (se le añade el nombre del plugin)
-     * @return true si tiene permiso
-     * <p>
-     * Ejemplo:
-     * {@code if (!utilsManagers.hasPermission(sender, "mycommand.use")) return;}
-     */
     public boolean hasPermission(CommandSender sender, String permission){
         return sender.hasPermission(plugin.getName().toLowerCase() + "." + permission);
     }
@@ -143,7 +122,7 @@ public class UtilsManagers extends Utils {
      * Ejemplo:
      * {@code utilsManagers.sendTitle(player, "&aBienvenido;&eDisfruta el servidor;10;60;10");}
      */
-    public void sendTitle(Player player,String actionLine){
+    public void sendTitle(Player player, String actionLine) {
         if (actionLine == null || actionLine.equals("none")) return;
 
         String[] sep = actionLine.split(";");
@@ -153,10 +132,10 @@ public class UtilsManagers extends Utils {
 
         String title = sep[0];
         String subtitle = sep[1];
-        if(title.equals("none")) {
+        if (title.equals("none")) {
             title = "";
         }
-        if(subtitle.equals("none")) {
+        if (subtitle.equals("none")) {
             subtitle = "";
         }
 
@@ -221,33 +200,28 @@ public class UtilsManagers extends Utils {
      * Los placeholders compatibles se reemplazarán usando el contexto del jugador antes de ejecutar el comando.
      *
      * @param player  Jugador cuyo contexto se usará para reemplazar los placeholders.
-     * @param command Comando a ejecutar (puede incluir placeholders como {@code %player_name%}, {@code %vault_eco_balance%}, etc.)
+     * @param commands Comando a ejecutar (puede incluir placeholders como {@code %player_name%}, {@code %vault_eco_balance%}, etc.)
      *
      * <p><b>Ejemplo de uso:</b></p>
      * <pre>{@code
      * utilsManagers.sendConsoleCommand(player, "say %player_name% ha usado un ítem especial");
      * }</pre>
      */
-    public void sendConsoleCommand(Player player, Object command) {
-        switch (command) {
-            case String string -> sendConsoleCommand(player, string);
-            case List<?> list -> {
-                for (Object msg : list) {
-                    if (msg instanceof String m) {
-                        sendConsoleCommand(player, m);
-                    }
-                }
-            }
-            case String[] array -> {
-                for (String msg : array) {
-                    sendConsoleCommand(player, msg);
-                }
-            }
-            case null, default -> {}
+
+    public void sendConsoleCommand(Player player, String... commands) {
+        if (commands == null) return;
+        for (String cmd : commands) {
+            sendConsoleCommand(player, cmd);
+        }
+    }
+    public void sendConsoleCommand(Player player, List<String> commands) {
+        if (commands == null) return;
+        for (String cmd : commands) {
+            sendConsoleCommand(player, cmd);
         }
     }
 
-    private void sendConsoleCommand(Player player, String command) {
+    public void sendConsoleCommand(Player player, String command) {
         if (command == null || command.isEmpty()) return;
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), setPlaceholders(player, command));
     }
@@ -533,7 +507,7 @@ public class UtilsManagers extends Utils {
      * @param player El jugador al que se aplicará el efecto.
      * @param actionLine La línea de acción que contiene los parámetros del efecto separados por punto y coma.
      */
-    public void givePotionEffect(Player player,String actionLine) {
+    public void givePotionEffect(Player player, String actionLine) {
         String[] sep = actionLine.split(";");
         if (sep.length < 3) {
             return;
@@ -573,79 +547,28 @@ public class UtilsManagers extends Utils {
     }
 
     // messages
-
-    /**
-     * Envía un mensaje centrado al jugador.
-     *
-     * @param player  Jugador
-     * @param message Mensaje (String, List<String> o String[])
-     *
-     * <p><strong>Ejemplos de uso:</strong></p>
-     * <pre>{@code
-     * utilsManagers.centeredMessage(player, "&a¡Bienvenido al servidor!");
-     * utilsManagers.centeredMessage(player, "&a¡Bienvenido al servidor!", "&e%player_name%");
-     * utilsManagers.centeredMessage(player, List.of("&a¡Bienvenido al servidor!", "&e%player_name%"));
-     * }</pre>
-     */
-    public void centeredMessage(Player player, Object message) {
-        switch (message) {
-            case String string -> centeredMessage(player, string);
-            case List<?> list -> {
-                for (Object msg : list) {
-                    if (msg instanceof String m) {
-                        centeredMessage(player, m);
-                    }
-                }
-            }
-            case String[] array -> {
-                for (String msg : array) {
-                    centeredMessage(player, msg);
-                }
-            }
-            case null, default -> {}
-        }
-    }
-
-    private void centeredMessage(Player player, String message) {
+    public void centeredMessage(Player player, String message) {
         if (message == null || message.isEmpty()) return;
         String coloredMessage = setPlaceholders(player, message);
         String centeredMessage = getCenteredMessage(coloredMessage);
         player.sendMessage(centeredMessage);
     }
 
-    /**
-     * Envía un mensaje formateado a un jugador o consola.
-     *
-     * @param sender Receptor
-     * @param message Mensaje (String, List<String> o String[])
-     *
-     *<p><strong>Ejemplos de uso:</strong></p>
-     * <pre>{@code
-     * utilsManagers.sendMessage(sender, "&a¡Comando ejecutado con éxito!");
-     * utilsManagers.sendMessage(sender, "&a¡Comando ejecutado con éxito!", "sisi");
-     * utilsManagers.sendMessage(sender, List.of("&a¡Comando ejecutado con éxito!", "sisi"));
-     * }</pre>
-     */
-    public void sendMessage(CommandSender sender, Object message) {
-        switch (message) {
-            case String string -> sendSingleMessage(sender, string);
-            case List<?> list -> {
-                for (Object msg : list) {
-                    if (msg instanceof String m) {
-                        sendSingleMessage(sender, m);
-                    }
-                }
-            }
-            case String[] array -> {
-                for (String msg : array) {
-                    sendSingleMessage(sender, msg);
-                }
-            }
-            case null, default -> {}
+    public void centeredMessage(Player player, String... messages) {
+        if (messages == null) return;
+        for (String message : messages) {
+            centeredMessage(player, message);
         }
     }
 
-    private void sendSingleMessage(CommandSender sender, String message) {
+    public void centeredMessage(Player player, List<String> messages) {
+        if (messages == null || messages.isEmpty()) return;
+        for (String message : messages) {
+            centeredMessage(player, message);
+        }
+    }
+
+    public void sendMessage(CommandSender sender, String message) {
         if (message == null || message.isEmpty()) return;
         if (sender instanceof Player player) {
             player.sendMessage(setPlaceholders(player, message));
@@ -654,237 +577,152 @@ public class UtilsManagers extends Utils {
         }
     }
 
-    /**
-     * Manda un mensaje a todos los jugadores online.
-     *
-     * @param message Mensaje (String, List<String> o String[])
-     *
-     *<p><strong>Ejemplos de uso:</strong></p>
-     * <pre>{@code
-     * utilsManagers.broadcastMessage("&6Evento global iniciado!");
-     * utilsManagers.broadcastMessage("&6Evento global iniciado!", "usa /eventos");
-     * utilsManagers.broadcastMessage(List.of("&6Evento global iniciado!", "usa /eventos"));
-     * }</pre>
-     */
-    public void broadcastMessage(Object message) {
-        switch (message) {
-            case String string -> sendSingleBroadcastMessage(string);
-            case List<?> list -> {
-                for (Object msg : list) {
-                    if (msg instanceof String m) {
-                        sendSingleBroadcastMessage(m);
-                    }
-                }
-            }
-            case String[] array -> {
-                for (String msg : array) {
-                    sendSingleBroadcastMessage(msg);
-                }
-            }
-            case null, default -> {
-            }
+    public void sendMessage(CommandSender sender, String... messages) {
+        if (messages == null) return;
+        for (String message : messages) {
+            sendMessage(sender, message);
+        }
+    }
+
+    public void sendMessage(CommandSender sender, List<String> messages) {
+        if (messages == null) return;
+        for (String message : messages) {
+            sendMessage(sender, message);
+        }
+    }
+
+    public void broadcastMessage(String message) {
+        if (message == null || message.isEmpty()) return;
+        sendSingleBroadcastMessage(message);
+    }
+
+    public void broadcastMessage(String... messages) {
+        if (messages == null) return;
+        for (String message : messages) {
+            sendSingleBroadcastMessage(message);
+        }
+    }
+
+    public void broadcastMessage(List<String> messages) {
+        if (messages == null || messages.isEmpty()) return;
+        for (String message : messages) {
+            sendSingleBroadcastMessage(message);
         }
     }
 
     private void sendSingleBroadcastMessage(String message) {
-        Bukkit.getOnlinePlayers().forEach(player -> sendSingleMessage(player, message));
+        Bukkit.getOnlinePlayers().forEach(player -> sendMessage(player, message));
     }
 
-    /**
-     * Manda un mensaje centrado a todos los jugadores online.
-     *
-     * @param message Mensaje (String, List<String> o String[])
-     *
-     * <pre>{@code
-     * utilsManagers.broadcastMessageCenter("&6Evento global iniciado!");
-     * utilsManagers.broadcastMessageCenter("&6Evento global iniciado!", "usa /eventos");
-     * utilsManagers.broadcastMessageCenter(List.of("&6Evento global iniciado!", "usa /eventos"));
-     * }</pre>
-     */
-    public void broadcastMessageCenter(Object message) {
-        switch (message) {
-            case String string -> sendSingleBroadcastMessageCenter(string);
-            case List<?> list -> {
-                for (Object msg : list) {
-                    if (msg instanceof String m) {
-                        sendSingleBroadcastMessageCenter(m);
-                    }
-                }
-            }
-            case String[] array -> {
-                for (String msg : array) {
-                    sendSingleBroadcastMessageCenter(msg);
-                }
-            }
-            case null, default -> {}
+    public void broadcastMessageCenter(String message) {
+        if (message == null || message.isEmpty()) return;
+        sendSingleBroadcastMessageCenter(message);
+    }
+
+    public void broadcastMessageCenter(String... messages) {
+        if (messages == null) return;
+        for (String message : messages) {
+            sendSingleBroadcastMessageCenter(message);
         }
     }
 
-    public void sendSingleBroadcastMessageCenter(String message) {
+    public void broadcastMessageCenter(List<String> messages) {
+        if (messages == null || messages.isEmpty()) return;
+        for (String message : messages) {
+            sendSingleBroadcastMessageCenter(message);
+        }
+    }
+
+    private void sendSingleBroadcastMessageCenter(String message) {
         Bukkit.getOnlinePlayers().forEach(player -> centeredMessage(player, message));
     }
 
-    /**
-     * Envía un mensaje al log de la consola.
-     *
-     * @param message Mensaje (String, List<String> o String[])
-     *
-     * <pre>{@code
-     * utilsManagers.consoleMessage("&cError al cargar configuración");
-     * utilsManagers.consoleMessage("&cError al cargar configuración", "&4data utils");
-     * utilsManagers.consoleMessage(List.of("&cError al cargar configuración", "&4data utils"));
-     * }</pre>
-     */
-    public void consoleMessage(Object message) {
-        switch (message) {
-            case String string -> sendSingleConsoleMessage(string);
-            case List<?> list -> {
-                for (Object msg : list) {
-                    if (msg instanceof String m) {
-                        sendSingleConsoleMessage(m);
-                    }
-                }
-            }
-            case String[] array -> {
-                for (String msg : array) {
-                    sendSingleConsoleMessage(msg);
-                }
-            }
-            case null, default -> {}
+    public void consoleMessage(String message) {
+        if (message == null || message.isEmpty()) return;
+        sendSingleConsoleMessage(message);
+    }
+
+    public void consoleMessage(String... messages) {
+        if (messages == null) return;
+        for (String message : messages) {
+            sendSingleConsoleMessage(message);
+        }
+    }
+
+    public void consoleMessage(List<String> messages) {
+        if (messages == null || messages.isEmpty()) return;
+        for (String message : messages) {
+            sendSingleConsoleMessage(message);
         }
     }
 
     private void sendSingleConsoleMessage(String message){
+        if (message == null || message.isEmpty()) return;
         Bukkit.getConsoleSender().sendMessage(setColoredMessage(message));
     }
 
-    /**
-     * Envía un mensaje formateado con Spigot (legacy text).
-     *
-     * @param player Jugador
-     * @param message Mensaje legacy
-     * <p>
-     * Ejemplo:
-     * {@code utilsManagers.sendSpigotSendMessage(player, "&aClick para aceptar");}
-     */
     public void sendSpigotSendMessage(Player player, String message){
         if (message == null || message.isEmpty()) return;
         TextComponent mainComponent = new TextComponent(TextComponent.fromLegacyText(setPlaceholders(player, message)));
         player.spigot().sendMessage(mainComponent);
     }
 
-    /**
-     * Envía un mensaje formateado con componentes a un jugador.
-     *
-     * @param player Jugador
-     * @param mainComponent Componente Spigot
-     * <p>
-     * Ejemplo:
-     * {@code utilsManagers.sendSpigotSendMessage(player, new TextComponent("Hola")); }
-     */
     public void sendSpigotSendMessage(Player player, TextComponent mainComponent){
         if (mainComponent == null) return;
         player.spigot().sendMessage(mainComponent);
     }
 
     /**
-     * Expulsa al jugador con un mensaje multilineal.
+     * Kicks a player with a colored message.
      *
-     * @param player Jugador
-     * @param message Mensaje (String, List<String> o String[])
-     *
-     * <pre>{@code
-     * utilsManagers.kickPlayer("&cHas sido expulsado");
-     * utilsManagers.kickPlayer("&cHas sido expulsado", "&7Por comportamiento inadecuado");
-     * utilsManagers.kickPlayer(List.of("&cHas sido expulsado", "&7Por comportamiento inadecuado"));
-     * }</pre>
+     * @param player  Player to kick
+     * @param message Message to send on kick
      */
-    public void kickPlayer(Player player, Object message) {
-        switch (message) {
-            case String string -> {
-                player.kickPlayer(setColoredMessage(string));
-            }
-            case List<?> list -> {
-                List<String> stringList = new ArrayList<>();
-                for (Object msg : list) {
-                    if (msg instanceof String m) {
-                        stringList.add(m);
-                    }
-                }
-                String m = String.join("\n", stringList);
-                player.kickPlayer(setColoredMessage(m));
-            }
-            case String[] array -> {
-                List<String> stringList = new ArrayList<>();
-                for (Object msg : array) {
-                    if (msg instanceof String m) {
-                        stringList.add(m);
-                    }
-                }
-                String m = String.join("\n", stringList);
-                player.kickPlayer(setColoredMessage(m));
-            }
-            case null, default -> {}
-        }
+    public void kickPlayer(Player player, String message) {
+        if (message == null || message.isEmpty()) return;
+        player.kickPlayer(setColoredMessage(message));
+    }
+
+    public void kickPlayer(Player player, String... messages) {
+        if (messages == null || messages.length == 0) return;
+        String message = String.join("\n", messages);
+        player.kickPlayer(setColoredMessage(message));
+    }
+
+    public void kickPlayer(Player player, List<String> messages) {
+        if (messages == null || messages.isEmpty()) return;
+        String message = String.join("\n", messages);
+        player.kickPlayer(setColoredMessage(message));
     }
 
     /**
-     * Envía mensajes de log a la consola del servidor con un prefijo y color según el tipo de log.
-     * <p>
-     * Este metodo acepta distintos tipos de mensajes:
-     * - Un solo mensaje {@code String}.
-     * - Una lista de mensajes {@code List<String>}.
-     * - Un array de mensajes {@code String[]}.
-     * <p>
-     * Los mensajes se formatean agregando un prefijo obtenido de {@code getPrefix()} y un color
-     * asociado al tipo de log (INFO, WARNING, ERROR, DEBUG) definido en el enum {@link Logger}.
-     *
-     * @param logger Tipo de log que define el color y prefijo del mensaje.
-     * @param message Mensaje o colección de mensajes a enviar a consola. Puede ser {@code String}, {@code List<String>} o {@code String[]}.
-     *
-     * <p>Ejemplos de uso:</p>
-     * <pre>
-     * {@code
-     * sendLogger(Logger.INFO, "Servidor iniciado");
-     * sendLogger(List.of(Logger.ERROR, "Error en el plugin", "Revise la configuración"));
-     * sendLogger(Logger.DEBUG, "Depuración activada", "Modo verbose");
-     * }
-     * </pre>
+     * Envía un mensaje al log de la consola con el prefijo del plugin.
      */
-    public void sendLogger(Logger logger, Object message) {
-        if (message == null) return;
+    public void sendLogger(Logger logger, List<String> messages) {
+        if (messages == null || messages.isEmpty()) return;
 
-        switch (message) {
-            case String string -> Bukkit.getConsoleSender().sendMessage(setColoredMessage(getPrefix() + logger.getName() + string));
-            case List<?> list -> {
-                for (Object msg : list) {
-                    Bukkit.getConsoleSender().sendMessage(setColoredMessage(getPrefix()));
-                    if (msg instanceof String m) {
-                        Bukkit.getConsoleSender().sendMessage(setColoredMessage(logger.getName() + m));
-                    }
-                }
-            }
-            case String[] array -> {
-                Bukkit.getConsoleSender().sendMessage(setColoredMessage(getPrefix()));
-                for (String msg : array) {
-                    Bukkit.getConsoleSender().sendMessage(setColoredMessage(logger.getName() + msg));
-                }
-            }
-            default -> {}
+        consoleMessage(getPrefix());
+        for (String message : messages) {
+            consoleMessage(logger.getName() + message);
         }
     }
+
+    public void sendLogger(Logger logger, String... messages) {
+        if (messages == null || messages.length == 0) return;
+
+        consoleMessage(getPrefix());
+        for (String message : messages) {
+            consoleMessage(logger.getName() + message);
+        }
+    }
+
+    public void sendLogger(Logger logger, String message) {
+        if (message == null || message.isEmpty()) return;
+        consoleMessage(getPrefix() + logger.getName() + message);
+    }
+
     // other
 
-    /**
-     * Crea un evento de hover con texto personalizado.
-     *
-     * @param player Jugador (para reemplazar placeholders)
-     * @param hoverText Lista de texto para mostrar
-     * @return HoverEvent generado
-     * <p>
-     * Ejemplo:
-     * {@code HoverEvent hover = utilsManagers.createHoverEvent(player, List.of("&aClick aquí", "&7Para más info")); }
-     */
     public HoverEvent createHoverEvent(Player player, @NotNull List<String> hoverText) {
         TextComponent hoverComponent = new TextComponent("");
         boolean first = true;
@@ -903,16 +741,6 @@ public class UtilsManagers extends Utils {
         return new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(hoverComponent).create());
     }
 
-    /**
-     * Aplica una acción de clic a un componente de texto.
-     *
-     * @param component Componente de texto
-     * @param clickAction Acción con formato: [EXECUTE], [OPEN], [SUGGEST]
-     * @param playerName Nombre del jugador a reemplazar en %player%
-     * <p>
-     * Ejemplo:
-     * {@code utilsManagers.applyClickAction(component, "[EXECUTE] /tp %player%", player.getName());}
-     */
     public void applyClickAction(TextComponent component, @NotNull String clickAction, String playerName) {
         String replacedAction = clickAction.replace("%player%", playerName);
         replacedAction = setColoredMessage(replacedAction);
