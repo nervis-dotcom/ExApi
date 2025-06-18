@@ -70,13 +70,11 @@ public class PyfigletMessage {
         return this;
     }
 
-    // Sobrecarga para Strings (varargs)
     public PyfigletMessage addPlugins(String... plugins) {
         Collections.addAll(this.pluginsSet, plugins);
         return this;
     }
 
-    // Sobrecarga para ExPl (varargs)
     public PyfigletMessage addPlugins(ExPl... exPls) {
         for (ExPl exPl : exPls) {
             this.pluginsSet.add(exPl.getName());
@@ -84,7 +82,6 @@ public class PyfigletMessage {
         return this;
     }
 
-    // Sobrecarga para Plugins (varargs)
     public PyfigletMessage addPlugins(Plugins... plugins) {
         for (Plugins plugin : plugins) {
             this.pluginsSet.add(plugin.getName());

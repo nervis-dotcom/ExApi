@@ -69,7 +69,7 @@ public class ExApi {
     public static String getPluginAuthor() {
         return descriptionFile != null ? descriptionFile.getAuthors().toString()
                 .replace("[", "")
-                .replace("]", "") : "null";
+                .replace("]", "") : "nervisking";
     }
 
     public static PluginDescriptionFile getPluginDescriptionFile() {
