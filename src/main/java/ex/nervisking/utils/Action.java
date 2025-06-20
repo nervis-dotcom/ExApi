@@ -10,7 +10,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -368,7 +367,7 @@ public class Action {
         }
     }
 
-    private @NotNull ItemBuilder getItemBuilder(String[] parts) {
+    private ItemBuilder getItemBuilder(String[] parts) {
         int amount = Integer.parseInt(parts[1]);
         ItemBuilder item = new ItemBuilder(parts[0], amount);
         String name = null;

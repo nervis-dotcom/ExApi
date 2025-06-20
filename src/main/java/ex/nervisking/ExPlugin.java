@@ -15,15 +15,17 @@ import org.bukkit.plugin.java.JavaPlugin;
 public abstract class ExPlugin extends JavaPlugin {
 
     private Task gui;
-    public UtilsManagers utilsManagers;
-    public Utils utils;
+    private UtilsManagers utilsManagers;
+    private Utils utils;
     public CommandManager commandManager;
     public PyfigletMessage pyfigletMessage;
 
     protected void Load() {}
+    protected boolean menu() {
+        return false;
+    }
     protected abstract void Enabled();
     protected abstract void Disable();
-    protected abstract boolean menu();
 
     @Override
     public void onLoad() {
