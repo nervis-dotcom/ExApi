@@ -87,16 +87,15 @@ public abstract class DataFolderConfigManager {
         }
     }
 
-    public void removeFile(String config) {
+    public boolean removeFile(String config) {
         CustomConfig configFile = getConfigFile(config + ".yml");
         if (configFile == null) {
-            return;
+            return false;
         }
 
         File file = new File(plugin.getDataFolder() + File.separator + folderName, configFile.getPath());
-        file.delete();
-
         removeConfig(configFile.getPath());
+        return file.delete();
     }
 
     private void removeConfig(String path) {
