@@ -1,9 +1,6 @@
 package ex.nervisking.config;
 
 import ex.nervisking.ExApi;
-import ex.nervisking.ModelManager.Logger;
-import ex.nervisking.ModelManager.Scheduler;
-import ex.nervisking.ModelManager.Task;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -19,7 +16,6 @@ public abstract class CustomConfigSave {
     protected FileConfiguration config = null;
     protected final String folderName;
     private File file = null;
-    private Task task;
 
     public CustomConfigSave() {
         this.plugin = ExApi.getPlugin();
@@ -58,22 +54,6 @@ public abstract class CustomConfigSave {
             e.printStackTrace();
         }
 
-        this.getUpdate();
-    }
-
-    private void getUpdate() {
-        if (autoSave()) {
-            if (setTime() <= 0) {
-                ExApi.getUtilsManagers().sendLogger(Logger.WARNING, "&cEl tiempo de auto guardado no puede ser menor o igual a 0, se desactivara el auto guardado del archivo: &e" + fileName);
-                return;
-            }
-            this.task = Scheduler.runTimer(() -> {
-                this.saveData();
-                if (message()) {
-                    ExApi.getUtilsManagers().sendLogger(Logger.INFO, "&aGuardando data Archivo: &e" + fileName + "...");
-                }
-            }, 10 * 60 * 20, setTime() * 60 * 20L);
-        }
     }
 
     public void saveConfig() {
@@ -119,26 +99,15 @@ public abstract class CustomConfigSave {
             config.setDefaults(defConfig);
         }
         this.loadConfigs();
-        if (task != null) {
-            task.cancel();
-            this.getUpdate();
-        }
     }
+
+
 
     public abstract void loadConfigs();
     public abstract void saveData();
     public abstract String fileName();
     public abstract String folderName();
     public abstract boolean newFile();
-    public int setTime() {
-        return 0;
-    }
-    public boolean autoSave() {
-        return false;
-    }
-    public boolean message() {
-        return false;
-    }
     public String getPath() {
         return this.fileName;
     }

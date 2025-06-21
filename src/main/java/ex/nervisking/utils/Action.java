@@ -113,6 +113,7 @@ public class Action {
 
                 // Reemplazar el placeholder
                 String value = utilsManagers.setPlaceholders(player, placeholder);
+                expected = utilsManagers.setPlaceholders(player, expected);
 
                 // Intentar comparar como número
                 try {

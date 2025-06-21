@@ -2,9 +2,6 @@ package ex.nervisking.config;
 
 import ex.nervisking.ExApi;
 import ex.nervisking.ModelManager.Configurate;
-import ex.nervisking.ModelManager.Logger;
-import ex.nervisking.ModelManager.Scheduler;
-import ex.nervisking.ModelManager.Task;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -17,7 +14,6 @@ public abstract class DataFolderConfigManager {
     protected JavaPlugin plugin;
     protected String folderName;
     protected ArrayList<CustomConfig> configFiles;
-    private Task task;
 
     public DataFolderConfigManager() {
         this.configFiles = new ArrayList<>();
@@ -26,30 +22,9 @@ public abstract class DataFolderConfigManager {
         this.create();
         this.createFolder();
         this.registerConfigFiles();
-        this.getUpdate();
-    }
-
-    private void getUpdate() {
-        if (autoSave()) {
-            if (time() <= 0) {
-                ExApi.getUtilsManagers().sendLogger(Logger.WARNING, "&cEl tiempo de auto guardado debe ser mayor a 0.");
-                return;
-            }
-            this.task = Scheduler.runTimer(() -> {
-                this.saveConfigs();
-                if (message()) {
-                    ExApi.getUtilsManagers().sendLogger(Logger.INFO, "&aGuardando data &e" + configFiles.size() + " &aArchivos en &b" + folderName + "...");
-                }
-            }, 10 * 60 * 20, time() * 60 * 20L);
-
-        }
     }
 
     public void reloadConfigs() {
-        if (task != null) {
-            task.cancel();
-            this.getUpdate();
-        }
         this.configFiles.clear();
         this.registerConfigFiles();
         this.loadConfigs();
@@ -112,18 +87,29 @@ public abstract class DataFolderConfigManager {
         }
     }
 
+    public void removeFile(String config) {
+        CustomConfig configFile = getConfigFile(config + ".yml");
+        if (configFile == null) {
+            return;
+        }
+
+        File file = new File(plugin.getDataFolder() + File.separator + folderName, configFile.getPath());
+        file.delete();
+
+        removeConfig(configFile.getPath());
+    }
+
+    private void removeConfig(String path) {
+        for (int i = 0; i < configFiles.size(); i++) {
+            if (configFiles.get(i).getPath().equals(path)) {
+                configFiles.remove(i);
+            }
+        }
+    }
+
     public abstract void loadConfigs();
     public abstract void saveConfigs();
     public abstract String folderName();
-    public int time() {
-        return 0;
-    }
-    public boolean autoSave() {
-        return false;
-    }
-    public boolean message() {
-        return false;
-    }
     public List<Configurate> createConfigFiles() {
         return List.of();
     }

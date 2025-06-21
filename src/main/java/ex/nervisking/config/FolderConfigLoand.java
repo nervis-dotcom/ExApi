@@ -2,6 +2,7 @@ package ex.nervisking.config;
 
 import ex.nervisking.ExApi;
 import ex.nervisking.ModelManager.Configurate;
+import ex.nervisking.ModelManager.Logger;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -78,6 +79,26 @@ public abstract class FolderConfigLoand {
         for (Configurate files : createConfigFiles()) {
             CustomConfig configFile = new CustomConfig(files.fileName(), files.folderName(), plugin, false);
             configFile.registerConfig();
+        }
+    }
+
+    public void removeFile(String config) {
+        CustomConfig configFile = getConfigFile(config + ".yml");
+        if (configFile == null) {
+            return;
+        }
+
+        File file = new File(plugin.getDataFolder() + File.separator + folderName, configFile.getPath());
+        file.delete();
+
+        removeConfig(configFile.getPath());
+    }
+
+    private void removeConfig(String path) {
+        for (int i = 0; i < configFiles.size(); i++) {
+            if (configFiles.get(i).getPath().equals(path)) {
+                configFiles.remove(i);
+            }
         }
     }
 
