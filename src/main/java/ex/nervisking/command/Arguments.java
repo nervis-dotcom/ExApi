@@ -252,6 +252,26 @@ public class Arguments {
     }
 
     /**
+     * Verifica si hay más argumentos que el máximo permitido.
+     *
+     * @param maxCount cantidad máxima permitida
+     * @return true si hay más argumentos que maxCount
+     */
+    public boolean lacksMaxArgs(int maxCount) {
+        return size() > maxCount;
+    }
+
+    /**
+     * Verifica si la cantidad de argumentos es igual o mayor al mínimo requerido.
+     *
+     * @param required la cantidad mínima de argumentos necesarios
+     * @return true si hay al menos {@code required} argumentos, false en caso contrario
+     */
+    public boolean hasMinArgs(int required) {
+        return args.length >= required;
+    }
+
+    /**
      * Verifica si la cantidad de argumentos es igual o mayor al mínimo requerido.
      *
      * @param required la cantidad mínima de argumentos necesarios

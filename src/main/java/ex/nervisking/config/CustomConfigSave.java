@@ -48,9 +48,7 @@ public abstract class CustomConfigSave {
         config = new YamlConfiguration();
         try {
             config.load(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InvalidConfigurationException e) {
+        } catch (IOException | InvalidConfigurationException e) {
             e.printStackTrace();
         }
 

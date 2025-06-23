@@ -1,5 +1,6 @@
 package ex.nervisking.config;
 
+import ex.nervisking.ExApi;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -17,10 +18,10 @@ public class CustomConfig {
     private final String folderName;
     private final boolean newFile;
 
-    public CustomConfig(String fileName, String folderName, JavaPlugin plugin, boolean newFile) {
+    public CustomConfig(String fileName, String folderName, boolean newFile) {
         this.fileName = fileName;
         this.folderName = folderName;
-        this.plugin = plugin;
+        this.plugin = ExApi.getPlugin();
         this.newFile = newFile;
     }
 
@@ -55,9 +56,7 @@ public class CustomConfig {
         fileConfiguration = new YamlConfiguration();
         try {
             fileConfiguration.load(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InvalidConfigurationException e) {
+        } catch (IOException | InvalidConfigurationException e) {
             e.printStackTrace();
         }
     }

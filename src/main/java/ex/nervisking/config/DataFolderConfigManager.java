@@ -73,7 +73,7 @@ public abstract class DataFolderConfigManager {
     }
 
     public CustomConfig registerConfigFile(String pathName) {
-        CustomConfig config = new CustomConfig(pathName, folderName, plugin, true);
+        CustomConfig config = new CustomConfig(pathName, folderName, true);
         config.registerConfig();
         configFiles.add(config);
 
@@ -82,7 +82,7 @@ public abstract class DataFolderConfigManager {
 
     private void create() {
         for (Configurate files : createConfigFiles()) {
-            CustomConfig configFile = new CustomConfig(files.fileName(), files.folderName(), plugin, false);
+            CustomConfig configFile = new CustomConfig(files.fileName(), files.folderName(), false);
             configFile.registerConfig();
         }
     }
@@ -99,11 +99,7 @@ public abstract class DataFolderConfigManager {
     }
 
     private void removeConfig(String path) {
-        for (int i = 0; i < configFiles.size(); i++) {
-            if (configFiles.get(i).getPath().equals(path)) {
-                configFiles.remove(i);
-            }
-        }
+        configFiles.removeIf(cfg -> cfg.getPath().equals(path));
     }
 
     public abstract void loadConfigs();

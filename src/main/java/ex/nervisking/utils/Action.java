@@ -390,7 +390,7 @@ public class Action {
             }
         }
         if (name != null) {
-            item.setName(parts[2]);
+            item.setName(name);
         }
 
         if (lore != null) {

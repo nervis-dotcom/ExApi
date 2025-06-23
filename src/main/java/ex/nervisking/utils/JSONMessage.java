@@ -1,80 +1,93 @@
 package ex.nervisking.utils;
 
 import ex.nervisking.ExApi;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.*;
 import org.bukkit.entity.Player;
-
-import java.util.List;
 
 @SuppressWarnings("deprecation")
 public class JSONMessage {
 
     private final Player player;
-    private final String text;
-    private BaseComponent[] hover;
-    private String suggestCommand;
-    private String executeCommand;
     private final UtilsManagers utilsManagers;
+    private final TextComponent root;
 
-    public JSONMessage(Player player, String text) {
+    public JSONMessage(Player player) {
         this.player = player;
-        this.hover = null;
-        this.text = text;
         this.utilsManagers = ExApi.getUtilsManagers();
+        this.root = new TextComponent("");
     }
 
-    public JSONMessage hover(List<String> list) {
-        hover = new BaseComponent[list.size()];
-        for (int i = 0; i < list.size(); i++) {
-            TextComponent line;
-            if (i == list.size() - 1) {
-                line = new TextComponent(TextComponent.fromLegacyText(utilsManagers.setPlaceholders(player, list.get(i))));
-            } else {
-                line = new TextComponent(TextComponent.fromLegacyText(utilsManagers.setPlaceholders(player, list.get(i)) + "\n"));
-            }
-            hover[i] = line;
+    // Clase interna fluida para construir componentes y agregarlos al root
+    public class Part {
+
+        private final String text;
+        private BaseComponent[] hover;
+        private ClickEvent clickEvent;
+
+        public Part(String text) {
+            this.text = utilsManagers.setPlaceholders(player, text);
         }
-        return this;
+
+        public Part hover(String... lines) {
+            hover = new BaseComponent[lines.length];
+            for (int i = 0; i < lines.length; i++) {
+                String line = utilsManagers.setPlaceholders(player, lines[i]);
+                if (i != lines.length - 1) {
+                    line += "\n";
+                }
+                hover[i] = new TextComponent(TextComponent.fromLegacyText(line));
+            }
+            return this;
+        }
+
+        public Part suggest(String command) {
+            this.clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command);
+            return this;
+        }
+
+        public Part run(String command) {
+            this.clickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND, command);
+            return this;
+        }
+
+        public Part openUrl(String url) {
+            this.clickEvent = new ClickEvent(ClickEvent.Action.OPEN_URL, url);
+            return this;
+        }
+
+        public Part copy(String text) {
+            this.clickEvent = new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, text);
+            return this;
+        }
+
+
+        public JSONMessage append() {
+            TextComponent message = new TextComponent(TextComponent.fromLegacyText(text));
+            if (hover != null) {
+                message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hover));
+            }
+            if (clickEvent != null) {
+                message.setClickEvent(clickEvent);
+            }
+            root.addExtra(message);
+            return JSONMessage.this;
+        }
     }
 
-    public JSONMessage setSuggestCommand(String command) {
-        this.suggestCommand = command;
-        return this;
+    public Part part(String text) {
+        return new Part(text);
     }
 
-    public JSONMessage setExecuteCommand(String command) {
-        this.executeCommand = command;
+    public JSONMessage add(String text) {
+        root.addExtra(new TextComponent(TextComponent.fromLegacyText(utilsManagers.setPlaceholders(player, text))));
         return this;
     }
 
     public void send() {
-        TextComponent message = new TextComponent(TextComponent.fromLegacyText(utilsManagers.setPlaceholders(player, text)));
-        if (hover != null) {
-            message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hover));
-        }
-        if (suggestCommand != null) {
-            message.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, suggestCommand));
-        }
-        if (executeCommand != null) {
-            message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, executeCommand));
-        }
-        player.spigot().sendMessage(message);
+        player.spigot().sendMessage(root);
     }
 
     public TextComponent build() {
-        TextComponent message = new TextComponent(TextComponent.fromLegacyText(utilsManagers.setPlaceholders(player, text)));
-        if (hover != null) {
-            message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hover));
-        }
-        if (suggestCommand != null) {
-            message.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, suggestCommand));
-        }
-        if (executeCommand != null) {
-            message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, executeCommand));
-        }
-        return message;
+        return root;
     }
 }

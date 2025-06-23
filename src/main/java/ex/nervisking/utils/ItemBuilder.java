@@ -318,6 +318,27 @@ public class ItemBuilder {
 
     // ======= Modifiers =======
 
+    public ItemBuilder setType(Material material) {
+        if (error) {
+            return this;
+        }
+        item.setType(material);
+        return this;
+    }
+
+    public ItemBuilder setType(String material) {
+        if (error) {
+            return this;
+        }
+        Material mat = getMaterial(material);
+        if (mat != Material.AIR) {
+            item.setType(mat);
+        } else {
+            throw new IllegalArgumentException("Invalid material: " + material);
+        }
+        return this;
+    }
+
     public ItemBuilder setAmount(int amount) {
         item.setAmount(amount);
         return this;
@@ -867,8 +888,18 @@ public class ItemBuilder {
     }
 
     // ======= Finalizer =======
+
+    public boolean isError() {
+        boolean in = error;
+        if (error) {
+            error = false; // Reset error state after checking
+        }
+        return in;
+    }
+
     public ItemStack build() {
         item.setItemMeta(meta);
+        error = false; // Reset error state after building
         return item;
     }
 }

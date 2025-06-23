@@ -23,8 +23,8 @@ import java.util.HashMap;
 public class ExApi {
 
     private static JavaPlugin plugin;
-    private static UtilsManagers utilsManagers;
-    private static Utils utils;
+    public static UtilsManagers utilsManagers;
+    public static Utils utils;
     public static ServerVersion serverVersion;
 
     private static final HashMap<Player, PlayerMenuUtility> playerMenuUtilityMap = new HashMap<>();

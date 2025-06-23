@@ -570,6 +570,25 @@ public class UtilsManagers extends Utils {
 
     public void sendMessage(CommandSender sender, String message) {
         if (message == null || message.isEmpty()) return;
+        message(sender, message);
+    }
+
+    public void sendMessage(CommandSender sender, String... messages) {
+        if (messages == null) return;
+        for (String message : messages) {
+            message(sender, message);
+        }
+    }
+
+    public void sendMessage(CommandSender sender, List<String> messages) {
+        if (messages == null) return;
+        for (String message : messages) {
+            message(sender, message);
+        }
+    }
+
+    private void message(CommandSender sender, String message) {
+        if (message == null || message.isEmpty()) return;
         if (sender instanceof Player player) {
             player.sendMessage(setPlaceholders(player, message));
         } else {
@@ -577,88 +596,61 @@ public class UtilsManagers extends Utils {
         }
     }
 
-    public void sendMessage(CommandSender sender, String... messages) {
-        if (messages == null) return;
-        for (String message : messages) {
-            sendMessage(sender, message);
-        }
-    }
-
-    public void sendMessage(CommandSender sender, List<String> messages) {
-        if (messages == null) return;
-        for (String message : messages) {
-            sendMessage(sender, message);
-        }
-    }
-
     public void broadcastMessage(String message) {
         if (message == null || message.isEmpty()) return;
-        sendSingleBroadcastMessage(message);
+        Bukkit.getOnlinePlayers().forEach(player -> sendMessage(player, message));
     }
 
     public void broadcastMessage(String... messages) {
         if (messages == null) return;
         for (String message : messages) {
-            sendSingleBroadcastMessage(message);
+            broadcastMessage(message);
         }
     }
 
     public void broadcastMessage(List<String> messages) {
         if (messages == null || messages.isEmpty()) return;
         for (String message : messages) {
-            sendSingleBroadcastMessage(message);
+            broadcastMessage(message);
         }
-    }
-
-    private void sendSingleBroadcastMessage(String message) {
-        Bukkit.getOnlinePlayers().forEach(player -> sendMessage(player, message));
     }
 
     public void broadcastMessageCenter(String message) {
         if (message == null || message.isEmpty()) return;
-        sendSingleBroadcastMessageCenter(message);
+        Bukkit.getOnlinePlayers().forEach(player -> centeredMessage(player, message));
     }
 
     public void broadcastMessageCenter(String... messages) {
         if (messages == null) return;
         for (String message : messages) {
-            sendSingleBroadcastMessageCenter(message);
+            broadcastMessageCenter(message);
         }
     }
 
     public void broadcastMessageCenter(List<String> messages) {
         if (messages == null || messages.isEmpty()) return;
         for (String message : messages) {
-            sendSingleBroadcastMessageCenter(message);
+            broadcastMessageCenter(message);
         }
-    }
-
-    private void sendSingleBroadcastMessageCenter(String message) {
-        Bukkit.getOnlinePlayers().forEach(player -> centeredMessage(player, message));
     }
 
     public void consoleMessage(String message) {
         if (message == null || message.isEmpty()) return;
-        sendSingleConsoleMessage(message);
+        Bukkit.getConsoleSender().sendMessage(setColoredMessage(message));
     }
 
     public void consoleMessage(String... messages) {
         if (messages == null) return;
         for (String message : messages) {
-            sendSingleConsoleMessage(message);
+            consoleMessage(message);
         }
     }
 
     public void consoleMessage(List<String> messages) {
         if (messages == null || messages.isEmpty()) return;
         for (String message : messages) {
-            sendSingleConsoleMessage(message);
+            consoleMessage(message);
         }
-    }
-
-    private void sendSingleConsoleMessage(String message){
-        if (message == null || message.isEmpty()) return;
-        Bukkit.getConsoleSender().sendMessage(setColoredMessage(message));
     }
 
     public void sendSpigotSendMessage(Player player, String message){

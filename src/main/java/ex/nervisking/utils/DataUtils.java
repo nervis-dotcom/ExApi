@@ -24,6 +24,10 @@ public class DataUtils {
         return segment.toString();
     }
 
+    public static NamespacedKey generateRandomKey(String namespace) {
+        return new NamespacedKey(ExApi.getPlugin(), namespace);
+    }
+
     public static String getDataFromString(ItemStack itemStack, NamespacedKey key) {
         ItemMeta itemMeta = itemStack.getItemMeta();
         if (itemMeta == null) return null;
