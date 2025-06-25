@@ -139,9 +139,9 @@ public class TeleportManager {
             return;
         }
 
+        teleportingPlayers.add(player.getUniqueId());
         // Si el permiso está configurado y el jugador lo tiene, teletransporte inmediato
         if (noDelayPermission != null && utilsManagers.hasPermission(player, noDelayPermission)) {
-            teleportingPlayers.add(player.getUniqueId());
             boolean result = teleport();
             teleportingPlayers.remove(player.getUniqueId());
 
@@ -153,7 +153,6 @@ public class TeleportManager {
             return;
         }
 
-        teleportingPlayers.add(player.getUniqueId()); // <- Agregar aquí
         initialLocation = player.getLocation().clone();
 
         if (teleportAnimation != null) {

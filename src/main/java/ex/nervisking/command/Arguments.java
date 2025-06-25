@@ -143,8 +143,16 @@ public class Arguments {
      * @return Cadena con los argumentos unidos por espacios.
      */
     public String join(int startIndex) {
+        if (startIndex >= args.length) return ""; // prevenir IllegalArgumentException
         return String.join(" ", Arrays.copyOfRange(args, startIndex, args.length));
     }
+
+
+    public String join(int start, int end) {
+        if (start >= end || start >= args.length) return "";
+        return String.join(" ", Arrays.copyOfRange(args, start, Math.min(end, args.length)));
+    }
+
 
     /**
      * Obtiene el arreglo original de argumentos.
@@ -330,4 +338,6 @@ public class Arguments {
         }
         return false;
     }
+
+
 }
