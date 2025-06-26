@@ -1,6 +1,7 @@
 package ex.nervisking.utils;
 
 import ex.nervisking.ExApi;
+import ex.nervisking.ModelManager.Logger;
 import ex.nervisking.menuManager.*;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
@@ -185,6 +186,14 @@ public class Action {
             for (Player target : world.getPlayers()) {
                 executeAction(target, actions);
             }
+        } else if (action.startsWith("[to_all]")) {
+            String[] parts = action.substring("[to_all]".length()).trim().split("->");
+            if (parts.length < 1) return;
+
+            String actions = parts[0].trim();
+            for (Player target : Bukkit.getOnlinePlayers()) {
+                executeAction(target, actions);
+            }
         } else if (action.startsWith("[teleport]")) {
             utilsManagers.teleport(player, action.substring("[teleport]".length()).trim());
         } else if (action.startsWith("[title]")) {
@@ -218,10 +227,15 @@ public class Action {
                 player.getInventory().addItem(item.build());
             }
         } else if (action.toLowerCase().startsWith("[damage]")) {
-            try {
-                double amount = Double.parseDouble(action.substring("[damage]".length()).trim());
-                player.damage(amount);
-            } catch (NumberFormatException ignored) {}
+            String[] parts = action.substring("[damage]".length()).trim().split(";");
+            if (parts.length >= 2) {
+                double damage = Double.parseDouble(parts[0]);
+                String message = parts[1];
+                try {
+                    Fake.setDamage(player, damage, message);
+                } catch (NumberFormatException ignored) {
+                }
+            }
         } else if (action.equalsIgnoreCase("[kill]")) {
             player.setHealth(0.0);
         } else if (action.toLowerCase().startsWith("[heal]")) {
@@ -261,6 +275,30 @@ public class Action {
                 }
             } else {
                 player.setFireTicks(20);
+            }
+        } else if (action.toLowerCase().startsWith("[lightning]")) {
+            String[] parts = action.substring("[lightning]".length()).trim().split(";");
+            if (parts.length >= 2) {
+                try {
+                    double radius = Double.parseDouble(parts[0].trim());
+                    double damage = Double.parseDouble(parts[1].trim());
+
+                    Location center = player.getLocation();
+                    World world = center.getWorld();
+                    if (world == null) return;
+
+                    for (Player target : world.getPlayers()) {
+                        if (target.getLocation().distance(center) <= radius) {
+                            // Efecto visual
+                            world.strikeLightningEffect(target.getLocation());
+                            // Daño
+                            Fake.setDamage(player, damage, "rayo");
+                        }
+                    }
+
+                } catch (NumberFormatException ignored) {
+                    utilsManagers.sendLogger(Logger.WARNING,"Acción [lightning] con formato inválido: " + action);
+                }
             }
         } else if (action.toLowerCase().startsWith("[freeze]")) {
             String value = action.substring("[freeze]".length()).trim();

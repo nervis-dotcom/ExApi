@@ -147,12 +147,10 @@ public class Arguments {
         return String.join(" ", Arrays.copyOfRange(args, startIndex, args.length));
     }
 
-
     public String join(int start, int end) {
         if (start >= end || start >= args.length) return "";
         return String.join(" ", Arrays.copyOfRange(args, start, Math.min(end, args.length)));
     }
-
 
     /**
      * Obtiene el arreglo original de argumentos.
@@ -285,8 +283,8 @@ public class Arguments {
      * @param required la cantidad mínima de argumentos necesarios
      * @return true si hay al menos {@code required} argumentos, false en caso contrario
      */
-    public boolean hasMinimumArgs(int required) {
-        return args.length >= required;
+    public boolean hasMaxArgs(int required) {
+        return args.length <= required;
     }
 
     /**
@@ -338,6 +336,4 @@ public class Arguments {
         }
         return false;
     }
-
-
 }
