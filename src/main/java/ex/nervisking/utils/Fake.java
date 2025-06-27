@@ -10,8 +10,10 @@ import org.bukkit.entity.Player;
 public class Fake {
 
     public static void setDamage(Player player, double damage, String name) {
-        double saludFinal = player.getHealth() - damage;
-        if (saludFinal <= 0.0) {
+        double totalHealth = player.getHealth() + player.getAbsorptionAmount();
+        double healthFinal = totalHealth - damage;
+
+        if (healthFinal <= 0.0) {
             Cow entity = createEntity(player.getLocation().add(2,10,2), name);
             player.damage(damage, entity);
             Bukkit.getScheduler().runTaskLater(ExApi.getPlugin(), entity::remove, 1L);
@@ -20,7 +22,7 @@ public class Fake {
         }
     }
 
-    public static Cow createEntity(Location loc, String name) {
+    private static Cow createEntity(Location loc, String name) {
         Cow entity = (Cow) loc.getWorld().spawnEntity(loc, EntityType.COW);
         entity.setCustomName(name);
         entity.setCustomNameVisible(false);

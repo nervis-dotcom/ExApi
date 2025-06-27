@@ -1,4 +1,4 @@
-package ex.nervisking.heads;
+package ex.nervisking.itemsManager;
 
 import java.net.URI;
 import java.net.URISyntaxException;

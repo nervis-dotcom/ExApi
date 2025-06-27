@@ -15,6 +15,7 @@ package ex.nervisking.ModelManager;
  * El metodo {@link #fromString(String)} permite obtener el enum a partir de un texto ignorando mayúsculas/minúsculas.
  */
 public enum Logger {
+
     INFO("&a "),
     WARNING("&e "),
     ERROR("&4 "),
@@ -34,7 +35,7 @@ public enum Logger {
         try {
             return Logger.valueOf(name.toUpperCase());
         } catch (IllegalArgumentException e) {
-            return null;  // O podrías devolver un valor por defecto, como INFO
+            return INFO;
         }
     }
 }

@@ -16,6 +16,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemRarity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.*;
+import org.bukkit.inventory.meta.components.CustomModelDataComponent;
 import org.bukkit.inventory.meta.components.FoodComponent;
 import org.bukkit.inventory.meta.trim.ArmorTrim;
 import org.bukkit.inventory.meta.trim.TrimMaterial;
@@ -30,6 +31,9 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Utility class for easily creating custom items.
@@ -117,11 +121,11 @@ public class ItemBuilder {
         Material material = getMaterial(value);
         if (material != Material.AIR) {
             this.item = new ItemStack(material, count);
-        } else if (value.startsWith("ey") || value.startsWith("[texture]")){
+        } else if (value.startsWith("ey") || value.startsWith("[texture]")) {
             this.item = texture(value.startsWith("[texture]") ? value.substring("[texture]".length()).trim() : value, count);
-        } else if (value.startsWith("[user]")){
+        } else if (value.startsWith("[user]")) {
             this.item = createSkullFromUsername(value.substring("[user]".length()).trim());
-        } else if (value.toLowerCase().startsWith("[random]")){
+        } else if (value.toLowerCase().startsWith("[random]")) {
             RDMaterial type = RDMaterial.fromString(value.substring("[random]".length()).trim());
             if (type != null) {
                 Material mat = type.getRandom();
@@ -151,11 +155,11 @@ public class ItemBuilder {
         Material material = getMaterial(value);
         if (material != Material.AIR) {
             this.item = new ItemStack(material, 1);
-        } else if (value.startsWith("ey") || value.startsWith("[texture]")){
+        } else if (value.startsWith("ey") || value.startsWith("[texture]")) {
             this.item = texture(value.startsWith("[texture]") ? value.substring("[texture]".length()).trim() : value, 1);
-        } else if (value.startsWith("[user]")){
+        } else if (value.startsWith("[user]")) {
             this.item = createSkullFromUsername(value.substring("[user]".length()).trim());
-        } else if (value.toLowerCase().startsWith("[random]")){
+        } else if (value.toLowerCase().startsWith("[random]")) {
             RDMaterial type = RDMaterial.fromString(value.substring("[random]".length()).trim());
             if (type != null) {
                 Material mat = type.getRandom();
@@ -187,9 +191,9 @@ public class ItemBuilder {
             this.item = new ItemStack(material, 1);
         } else if (value.startsWith("ey") || value.startsWith("[texture]")) {
             this.item = texture(value.startsWith("[texture]") ? value.substring("[texture]".length()).trim() : value, 1);
-        } else if (value.startsWith("[user]")){
+        } else if (value.startsWith("[user]")) {
             this.item = createSkullFromUsername(value.substring("[user]".length()).trim());
-        } else if (value.toLowerCase().startsWith("[random]")){
+        } else if (value.toLowerCase().startsWith("[random]")) {
             RDMaterial type = RDMaterial.fromString(value.substring("[random]".length()).trim());
             if (type != null) {
                 Material mat = type.getRandom();
@@ -278,8 +282,8 @@ public class ItemBuilder {
     private static ItemStack texture(String texture, int amount) {
         ItemStack head = new ItemStack(Material.PLAYER_HEAD);
         head.setAmount(amount);
-        if(head.getItemMeta() instanceof SkullMeta skullMeta && texture != null){
-            if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_20_R2)){
+        if (head.getItemMeta() instanceof SkullMeta skullMeta && texture != null) {
+            if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_20_R2)) {
                 PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID());
                 PlayerTextures textures = profile.getTextures();
                 URL url;
@@ -306,7 +310,8 @@ public class ItemBuilder {
                     Field profileField = skullMeta.getClass().getDeclaredField("profile");
                     profileField.setAccessible(true);
                     profileField.set(skullMeta, profile);
-                } catch (IllegalArgumentException | NoSuchFieldException | SecurityException | IllegalAccessException ignored) {
+                } catch (IllegalArgumentException | NoSuchFieldException | SecurityException |
+                         IllegalAccessException ignored) {
                 }
             }
 
@@ -563,7 +568,7 @@ public class ItemBuilder {
             return this;
         }
         meta.addItemFlags(ItemFlag.values());
-        if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)){
+        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
             for (Attribute attribute : Attribute.values()) {
                 meta.removeAttributeModifier(attribute);
             }
@@ -577,7 +582,7 @@ public class ItemBuilder {
         }
         if (value) {
             meta.addItemFlags(ItemFlag.values());
-            if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)){
+            if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
                 for (Attribute attribute : Attribute.values()) {
                     meta.removeAttributeModifier(attribute);
                 }
@@ -641,7 +646,7 @@ public class ItemBuilder {
             return this;
         }
         if (meta instanceof SkullMeta skullMeta) {
-            if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_20_R2)){
+            if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_20_R2)) {
                 PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID());
                 PlayerTextures textures = profile.getTextures();
                 URL url;
@@ -681,7 +686,7 @@ public class ItemBuilder {
         if (error) {
             return this;
         }
-        if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)){
+        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
             meta.setMaxStackSize(amount);
         }
         return this;
@@ -691,7 +696,7 @@ public class ItemBuilder {
         if (error) {
             return this;
         }
-        if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)){
+        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
             meta.setEnchantmentGlintOverride(true);
         } else {
             addEnchant(Enchantment.FLAME, 1, true);
@@ -704,7 +709,7 @@ public class ItemBuilder {
         if (error) {
             return this;
         }
-        if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)){
+        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
             meta.setEnchantmentGlintOverride(value);
         } else if (value) {
             addEnchant(Enchantment.LURE, 1, true);
@@ -717,7 +722,7 @@ public class ItemBuilder {
         if (error) {
             return this;
         }
-        if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)){
+        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
             meta.setGlider(true);
         } else {
             addEnchant(Enchantment.LURE, 1, true);
@@ -730,7 +735,7 @@ public class ItemBuilder {
         if (error) {
             return this;
         }
-        if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)){
+        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
             meta.setGlider(value);
         } else if (value) {
             addEnchant(Enchantment.LURE, 1, true);
@@ -743,7 +748,7 @@ public class ItemBuilder {
         if (error) {
             return this;
         }
-        if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)){
+        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
             meta.setHideTooltip(true);
         } else {
             setName(" ");
@@ -755,9 +760,9 @@ public class ItemBuilder {
         if (error) {
             return this;
         }
-        if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)){
+        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
             meta.setHideTooltip(value);
-        } else if (value){
+        } else if (value) {
             setName(" ");
         }
         return this;
@@ -768,7 +773,7 @@ public class ItemBuilder {
             return this;
         }
         if (meta instanceof FoodComponent foodMeta) {
-            if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)){
+            if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
                 foodMeta.setNutrition(nutrition);
                 foodMeta.setSaturation(saturationModifier);
                 foodMeta.setCanAlwaysEat(canAlwaysEat);
@@ -783,7 +788,7 @@ public class ItemBuilder {
         if (error) {
             return this;
         }
-        if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)){
+        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
             try {
                 meta.setRarity(ItemRarity.valueOf(rarityName.toUpperCase()));
             } catch (IllegalArgumentException e) {
@@ -821,7 +826,7 @@ public class ItemBuilder {
         if (error) {
             return this;
         }
-        if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_9_R2)){
+        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_9_R2)) {
             if (meta instanceof ArmorMeta potionMeta) {
                 if (value) {
                     potionMeta.setTrim(null);
@@ -835,7 +840,7 @@ public class ItemBuilder {
         if (error) {
             return this;
         }
-        if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_9_R2)){
+        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_9_R2)) {
             if (meta instanceof ArmorMeta armorMeta) {
                 armorMeta.setTrim(new ArmorTrim(trimMaterial, trimPattern));
             }
@@ -847,7 +852,7 @@ public class ItemBuilder {
         if (error) {
             return this;
         }
-        if(serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_9_R2)){
+        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_9_R2)) {
             if (meta instanceof ArmorMeta armorMeta) {
                 TrimMaterial trimMaterial = ItemUtils.getTrimMaterial(Material);
                 if (trimMaterial == null) {
@@ -885,6 +890,139 @@ public class ItemBuilder {
         }
         throw new IllegalArgumentException("Enchantment '" + name + "' does not exist");
 
+    }
+
+    public ItemBuilder setComponentFlags(List<Boolean> booleans) {
+        if (error) {
+            return this;
+        }
+        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
+            CustomModelDataComponent component = meta.getCustomModelDataComponent();
+            component.setFlags(booleans);
+        }
+        return this;
+    }
+
+    public ItemBuilder setComponentFlags(Boolean... booleans) {
+        if (error) {
+            return this;
+        }
+        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
+            CustomModelDataComponent component = meta.getCustomModelDataComponent();
+            component.setFlags(List.of(booleans));
+        }
+        return this;
+    }
+
+    public ItemBuilder setComponentFloats(List<Float> floats) {
+        if (error) {
+            return this;
+        }
+        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
+            CustomModelDataComponent component = meta.getCustomModelDataComponent();
+            component.setFloats(floats);
+        }
+        return this;
+    }
+
+    public ItemBuilder setComponentFloats(Float... floats) {
+        if (error) {
+            return this;
+        }
+
+        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
+            CustomModelDataComponent component = meta.getCustomModelDataComponent();
+            component.setFloats(List.of(floats));
+        }
+        return this;
+    }
+
+    public ItemBuilder setComponentColors(List<Color> colors) {
+        if (error) {
+            return this;
+        }
+
+        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
+            CustomModelDataComponent component = meta.getCustomModelDataComponent();
+            component.setColors(colors);
+        }
+        return this;
+    }
+
+    public ItemBuilder setComponentColors(Color... colors) {
+        if (error) {
+            return this;
+        }
+
+        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
+            CustomModelDataComponent component = meta.getCustomModelDataComponent();
+            component.setColors(List.of(colors));
+        }
+        return this;
+    }
+
+    public ItemBuilder setComponentColorsByName(List<String> colors) {
+        if (error) {
+            return this;
+        }
+
+        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
+            CustomModelDataComponent component = meta.getCustomModelDataComponent();
+            component.setColors(colors.stream()
+                    .map(rgb -> Color.fromRGB(Integer.parseInt(rgb)))
+                    .collect(Collectors.toList()));
+        }
+        return this;
+    }
+
+    public ItemBuilder setComponentColors(String... colors) {
+        if (error) {
+            return this;
+        }
+
+        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
+            CustomModelDataComponent component = meta.getCustomModelDataComponent();
+            component.setColors(Stream.of(colors)
+                    .map(rgb -> Color.fromRGB(Integer.parseInt(rgb)))
+                    .collect(Collectors.toList()));
+        }
+        return this;
+    }
+
+    public ItemBuilder setComponentStrings(List<String> strings) {
+        if (error) {
+            return this;
+        }
+
+        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
+            CustomModelDataComponent component = meta.getCustomModelDataComponent();
+            component.setStrings(strings);
+        }
+        return this;
+    }
+
+    public ItemBuilder setComponentStrings(String... strings) {
+        if (error) {
+            return this;
+        }
+
+        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
+            CustomModelDataComponent component = meta.getCustomModelDataComponent();
+            component.setStrings(List.of(strings));
+        }
+        return this;
+    }
+
+    public ItemBuilder setItemModel(String namespace, String key) {
+        if (error) {
+            return this;
+        }
+
+        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
+            meta.setItemModel(new NamespacedKey(namespace, key));
+        }
+
+        return this;
     }
 
     // ======= Finalizer =======

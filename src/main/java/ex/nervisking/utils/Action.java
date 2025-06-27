@@ -311,8 +311,6 @@ public class Action {
             } else {
                 player.setFreezeTicks(20);
             }
-        } else if (action.equalsIgnoreCase("[extinguish]")) {
-            player.setFireTicks(0);
         } else if (action.toLowerCase().startsWith("[fly]")) {
             String value = action.substring("[fly]".length()).trim();
             if (!value.isEmpty()) {
