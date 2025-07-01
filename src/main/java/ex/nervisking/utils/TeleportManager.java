@@ -190,12 +190,12 @@ public class TeleportManager {
                 if (messageInTeleport != null && ticksLeft % 20 == 0 && ticksLeft > 0) {
                     int secondsLeft = ticksLeft / 20;
                     String formattedMessage = messageInTeleport.replace("%time%", String.valueOf(secondsLeft));
-                    utilsManagers.actionBar(player, formattedMessage);
+                    utilsManagers.sendActionBar(player, formattedMessage);
                 }
 
                 if (ticksLeft-- <= 0) {
                     if (messageInTeleport != null) {
-                        utilsManagers.actionBar(player, messageSuccess != null ? messageSuccess : " ");
+                        utilsManagers.sendActionBar(player, messageSuccess != null ? messageSuccess : " ");
                     }
 
                     teleportingPlayers.remove(player.getUniqueId()); // <- limpiar

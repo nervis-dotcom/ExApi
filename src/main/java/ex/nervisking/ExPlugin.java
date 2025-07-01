@@ -1,5 +1,7 @@
 package ex.nervisking;
 
+import ex.nervisking.Event.armorequipevent.ArmorListener;
+import ex.nervisking.Event.itemselectevent.ItemSelectListener;
 import ex.nervisking.ModelManager.ExPl;
 import ex.nervisking.ModelManager.Plugins;
 import ex.nervisking.ModelManager.Scheduler;
@@ -10,7 +12,10 @@ import ex.nervisking.utils.PyfigletMessage;
 import ex.nervisking.utils.Utils;
 import ex.nervisking.utils.UtilsManagers;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.ArrayList;
 
 public abstract class ExPlugin extends JavaPlugin {
 
@@ -43,6 +48,10 @@ public abstract class ExPlugin extends JavaPlugin {
         if (menu()) {
             this.gui = Scheduler.runTimer(new updateMenus(), 0, 20);
         }
+
+        PluginManager pm = getServer().getPluginManager();
+        pm.registerEvents(new ArmorListener(new ArrayList<>()), this);
+        pm.registerEvents(new ItemSelectListener(this), this);
         this.Enabled();
     }
 

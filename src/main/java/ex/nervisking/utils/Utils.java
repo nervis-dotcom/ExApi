@@ -2,6 +2,7 @@ package ex.nervisking.utils;
 
 import ex.nervisking.ExApi;
 import ex.nervisking.ModelManager.DefaultFontInfo;
+import ex.nervisking.ModelManager.Plugins;
 import ex.nervisking.Placeholder.Placeholder;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.TextComponent;
@@ -100,7 +101,7 @@ public class Utils {
     public String setPlaceholders(final Player player, String text) {
         text = replacePlaceholders(player, text);
         text = Placeholder.parsePlaceholders(player, text);
-        if (!ExApi.isPlugin("PlaceholderAPI")) {
+        if (!ExApi.isPlugin(Plugins.PLACEHOLDERAPI)) {
             return setColoredMessage(text);
         }
         return setColoredMessage(PlaceholderAPI.setPlaceholders(player, text));

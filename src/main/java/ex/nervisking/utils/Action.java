@@ -203,7 +203,7 @@ public class Action {
         } else if (action.startsWith("[message_center]")) {
             utilsManagers. centeredMessage(player, action.substring("[message_center]".length()).trim());
         } else if (action.startsWith("[action_bar]")) {
-            utilsManagers.actionBar(player, action.substring("[action_bar]".length()).trim());
+            utilsManagers.sendActionBar(player, action.substring("[action_bar]".length()).trim());
         } else if (action.startsWith("[sound]")) {
             utilsManagers.playSound(player, action.substring("[sound]".length()).trim());
         } else if (action.startsWith("[console]")) {

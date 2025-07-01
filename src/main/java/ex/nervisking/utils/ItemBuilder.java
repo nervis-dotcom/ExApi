@@ -975,7 +975,7 @@ public class ItemBuilder {
         return this;
     }
 
-    public ItemBuilder setComponentColors(String... colors) {
+    public ItemBuilder setComponentColorsByName(String... colors) {
         if (error) {
             return this;
         }

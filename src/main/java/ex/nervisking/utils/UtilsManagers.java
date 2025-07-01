@@ -103,6 +103,38 @@ public class UtilsManagers extends Utils {
 
     }
 
+    /**
+     * Reproduce un sonido en una ubicación.
+     *
+     * @param location location
+     * @param actionLine Formato: SONIDO;VOLUMEN;PITCH
+     * <p>
+     * Ejemplo:
+     * {@code utilsManagers.playSound(location, "ENTITY_PLAYER_LEVELUP;1.0;1.0");}
+     */
+    public void playSound(Location location, String actionLine) {
+        if (actionLine == null || actionLine.equals("none")) return;
+        String[] sep = actionLine.split(";");
+        if (sep.length < 3) {
+            sendLogger(Logger.ERROR, "se necesitan minimo 3 partes para reproducir un sonido");
+            return;
+        }
+
+        Sound sound;
+        float volume;
+        float pitch;
+        try {
+            sound = getSoundByName(sep[0]);
+            volume = Float.parseFloat(sep[1]);
+            pitch = Float.parseFloat(sep[2]);
+        } catch (Exception e) {
+            sendLogger(Logger.WARNING, "Nombre del sonido: &c" + sep[0] + " no es válido.");
+            return;
+        }
+
+        location.getWorld().playSound(location, sound, volume, pitch);
+    }
+
     private Sound getSoundByName(String name){
         try {
             Class<?> soundTypeClass = Class.forName("org.bukkit.Sound");
@@ -153,7 +185,7 @@ public class UtilsManagers extends Utils {
      * Ejemplo:
      * {@code utilsManagers.actionBar(player, "&eModo Combate Activado");}
      */
-    public void actionBar(Player player, String message) {
+    public void sendActionBar(Player player, String message) {
         if (message == null || message.isEmpty() || message.equals("none")) return;
         player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(setPlaceholders(player, message)));
     }
@@ -170,14 +202,14 @@ public class UtilsManagers extends Utils {
      */
     public void sendActionBar(final Player player, final String message, int duration) {
         if (message == null || message.isEmpty()) return;
-        actionBar(player, message);
+        sendActionBar(player, message);
 
         if (duration > 0) {
             // Envía un mensaje vacío al final del tiempo límite. Permite mensajes de menos de 3 segundos para garantizar la precisión.
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    actionBar(player, "");
+                    sendActionBar(player, "");
                 }
             }.runTaskLater(plugin, duration + 1);
         }
@@ -188,7 +220,7 @@ public class UtilsManagers extends Utils {
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    actionBar(player, message);
+                    sendActionBar(player, message);
                 }
             }.runTaskLater(plugin, duration);
         }
