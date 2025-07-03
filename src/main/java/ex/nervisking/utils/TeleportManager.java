@@ -220,9 +220,7 @@ public class TeleportManager {
 
     private boolean playerMoved(Player p, Location from) {
         Location to = p.getLocation();
-        return from.getBlockX() != to.getBlockX()
-                || from.getBlockY() != to.getBlockY()
-                || from.getBlockZ() != to.getBlockZ();
+        return from.getBlockX() != to.getBlockX() || from.getBlockY() != to.getBlockY() || from.getBlockZ() != to.getBlockZ();
     }
 
     public String getErrorMessage() {

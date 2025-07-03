@@ -58,7 +58,7 @@ public class JSONMessage {
         private BaseComponent[] hover;
         private ClickEvent clickEvent;
 
-        public Part(Player player,  String text) {
+        public Part(Player player, String text) {
             this.text = utilsManagers.setPlaceholders(player, text);
         }
 

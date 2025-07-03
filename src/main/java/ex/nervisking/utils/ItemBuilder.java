@@ -31,7 +31,6 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -46,9 +45,11 @@ public class ItemBuilder {
     private final ItemStack item;
     private final ItemMeta meta;
     private final PersistentDataContainer container;
+
     private Player player = null;
     private static boolean error = false;
     private static final ServerVersion serverVersion = ExApi.serverVersion;
+
     public final static String CLOSE = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDM0NWU1ZmNlMmZjZmZmNzhjZGFjNjVlZDg4MTkxOGM3OWMzOGU4NTVlYmJjMTkyYzk3YzU3ODRjMzJkMzc4In19fQ==";
     public final static String BACK = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWQ3M2NmNjZkMzFiODNjZDhiODY0NGMxNTk1OGMxYjczYzhkOTczMjNiODAxMTcwYzFkODg2NGJiNmE4NDZkIn19fQ==";
     public final static String AFTER = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzg2MTg1YjFkNTE5YWRlNTg1ZjE4NGMzNGYzZjNlMjBiYjY0MWRlYjg3OWU4MTM3OGU0ZWFmMjA5Mjg3In19fQ==";
@@ -534,6 +535,24 @@ public class ItemBuilder {
         return this;
     }
 
+    @Deprecated
+    public <T, Z> ItemBuilder addPersistentData(NamespacedKey key, PersistentDataType<T, Z> type, Z data) {
+        if (error) {
+            return this;
+        }
+        container.set(key, type, data);
+        return this;
+    }
+
+    @Deprecated
+    public <T, Z> ItemBuilder addPersistentData(String key, PersistentDataType<T, Z> type, Z data) {
+        if (error) {
+            return this;
+        }
+        container.set(new NamespacedKey(ExApi.getPlugin(), key), type, data);
+        return this;
+    }
+
     public ItemBuilder addAttributeModifier(Attribute attribute, AttributeModifier modifier) {
         if (error) {
             return this;
@@ -617,7 +636,7 @@ public class ItemBuilder {
                 if (offlinePlayer.isOnline()) {
                     skullMeta.setPlayerProfile(offlinePlayer.getPlayerProfile());
                 } else {
-                    return SkullTexture(OFFLINE);
+                    return setSkullTexture(OFFLINE);
                 }
             }
         }
@@ -634,14 +653,55 @@ public class ItemBuilder {
                 if (offlinePlayer.isOnline()) {
                     skullMeta.setPlayerProfile(offlinePlayer.getPlayerProfile());
                 } else {
-                    return SkullTexture(OFFLINE);
+                    return setSkullTexture(OFFLINE);
                 }
             }
         }
         return this;
     }
 
+    @Deprecated
     public ItemBuilder SkullTexture(String texture) {
+        if (error) {
+            return this;
+        }
+        if (meta instanceof SkullMeta skullMeta) {
+            if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_20_R2)) {
+                PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID());
+                PlayerTextures textures = profile.getTextures();
+                URL url;
+                try {
+                    String decoded = new String(Base64.getDecoder().decode(texture));
+                    String decodedFormatted = decoded.replaceAll("\\s", "");
+                    JsonObject jsonObject = new Gson().fromJson(decodedFormatted, JsonObject.class);
+                    String urlText = jsonObject.get("textures").getAsJsonObject().get("SKIN").getAsJsonObject().get("url").getAsString();
+
+                    url = new URL(urlText);
+                } catch (Exception error) {
+                    error.printStackTrace();
+                    return this;
+                }
+                textures.setSkin(url);
+                profile.setTextures(textures);
+
+                skullMeta.setOwnerProfile(profile);
+            } else {
+                GameProfile profile = new GameProfile(UUID.randomUUID(), "");
+                profile.getProperties().put("textures", new Property("textures", texture));
+
+                try {
+                    Field profileField = skullMeta.getClass().getDeclaredField("profile");
+                    profileField.setAccessible(true);
+                    profileField.set(skullMeta, profile);
+                } catch (IllegalArgumentException | NoSuchFieldException | SecurityException | IllegalAccessException ignored) {
+                }
+            }
+
+        }
+        return this;
+    }
+
+    public ItemBuilder setSkullTexture(String texture) {
         if (error) {
             return this;
         }
