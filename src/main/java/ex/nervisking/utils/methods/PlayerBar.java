@@ -67,6 +67,157 @@ public class PlayerBar {
         return this;
     }
 
+    private boolean hasOnlinePlayers() {
+        return players.stream().anyMatch(Player::isOnline);
+    }
+
+    public PlayerBar onFinish(Runnable runnable) {
+        this.onFinish = runnable;
+        return this;
+    }
+
+    public PlayerBar setVisibleAll(boolean status) {
+        this.bossBar.setVisible(status);
+        return this;
+    }
+
+    public PlayerBar addPlayers(Set<Player> newPlayers) {
+        this.players.addAll(newPlayers);
+        for (Player player : newPlayers) {
+            bossBar.addPlayer(player);
+        }
+        return this;
+    }
+
+    public PlayerBar addPlayer(Player player) {
+        this.players.add(player);
+        bossBar.addPlayer(player);
+        return this;
+    }
+
+    public PlayerBar removePlayer(Player player) {
+        this.players.remove(player);
+        this.bossBar.removePlayer(player);
+        return this;
+    }
+
+    public PlayerBar clearPlayers() {
+        bossBar.removeAll();
+        bossBar.setVisible(false);
+        players.clear();
+        return this;
+    }
+
+    public PlayerBar addTime(String seconds) {
+        long millis;
+        try {
+            millis = utilsManagers.parseTime(seconds);
+        } catch (NumberFormatException e) {
+            millis = 10 * 1000L;
+        }
+        this.timeLeft += millis;
+        this.totalTime = Math.max(this.totalTime, this.timeLeft);
+        return this;
+    }
+
+    public PlayerBar setTitle(String title) {
+        this.title = title;
+        this.bossBar.setTitle(utilsManagers.setColoredMessage(title));
+        return this;
+    }
+
+    public PlayerBar setColor(BarColor color) {
+        this.color = color;
+        this.bossBar.setColor(color);
+        return this;
+    }
+
+    public PlayerBar setStyle(BarStyle style) {
+        this.style = style;
+        this.bossBar.setStyle(style);
+        return this;
+    }
+
+    public PlayerBar setColor(String color) {
+        BarColor barColor;
+        try {
+            barColor = BarColor.valueOf(color.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            barColor = BarColor.WHITE;
+            utilsManagers.sendLogger(Logger.WARNING, "Color de la bossbar no es correcto: " + color);
+        }
+        this.color = barColor;
+        return setColor(barColor);
+    }
+
+    public PlayerBar setStyle(String style) {
+        BarStyle barStyle;
+        try {
+            barStyle = BarStyle.valueOf(style.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            barStyle = BarStyle.SOLID;
+            utilsManagers.sendLogger(Logger.WARNING, "Estilo de la bossbar no es correcto: " + style);
+        }
+        this.style = barStyle;
+        return setStyle(barStyle);
+    }
+
+    public PlayerBar addFlag(BarFlag flag) {
+        this.barFlags.add(flag);
+        if (bossBar != null) {
+            bossBar.addFlag(flag);
+        }
+        return this;
+    }
+
+    public PlayerBar removeFlag(BarFlag flag) {
+        this.barFlags.remove(flag);
+        if (bossBar != null) {
+            bossBar.removeFlag(flag);
+        }
+        return this;
+    }
+
+    public PlayerBar clearFlags() {
+        barFlags.clear();
+        if (bossBar != null) {
+            for (BarFlag flag : BarFlag.values()) {
+                bossBar.removeFlag(flag);
+            }
+        }
+        return this;
+    }
+
+    private void createBossBar() {
+        if (bossBar != null) {
+            bossBar.removeAll();
+        }
+        // Usa los flags configurados:
+        bossBar = Bukkit.createBossBar(title, BarColor.WHITE, BarStyle.SOLID, barFlags.toArray(new BarFlag[0]));
+        bossBar.setVisible(true);
+        // Re-agrega los jugadores actuales
+        for (Player p : players) {
+            bossBar.addPlayer(p);
+        }
+    }
+
+    public void remove() {
+        if (task != null) {
+            task.cancel();
+        }
+        bossBar.removeAll();
+        players.clear();
+    }
+
+    public void stop() {
+        if (task != null) {
+            task.cancel();
+        }
+        clearPlayers();
+        this.bossBar = null;
+        this.running = false;
+    }
+
     public void pause() {
         if (!running || task == null) {
             utilsManagers.sendLogger(Logger.INFO, "La bossbar no está activa. No se puede pausar.", true);
@@ -139,159 +290,6 @@ public class PlayerBar {
             }
         };
         task.runTaskTimer(ExApi.getPlugin(), 0L, 20L);
-    }
-
-    private boolean hasOnlinePlayers() {
-        return players.stream().anyMatch(Player::isOnline);
-    }
-
-    public PlayerBar onFinish(Runnable runnable) {
-        this.onFinish = runnable;
-        return this;
-    }
-
-    public PlayerBar setVisibleAll(boolean status) {
-        this.bossBar.setVisible(status);
-        return this;
-    }
-
-    public PlayerBar addPlayers(Set<Player> newPlayers) {
-        this.players.addAll(newPlayers);
-        for (Player player : newPlayers) {
-            bossBar.addPlayer(player);
-        }
-        return this;
-    }
-
-    public PlayerBar addPlayer(Player player) {
-        this.players.add(player);
-        bossBar.addPlayer(player);
-        return this;
-    }
-
-    public PlayerBar removePlayer(Player player) {
-        this.players.remove(player);
-        this.bossBar.removePlayer(player);
-        return this;
-    }
-
-    public PlayerBar clearPlayers() {
-        bossBar.removeAll();
-        bossBar.setVisible(false);
-        players.clear();
-        return this;
-    }
-
-    public void stop() {
-        if (task != null) {
-            task.cancel();
-        }
-        clearPlayers();
-        this.bossBar = null;
-        this.running = false;
-    }
-
-    public PlayerBar addTime(String seconds) {
-        long millis;
-        try {
-            millis = utilsManagers.parseTime(seconds);
-        } catch (NumberFormatException e) {
-            millis = 10 * 1000L;
-        }
-        this.timeLeft += millis;
-        this.totalTime = Math.max(this.totalTime, this.timeLeft);
-        return this;
-    }
-
-    public PlayerBar setTitle(String title) {
-        this.title = title;
-        this.bossBar.setTitle(utilsManagers.setColoredMessage(title));
-        return this;
-    }
-
-    public PlayerBar setColor(BarColor color) {
-        this.color = color;
-        this.bossBar.setColor(color);
-        return this;
-    }
-
-    public PlayerBar setStyle(BarStyle style) {
-        this.style = style;
-        this.bossBar.setStyle(style);
-        return this;
-    }
-
-    public PlayerBar setColor(String color) {
-        BarColor barColor;
-        try {
-            barColor = BarColor.valueOf(color.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            barColor = BarColor.WHITE;
-            utilsManagers.sendLogger(Logger.WARNING, "Color de la bossbar no es correcto: " + color);
-        }
-        this.color = barColor;
-        return setColor(barColor);
-    }
-
-    public PlayerBar setStyle(String style) {
-        BarStyle barStyle;
-        try {
-            barStyle = BarStyle.valueOf(style.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            barStyle = BarStyle.SOLID;
-            utilsManagers.sendLogger(Logger.WARNING, "Estilo de la bossbar no es correcto: " + style);
-        }
-        this.style = barStyle;
-        return setStyle(barStyle);
-    }
-
-    public PlayerBar addFlag(BarFlag flag) {
-        this.barFlags.add(flag);
-        if (bossBar != null) {
-            bossBar.addFlag(flag);
-        } else {
-            createBossBar();
-        }
-        return this;
-    }
-
-    public PlayerBar removeFlag(BarFlag flag) {
-        this.barFlags.remove(flag);
-        if (bossBar != null) {
-            bossBar.removeFlag(flag);
-        }
-        return this;
-    }
-
-    public PlayerBar clearFlags() {
-        barFlags.clear();
-        if (bossBar != null) {
-            for (BarFlag flag : BarFlag.values()) {
-                bossBar.removeFlag(flag);
-            }
-        }
-        return this;
-    }
-
-    private void createBossBar() {
-        if (bossBar != null) {
-            bossBar.removeAll();
-        }
-        // Usa los flags configurados:
-        bossBar = Bukkit.createBossBar(title, BarColor.WHITE, BarStyle.SOLID, barFlags.toArray(new BarFlag[0]));
-        bossBar.setVisible(true);
-        // Re-agrega los jugadores actuales
-        for (Player p : players) {
-            bossBar.addPlayer(p);
-        }
-    }
-
-    public void remove() {
-        if (task != null) {
-            task.cancel();
-        }
-        bossBar.removeAll();
-        players.clear();
     }
 
     public long getTimeLeft() {
