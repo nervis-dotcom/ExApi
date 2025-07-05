@@ -745,8 +745,20 @@ public class UtilsManagers extends Utils {
         consoleMessage(getPrefix() + logger.getName() + message);
     }
 
-    // other
+    public void sendLogger(Logger logger, String message, boolean online) {
+        if (message == null || message.isEmpty()) return;
+        consoleMessage(getPrefix() + logger.getName() + message);
+        if (online) {
+            Bukkit.getOnlinePlayers().forEach(player -> {
+                if (hasOp(player)) {
+                    sendMessage(player, getPrefix() + logger.getName() + message);
+                }
+            });
+        }
+    }
 
+    // other
+    @Deprecated(since = "1.0.0")
     public HoverEvent createHoverEvent(Player player, @NotNull List<String> hoverText) {
         TextComponent hoverComponent = new TextComponent("");
         boolean first = true;
@@ -765,6 +777,7 @@ public class UtilsManagers extends Utils {
         return new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(hoverComponent).create());
     }
 
+    @Deprecated(since = "1.0.0")
     public void applyClickAction(TextComponent component, @NotNull String clickAction, String playerName) {
         String replacedAction = clickAction.replace("%player%", playerName);
         replacedAction = setColoredMessage(replacedAction);
@@ -780,7 +793,7 @@ public class UtilsManagers extends Utils {
         }
     }
 
-    @SuppressWarnings("removal")
+    @Deprecated(since = "1.0.0") @SuppressWarnings("removal")
     public TextComponent getNameComponent(Object value) {
         switch (value) {
             case ItemStack itemStack -> {
