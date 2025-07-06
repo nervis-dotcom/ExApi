@@ -39,6 +39,7 @@ import java.util.stream.Stream;
  * Utility class for easily creating custom items.
  * Inspired by builder patterns for clean and readable item creation.
  * Author: Thomas Tran
+ * Restore: nervisking
  */
 @SuppressWarnings({"removal", "UnstableApiUsage", "deprecation"})
 public class ItemBuilder {
@@ -48,7 +49,7 @@ public class ItemBuilder {
     private final PersistentDataContainer container;
 
     private Player player = null;
-    private static boolean error = false;
+    private static final Error error = new Error();
     private static final ServerVersion serverVersion = ExApi.serverVersion;
 
     public final static String CLOSE = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDM0NWU1ZmNlMmZjZmZmNzhjZGFjNjVlZDg4MTkxOGM3OWMzOGU4NTVlYmJjMTkyYzk3YzU3ODRjMzJkMzc4In19fQ==";
@@ -114,6 +115,7 @@ public class ItemBuilder {
 
     public ItemBuilder(String value, int count) {
         if (value == null) {
+            error.setCause("Material incorrecto: " + value);
             this.item = createErrorItem();
             this.meta = item.getItemMeta();
             this.container = meta.getPersistentDataContainer();
@@ -148,6 +150,7 @@ public class ItemBuilder {
 
     public ItemBuilder(String value) {
         if (value == null || value.isEmpty()) {
+            error.setCause("Material incorrecto: " + value);
             this.item = createErrorItem();
             this.meta = item.getItemMeta();
             this.container = meta.getPersistentDataContainer();
@@ -182,6 +185,7 @@ public class ItemBuilder {
 
     public ItemBuilder(Player player, String value) {
         if (value == null || value.isEmpty()) {
+            error.setCause("Material incorrecto: " + value);
             this.item = createErrorItem();
             this.meta = item.getItemMeta();
             this.container = meta.getPersistentDataContainer();
@@ -196,11 +200,13 @@ public class ItemBuilder {
         } else if (value.startsWith("[user]")) {
             this.item = createSkullFromUsername(value.substring("[user]".length()).trim());
         } else if (value.toLowerCase().startsWith("[random]")) {
-            RDMaterial type = RDMaterial.fromString(value.substring("[random]".length()).trim());
+            String trim = value.substring("[random]".length()).trim();
+            RDMaterial type = RDMaterial.fromString(trim);
             if (type != null) {
                 Material mat = type.getRandom();
                 this.item = new ItemStack(mat, 1);
             } else {
+                error.setCause("RDMaterial incorrecto: " + trim);
                 this.item = createErrorItem();
             }
         } else {
@@ -225,11 +231,10 @@ public class ItemBuilder {
     // ======= Static Helpers =======
 
     private static ItemStack createErrorItem() {
-        error = true;
         ItemStack errorItem = new ItemStack(Material.BARRIER);
         ItemMeta meta = errorItem.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ExApi.getUtils().setColoredMessage("&cERROR"));
+            meta.setDisplayName(ExApi.getUtils().setColoredMessage(error.getCause() != null ? error.getCause() : "&cERROR"));
             errorItem.setItemMeta(meta);
         }
         return errorItem;
@@ -254,6 +259,7 @@ public class ItemBuilder {
                     return texture(OFFLINE, 1);
                 }
             } else {
+                error.setCause("Material incorrecto: " + user);
                 return createErrorItem();
             }
 
@@ -296,8 +302,9 @@ public class ItemBuilder {
                     String urlText = jsonObject.get("textures").getAsJsonObject().get("SKIN").getAsJsonObject().get("url").getAsString();
 
                     url = new URL(urlText);
-                } catch (Exception error) {
-                    error.printStackTrace();
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                    error.setCause(exception.getMessage());
                     return createErrorItem();
                 }
                 textures.setSkin(url);
@@ -326,7 +333,7 @@ public class ItemBuilder {
     // ======= Modifiers =======
 
     public ItemBuilder setType(Material material) {
-        if (error) {
+        if (error.isStatus() || material == null || material.isEmpty()) {
             return this;
         }
         item.setType(material);
@@ -334,7 +341,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setType(String material) {
-        if (error) {
+        if (error.isStatus() || material == null || material.isEmpty()) {
             return this;
         }
         Material mat = getMaterial(material);
@@ -352,7 +359,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setName(String name) {
-        if (error || name == null || name.isEmpty()) {
+        if (error.isStatus() || name == null || name.isEmpty()) {
             return this;
         }
         if (player != null) {
@@ -364,7 +371,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setLore(String... lore) {
-        if (error || lore == null || lore.length == 0) {
+        if (error.isStatus() || lore == null || lore.length == 0) {
             return this;
         }
         List<String> currentLore = new ArrayList<>();
@@ -381,7 +388,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setLore(List<String> lore) {
-        if (error || lore == null || lore.isEmpty()) {
+        if (error.isStatus() || lore == null || lore.isEmpty()) {
             return this;
         }
         List<String> coloredLore = new ArrayList<>();
@@ -397,7 +404,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder addLore(String... lore) {
-        if (error || lore == null || lore.length == 0) {
+        if (error.isStatus() || lore == null || lore.length == 0) {
             return this;
         }
         List<String> currentLore = meta.hasLore() ? new ArrayList<>(Objects.requireNonNull(meta.getLore())) : new ArrayList<>();
@@ -413,7 +420,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder addLore(List<String> lore) {
-        if (error || lore == null || lore.isEmpty()) {
+        if (error.isStatus() || lore == null || lore.isEmpty()) {
             return this;
         }
         List<String> currentLore = meta.hasLore() ? new ArrayList<>(Objects.requireNonNull(meta.getLore())) : new ArrayList<>();
@@ -429,7 +436,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder addItemFlags(ItemFlag... flags) {
-        if (error || flags == null || flags.length == 0) {
+        if (error.isStatus() || flags == null || flags.length == 0) {
             return this;
         }
         meta.addItemFlags(flags);
@@ -437,7 +444,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder addItemFlagsByName(List<String> flags) {
-        if (error) {
+        if (error.isStatus() || flags == null || flags.isEmpty()) {
             return this;
         }
         for (String s : flags) {
@@ -447,7 +454,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder addItemFlagsByName(String... flags) {
-        if (error || flags == null) {
+        if (error.isStatus() || flags == null) {
             return this;
         }
         for (String name : flags) {
@@ -461,7 +468,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setCustomModelData(int data) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         meta.setCustomModelData(data);
@@ -469,7 +476,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder addEnchant(Enchantment enchantment, int level, boolean ignoreLevelRestriction) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         meta.addEnchant(enchantment, level, ignoreLevelRestriction);
@@ -480,7 +487,7 @@ public class ItemBuilder {
      * @since 1.1.0
      */
     public ItemBuilder addEnchant(Map<String, Integer> enchantments) {
-        if (error || enchantments == null || enchantments.isEmpty()) {
+        if (error.isStatus() || enchantments == null || enchantments.isEmpty()) {
             return this;
         }
         for (Map.Entry<String, Integer> enchantment : enchantments.entrySet()) {
@@ -493,7 +500,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder addEnchantByName(String name, int level, boolean ignoreLevelRestriction) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         Enchantment enchant = Enchantment.getByName(name.toUpperCase());
@@ -504,7 +511,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setDamage(int damage) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         if (meta instanceof Damageable d) {
@@ -514,7 +521,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setMaxDamage(int damage) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         if (meta instanceof Damageable damageable) {
@@ -524,7 +531,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setRepairCost(int repairCost) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         if (meta instanceof Repairable repairable) {
@@ -534,7 +541,7 @@ public class ItemBuilder {
     }
 
     public <T, Z> ItemBuilder setPersistentData(NamespacedKey key, PersistentDataType<T, Z> type, Z data) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         container.set(key, type, data);
@@ -542,7 +549,7 @@ public class ItemBuilder {
     }
 
     public <T, Z> ItemBuilder setPersistentData(String key, PersistentDataType<T, Z> type, Z data) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         container.set(new NamespacedKey(ExApi.getPlugin(), key), type, data);
@@ -551,7 +558,7 @@ public class ItemBuilder {
 
     @Deprecated(since = "1.0.0", forRemoval = true)
     public <T, Z> ItemBuilder addPersistentData(NamespacedKey key, PersistentDataType<T, Z> type, Z data) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         container.set(key, type, data);
@@ -560,7 +567,7 @@ public class ItemBuilder {
 
     @Deprecated(since = "1.0.0", forRemoval = true)
     public <T, Z> ItemBuilder addPersistentData(String key, PersistentDataType<T, Z> type, Z data) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         container.set(new NamespacedKey(ExApi.getPlugin(), key), type, data);
@@ -568,7 +575,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder addAttributeModifier(Attribute attribute, AttributeModifier modifier) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         meta.addAttributeModifier(attribute, modifier);
@@ -576,7 +583,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder addAttributeModifierByName(String attributeName, AttributeModifier modifier) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         try {
@@ -589,7 +596,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setHide() {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         meta.addItemFlags(ItemFlag.values());
@@ -597,7 +604,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setHideAll() {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         meta.addItemFlags(ItemFlag.values());
@@ -610,7 +617,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setHideAll(boolean value) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         if (value) {
@@ -625,7 +632,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setUnbreakable() {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         meta.setUnbreakable(true);
@@ -633,7 +640,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setUnbreakable(boolean value) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         meta.setUnbreakable(value);
@@ -641,7 +648,7 @@ public class ItemBuilder {
     }
 
     private ItemBuilder Skull(String user) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         if (meta instanceof SkullMeta skullMeta) {
@@ -658,7 +665,7 @@ public class ItemBuilder {
     }
 
     private ItemBuilder Skull(UUID uuid) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         if (meta instanceof SkullMeta skullMeta) {
@@ -676,7 +683,7 @@ public class ItemBuilder {
 
     @Deprecated(since = "1.0.0", forRemoval = true)
     public ItemBuilder SkullTexture(String texture) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         if (meta instanceof SkullMeta skullMeta) {
@@ -716,7 +723,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setSkullTexture(String texture) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         if (meta instanceof SkullMeta skullMeta) {
@@ -757,7 +764,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setMaxStackSize(int amount) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
@@ -767,7 +774,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setEnchantmentGlintOverride() {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
@@ -781,7 +788,7 @@ public class ItemBuilder {
 
     @Deprecated(since = "1.0.0", forRemoval = true)
     public ItemBuilder setEnchantmentGlintOverride(boolean value) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
@@ -797,7 +804,7 @@ public class ItemBuilder {
      * @since 1.1.0
      */
     public ItemBuilder setGlintOverride(boolean value) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
@@ -810,7 +817,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setGlider() {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
@@ -823,7 +830,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setGlider(boolean value) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
@@ -836,7 +843,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setHideTooltip() {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
@@ -848,7 +855,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setHideTooltip(boolean value) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
@@ -860,7 +867,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setFoodComponent(int nutrition, float saturationModifier, boolean canAlwaysEat) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         if (meta instanceof FoodComponent foodMeta) {
@@ -876,7 +883,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setRarity(String rarityName) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
@@ -890,7 +897,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setPotionEffects(PotionEffect... effects) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         if (meta instanceof PotionMeta potionMeta) {
@@ -902,7 +909,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setPotionEffect(PotionEffect effect) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         if (meta instanceof PotionMeta potionMeta) {
@@ -912,7 +919,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setColor(Color color) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         if (meta instanceof PotionMeta potionMeta) {
@@ -924,7 +931,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder clearTrim(boolean value) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_9_R2)) {
@@ -938,7 +945,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setTrim(TrimMaterial trimMaterial, TrimPattern trimPattern) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_9_R2)) {
@@ -950,7 +957,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setTrimByName(String trim, String Material) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_9_R2)) {
@@ -972,7 +979,7 @@ public class ItemBuilder {
 
 
     public ItemBuilder addBookEnchant(Enchantment enchantment, int level, boolean ignoreLevelRestriction) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         if (meta instanceof EnchantmentStorageMeta storageMeta) {
@@ -982,7 +989,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder addBookEnchantByName(String name, int level, boolean ignoreLevelRestriction) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         Enchantment enchant = Enchantment.getByName(name.toUpperCase());
@@ -994,7 +1001,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setComponentFlags(List<Boolean> booleans) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
@@ -1005,7 +1012,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setComponentFlags(Boolean... booleans) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
@@ -1016,7 +1023,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setComponentFloats(List<Float> floats) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
         if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
@@ -1027,7 +1034,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setComponentFloats(Float... floats) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
 
@@ -1039,7 +1046,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setComponentColors(List<Color> colors) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
 
@@ -1051,7 +1058,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setComponentColors(Color... colors) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
 
@@ -1063,7 +1070,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setComponentColorsByName(List<String> colors) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
 
@@ -1077,7 +1084,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setComponentColorsByName(String... colors) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
 
@@ -1091,7 +1098,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setComponentStrings(List<String> strings) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
 
@@ -1103,7 +1110,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setComponentStrings(String... strings) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
 
@@ -1115,7 +1122,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setItemModel(String namespace, String key) {
-        if (error) {
+        if (error.isStatus()) {
             return this;
         }
 
@@ -1126,19 +1133,51 @@ public class ItemBuilder {
         return this;
     }
 
+    /**
+     * @since 1.1.0
+     */
+    public ItemBuilder setPlayer(Player player) {
+        this.player = player;
+        return this;
+    }
+
     // ======= Finalizer =======
 
     public boolean isError() {
-        boolean in = error;
-        if (error) {
-            error = false; // Reset error state after checking
+        boolean status = error.isStatus();
+        if (error.isStatus()) {
+            error.setCause(null); // Reset error state after checking
         }
-        return in;
+        return status;
     }
 
     public ItemStack build() {
         item.setItemMeta(meta);
-        error = false; // Reset error state after building
+        error.setCause(null); // Reset error state after building
         return item;
+    }
+
+    /**
+     * @since 1.1.0
+     */
+    private static class Error {
+
+        private String cause;
+
+        public Error() {
+            this.cause = null;
+        }
+
+        public boolean isStatus() {
+            return cause != null;
+        }
+
+        public String getCause() {
+            return cause;
+        }
+
+        public void setCause(String cause) {
+            this.cause = cause;
+        }
     }
 }

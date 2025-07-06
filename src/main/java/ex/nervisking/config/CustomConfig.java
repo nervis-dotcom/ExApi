@@ -100,6 +100,9 @@ public class CustomConfig {
         }
     }
 
+    /**
+     * @since 1.1.0
+     */
     public ItemBuilder createItem(String path) {
         FileConfiguration config = getConfig();
         String id = config.getString(path + ".material", "ASB");

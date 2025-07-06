@@ -10,9 +10,13 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * @since 1.1.0
+ */
 public class PlayerBar {
 
     private final UtilsManagers utilsManagers = ExApi.getUtilsManagers();
@@ -35,12 +39,72 @@ public class PlayerBar {
         this.players = new HashSet<>();
         this.barFlags = new HashSet<>();
         this.title = " ";
-        this.style = BarStyle.SOLID;
         this.color = BarColor.WHITE;
+        this.style = BarStyle.SOLID;
         this.timeLeft = 0L;
         this.totalTime = 0L;
         this.createBossBar();
-        this.bossBar.setVisible(true);
+    }
+
+    public PlayerBar(String title) {
+        this.running = false;
+        this.players = new HashSet<>();
+        this.barFlags = new HashSet<>();
+        this.title = title;
+        this.color = BarColor.WHITE;
+        this.style = BarStyle.SOLID;
+        this.timeLeft = 0L;
+        this.totalTime = 0L;
+        this.createBossBar();
+    }
+
+    public PlayerBar(String title, BarColor barColor) {
+        this.running = false;
+        this.players = new HashSet<>();
+        this.barFlags = new HashSet<>();
+        this.title = title;
+        this.color = barColor;
+        this.style = BarStyle.SOLID;
+        this.timeLeft = 0L;
+        this.totalTime = 0L;
+        this.createBossBar();
+    }
+
+    public PlayerBar(String title, BarStyle barStyle) {
+        this.running = false;
+        this.players = new HashSet<>();
+        this.barFlags = new HashSet<>();
+        this.title = title;
+        this.color = BarColor.WHITE;
+        this.style = barStyle;
+        this.timeLeft = 0L;
+        this.totalTime = 0L;
+        this.createBossBar();
+    }
+
+    public PlayerBar(String title, BarColor barColor, BarStyle barStyle) {
+        this.running = false;
+        this.players = new HashSet<>();
+        this.barFlags = new HashSet<>();
+        this.title = title;
+        this.color = barColor;
+        this.style = barStyle;
+        this.timeLeft = 0L;
+        this.totalTime = 0L;
+        this.createBossBar();
+    }
+
+    public PlayerBar(String title, BarColor barColor, BarStyle barStyle, BarFlag... flag) {
+        this.running = false;
+        this.players = new HashSet<>();
+        this.barFlags = new HashSet<>();
+        this.title = title;
+        this.color = barColor;
+        this.style = barStyle;
+        this.barFlags.addAll(Arrays.asList(flag));
+        this.timeLeft = 0L;
+        this.totalTime = 0L;
+        this.createBossBar();
     }
 
     public PlayerBar start() {
@@ -136,7 +200,7 @@ public class PlayerBar {
             barColor = BarColor.valueOf(color.toUpperCase());
         } catch (IllegalArgumentException e) {
             barColor = BarColor.WHITE;
-            utilsManagers.sendLogger(Logger.WARNING, "Color de la bossbar no es correcto: " + color);
+            this.utilsManagers.sendLogger(Logger.WARNING, "Color de la bossbar no es correcto: " + color);
         }
         this.color = barColor;
         return setColor(barColor);
@@ -148,7 +212,7 @@ public class PlayerBar {
             barStyle = BarStyle.valueOf(style.toUpperCase());
         } catch (IllegalArgumentException e) {
             barStyle = BarStyle.SOLID;
-            utilsManagers.sendLogger(Logger.WARNING, "Estilo de la bossbar no es correcto: " + style);
+            this.utilsManagers.sendLogger(Logger.WARNING, "Estilo de la bossbar no es correcto: " + style);
         }
         this.style = barStyle;
         return setStyle(barStyle);
@@ -157,7 +221,7 @@ public class PlayerBar {
     public PlayerBar addFlag(BarFlag flag) {
         this.barFlags.add(flag);
         if (bossBar != null) {
-            bossBar.addFlag(flag);
+            this.bossBar.addFlag(flag);
         }
         return this;
     }
@@ -165,16 +229,16 @@ public class PlayerBar {
     public PlayerBar removeFlag(BarFlag flag) {
         this.barFlags.remove(flag);
         if (bossBar != null) {
-            bossBar.removeFlag(flag);
+            this.bossBar.removeFlag(flag);
         }
         return this;
     }
 
     public PlayerBar clearFlags() {
-        barFlags.clear();
+        this.barFlags.clear();
         if (bossBar != null) {
             for (BarFlag flag : BarFlag.values()) {
-                bossBar.removeFlag(flag);
+                this.bossBar.removeFlag(flag);
             }
         }
         return this;
@@ -182,14 +246,14 @@ public class PlayerBar {
 
     private void createBossBar() {
         if (bossBar != null) {
-            bossBar.removeAll();
+            this.bossBar.removeAll();
         }
         // Usa los flags configurados:
-        bossBar = Bukkit.createBossBar(title, BarColor.WHITE, BarStyle.SOLID, barFlags.toArray(new BarFlag[0]));
-        bossBar.setVisible(true);
+        this.bossBar = Bukkit.createBossBar(title, color, style, barFlags.toArray(new BarFlag[0]));
+        this. bossBar.setVisible(true);
         // Re-agrega los jugadores actuales
         for (Player p : players) {
-            bossBar.addPlayer(p);
+            this.bossBar.addPlayer(p);
         }
     }
 
@@ -197,13 +261,13 @@ public class PlayerBar {
         if (task != null) {
             task.cancel();
         }
-        bossBar.removeAll();
-        players.clear();
+        this.bossBar.removeAll();
+        this.players.clear();
     }
 
     public void stop() {
         if (task != null) {
-            task.cancel();
+            this.task.cancel();
         }
         this.clearPlayers();
         this.bossBar = null;
@@ -211,68 +275,72 @@ public class PlayerBar {
     }
 
     public void clearPlayers() {
-        bossBar.removeAll();
-        bossBar.setVisible(false);
-        players.clear();
+        this.bossBar.removeAll();
+        this.bossBar.setVisible(false);
+        this.players.clear();
+    }
+
+    public boolean iaVisible() {
+        return this.bossBar.isVisible();
     }
 
     public void pause() {
         if (!running || task == null) {
-            utilsManagers.sendLogger(Logger.INFO, "La bossbar no está activa. No se puede pausar.", true);
+            this.utilsManagers.sendLogger(Logger.INFO, "La bossbar no está activa. No se puede pausar.", true);
             return;
         }
 
-        task.cancel();
-        task = null;
-        running = false;
-        utilsManagers.sendLogger(Logger.INFO, "La bossbar ha sido pausada.", true);
+        this.task.cancel();
+        this.task = null;
+        this.running = false;
+        this.utilsManagers.sendLogger(Logger.INFO, "La bossbar ha sido pausada.", true);
     }
 
     public void resume() {
         if (running) {
-            utilsManagers.sendLogger(Logger.WARNING, "La bossbar ya está activa. No se puede reanudar.", true);
+            this.utilsManagers.sendLogger(Logger.WARNING, "La bossbar ya está activa. No se puede reanudar.", true);
             return;
         }
 
         if (timeLeft <= 0) {
-            utilsManagers.sendLogger(Logger.WARNING, "No se puede reanudar la bossbar: no queda tiempo.", true);
+            this.utilsManagers.sendLogger(Logger.WARNING, "No se puede reanudar la bossbar: no queda tiempo.", true);
             return;
         }
 
         if (players.isEmpty()) {
-            utilsManagers.sendLogger(Logger.WARNING, "No se puede reanudar la bossbar sin jugadores asignados.", true);
+            this.utilsManagers.sendLogger(Logger.WARNING, "No se puede reanudar la bossbar sin jugadores asignados.", true);
             return;
         }
 
-        running = true;
-        startTimer();
-        utilsManagers.sendLogger(Logger.INFO, "La bossbar ha sido reanudada.", true);
+        this.running = true;
+        this.startTimer();
+        this.utilsManagers.sendLogger(Logger.INFO, "La bossbar ha sido reanudada.", true);
     }
 
     public void restart() {
         if (players.isEmpty()) {
-            utilsManagers.sendLogger(Logger.WARNING, "No se puede reiniciar la bossbar sin jugadores asignados.", true);
+            this.utilsManagers.sendLogger(Logger.WARNING, "No se puede reiniciar la bossbar sin jugadores asignados.", true);
             return;
         }
 
         if (initialTime <= 0) {
-            utilsManagers.sendLogger(Logger.WARNING, "No se puede reiniciar la bossbar: no se ha definido un tiempo inicial.", true);
+            this.utilsManagers.sendLogger(Logger.WARNING, "No se puede reiniciar la bossbar: no se ha definido un tiempo inicial.", true);
             return;
         }
 
         if (task != null) {
-            task.cancel();
+            this.task.cancel();
         }
 
         this.timeLeft = initialTime;
         this.totalTime = initialTime;
         this.running = true;
-        startTimer();
-        utilsManagers.sendLogger(Logger.INFO, "La bossbar ha sido reiniciada desde " + initialTime + " segundos.", true);
+        this.startTimer();
+        this.utilsManagers.sendLogger(Logger.INFO, "La bossbar ha sido reiniciada desde " + initialTime + " segundos.", true);
     }
 
     private void startTimer() {
-        task = new BukkitRunnable() {
+        this.task = new BukkitRunnable() {
             @Override
             public void run() {
                 if (timeLeft <= 0 || !hasOnlinePlayers()) {
@@ -287,30 +355,30 @@ public class PlayerBar {
                 timeLeft -= 1000;
             }
         };
-        task.runTaskTimer(ExApi.getPlugin(), 0L, 20L);
+        this.task.runTaskTimer(ExApi.getPlugin(), 0L, 20L);
     }
 
     public long getTimeLeft() {
-        return timeLeft;
+        return this.timeLeft;
     }
 
     public long getTotalTime() {
-        return totalTime;
+        return this.totalTime;
     }
 
     public BossBar getBossBar() {
-        return bossBar;
+        return this.bossBar;
     }
 
     public boolean isRunning() {
-        return running;
+        return this.running;
     }
 
     public BukkitRunnable getTask() {
-        return task;
+        return this.task;
     }
 
     public Set<Player> getPlayers() {
-        return players;
+        return this.players;
     }
 }

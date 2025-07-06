@@ -236,7 +236,6 @@ public class Utils {
         placeholders.put("%max_player%", String.valueOf(Bukkit.getMaxPlayers()));
 
         if (player != null) {
-
             placeholders.put("%player%", safeString(player.getName()));
             placeholders.put("%display_name%", safeString(player.getDisplayName()));
             placeholders.put("%world%", safeString(player.getWorld().getName()));
