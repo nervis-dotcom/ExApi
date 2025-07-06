@@ -133,20 +133,18 @@ public abstract class ExCommand extends UtilsManagers implements BaseCommand {
         return result;
     }
 
-    // Enlaces con Bukkit
     @Override
     public final boolean onCommand(@NotNull CommandSender sender, org.bukkit.command.@NotNull Command cmd, @NotNull String label, String @NotNull [] args) {
         return this.onCommand(sender, new Arguments(args));
     }
 
-    public List<String> onTab(CommandSender sender, Arguments args) {
-        return List.of();
-    }
-
     @Override
     public final List<String> onTabComplete(@NotNull CommandSender sender, org.bukkit.command.@NotNull Command cmd, @NotNull String alias, String @NotNull [] args) {
-        return this.onTab(sender, new Arguments(args));
+        return this.onTab(sender, new Arguments(args), new ArrayList<>());
     }
-    // Métodos que implementan las clases hijas
+
+    public List<String> onTab(CommandSender sender, Arguments args, List<String> completions) {
+        return completions;
+    }
     public abstract boolean onCommand(CommandSender sender, Arguments args);
 }

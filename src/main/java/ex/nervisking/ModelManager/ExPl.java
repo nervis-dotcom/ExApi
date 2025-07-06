@@ -14,6 +14,7 @@ public enum ExPl {
     EXPETS("ExPets"),
     EXUSEFUL("ExUseful"),
     EXBLOCKPROTECTOR("ExBlockProtector"),
+    EXNAMETAGS("ExNameTags"),
     EXINVENTORYPANEL("ExInventoryPanel");
 
     private final String name;

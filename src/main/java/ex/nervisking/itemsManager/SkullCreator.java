@@ -13,8 +13,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 
 public class SkullCreator {
-    public SkullCreator() {
-    }
 
     /** @deprecated */
     @Deprecated
@@ -40,7 +38,7 @@ public class SkullCreator {
         notNull(item, "item");
         notNull(id, "id");
         SkullMeta meta = (SkullMeta)item.getItemMeta();
-        ((SkullMeta)Objects.requireNonNull(meta)).setOwningPlayer(Bukkit.getOfflinePlayer(id));
+        Objects.requireNonNull(meta).setOwningPlayer(Bukkit.getOfflinePlayer(id));
         item.setItemMeta(meta);
         return item;
     }
@@ -64,7 +62,7 @@ public class SkullCreator {
     public static ItemStack itemWithBase64(ItemStack item, String base64) {
         notNull(item, "item");
         notNull(base64, "base64");
-        UUID hashAsId = new UUID((long)base64.hashCode(), (long)base64.hashCode());
+        UUID hashAsId = new UUID(base64.hashCode(), base64.hashCode());
         return Bukkit.getUnsafe().modifyItemStack(item, "{SkullOwner:{Id:\"" + hashAsId + "\",Properties:{textures:[{Value:\"" + base64 + "\"}]}}}");
     }
 
@@ -93,7 +91,7 @@ public class SkullCreator {
     public static void blockWithBase64(Block block, String base64) {
         notNull(block, "block");
         notNull(base64, "base64");
-        UUID hashAsId = new UUID((long)base64.hashCode(), (long)base64.hashCode());
+        UUID hashAsId = new UUID(base64.hashCode(), base64.hashCode());
         String args = String.format("%d %d %d %s", block.getX(), block.getY(), block.getZ(), "{Owner:{Id:\"" + hashAsId + "\",Properties:{textures:[{Value:\"" + base64 + "\"}]}}}");
         if (newerApi()) {
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "data merge block " + args);
@@ -136,8 +134,7 @@ public class SkullCreator {
         try {
             actualUrl = new URI(url);
         } catch (URISyntaxException var3) {
-            URISyntaxException e = var3;
-            throw new RuntimeException(e);
+            throw new RuntimeException(var3);
         }
 
         String toEncode = "{\"textures\":{\"SKIN\":{\"url\":\"" + actualUrl + "\"}}}";

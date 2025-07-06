@@ -8,46 +8,46 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-@Deprecated
+@Deprecated(since = "1.0.0")
 public abstract class CustomCommand extends UtilsManagers implements BaseCommand {
 
     private final Map<String, String> permission;
 
-    @Deprecated
+    @Deprecated(since = "1.0.0")
     public CustomCommand() {
         this.permission = new HashMap<>();
     }
 
-    @Deprecated
+    @Deprecated(since = "1.0.0")
     public abstract String getName();
 
-    @Deprecated
+    @Deprecated(since = "1.0.0")
     public abstract String getDescription();
 
-    @Deprecated
+    @Deprecated(since = "1.0.0")
     public abstract boolean getPermission();
 
-    @Deprecated
+    @Deprecated(since = "1.0.0")
     public List<String> getAliases() {
         return Collections.emptyList();
     }
 
-    @Deprecated
+    @Deprecated(since = "1.0.0")
     public Map<String, String> getPermissions() {
         return permission;
     }
 
-    @Deprecated
+    @Deprecated(since = "1.0.0")
     public void addPermission(String description, String permission) {
         this.permission.put(description, permission);
     }
 
-    @Deprecated
+    @Deprecated(since = "1.0.0")
     public boolean hasPermission(CommandSender sender) {
         return hasPermission(sender, "command." + getName());
     }
 
-    @Deprecated
+    @Deprecated(since = "1.0.0")
     public boolean hasSubPermission(CommandSender sender, String subPermission) {
         return hasPermission(sender, "command." + getName() + "." + subPermission);
     }
@@ -56,32 +56,32 @@ public abstract class CustomCommand extends UtilsManagers implements BaseCommand
         sendMessage(sender, ExApi.getPermissionMessage());
     }
 
-    @Deprecated
+    @Deprecated(since = "1.0.0")
     public void neverConnected(CommandSender sender, String target) {
         sendMessage(sender, ExApi.getNeverConnected().replace("%player%", target));
     }
 
-    @Deprecated
+    @Deprecated(since = "1.0.0")
     public void noConsole(CommandSender sender) {
         sendMessage(sender, ExApi.getConsoleMessage());
     }
 
-    @Deprecated
+    @Deprecated(since = "1.0.0")
     public void invalidityAmount(CommandSender sender) {
         sendMessage(sender, ExApi.getInvalidityAmountMessage());
     }
 
-    @Deprecated
+    @Deprecated(since = "1.0.0")
     public void noOnline(CommandSender sender, String target) {
         sendMessage(sender, ExApi.getNoOnlineMessage().replace("%player%", target));
     }
 
-    @Deprecated
+    @Deprecated(since = "1.0.0")
     public void help(CommandSender sender, String... args) {
         help(sender, args == null ? List.of() : Arrays.asList(args));
     }
 
-    @Deprecated
+    @Deprecated(since = "1.0.0")
     public void help(CommandSender sender, List<String> args) {
         sendMessage(sender, ExApi.getUsage().replace("%command%", getName()));
 
@@ -117,10 +117,10 @@ public abstract class CustomCommand extends UtilsManagers implements BaseCommand
     }
 
 
-    @Override @Deprecated
+    @Override @Deprecated(since = "1.0.0")
     public abstract boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args);
 
-    @Override @Deprecated
+    @Override @Deprecated(since = "1.0.0")
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String @NotNull [] args) {
         return List.of();
     }

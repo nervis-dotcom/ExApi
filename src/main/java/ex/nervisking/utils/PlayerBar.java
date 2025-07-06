@@ -29,10 +29,10 @@ public class PlayerBar {
     private long initialTime = -1;
     private BarColor color;
     private BarStyle style;
-
     private long timeLeft;
     private long totalTime;
     private String title;
+    private boolean deleteAnDeath;
 
     public PlayerBar() {
         this.running = false;
@@ -128,10 +128,6 @@ public class PlayerBar {
         this.initialTime = timeLeft; // 🔸 Guarda el tiempo inicial
         startTimer();
         return this;
-    }
-
-    private boolean hasOnlinePlayers() {
-        return players.stream().anyMatch(Player::isOnline);
     }
 
     public PlayerBar onFinish(Runnable runnable) {
@@ -244,6 +240,11 @@ public class PlayerBar {
         return this;
     }
 
+    public PlayerBar removeAnDeath(boolean value) {
+        this.deleteAnDeath = value;
+        return this;
+    }
+
     private void createBossBar() {
         if (bossBar != null) {
             this.bossBar.removeAll();
@@ -349,13 +350,24 @@ public class PlayerBar {
                     return;
                 }
 
+                for (Player player : players) {
+                    if (!player.isOnline() || (deleteAnDeath && player.isDead())) {
+                        bossBar.removePlayer(player);
+                        players.remove(player);
+                    }
+                }
+
                 double progress = Math.max(0, Math.min(1, timeLeft / (double) totalTime));
                 bossBar.setProgress(progress);
-                bossBar.setTitle(utilsManagers.setColoredMessage(title));
+                bossBar.setTitle(utilsManagers.setColoredMessage(title.replace("%time%", utilsManagers.formatTime(timeLeft))));
                 timeLeft -= 1000;
             }
         };
         this.task.runTaskTimer(ExApi.getPlugin(), 0L, 20L);
+    }
+
+    private boolean hasOnlinePlayers() {
+        return players.stream().anyMatch(Player::isOnline);
     }
 
     public long getTimeLeft() {

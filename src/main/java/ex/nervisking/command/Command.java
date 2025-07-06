@@ -108,7 +108,7 @@ public abstract class Command extends UtilsManagers implements BaseCommand {
     }
 
     public void sendHelp(CommandSender sender, String... usages) {
-        sendMessage(sender, "&eUso del comando:");
+        sendMessage(sender, "%prefix% &eUso del comando:");
         for (String usage : usages) {
             sendMessage(sender, "&7 - /" + getName() + " " + usage);
         }

@@ -3,6 +3,7 @@ package ex.nervisking.command;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public interface MyCommand extends BaseCommand {
@@ -19,8 +20,8 @@ public interface MyCommand extends BaseCommand {
 
     boolean onCommand(CommandSender sender, Arguments args);
 
-    default List<String> onTab(CommandSender sender, Arguments args) {
-        return List.of();
+    default List<String> onTab(CommandSender sender, Arguments args, List<String> completions) {
+        return completions;
     }
 
     @Override
@@ -30,7 +31,7 @@ public interface MyCommand extends BaseCommand {
 
     @Override
     default List<String> onTabComplete(@NotNull CommandSender sender, org.bukkit.command.@NotNull Command command, @NotNull String alias, String @NotNull [] args) {
-        return onTab(sender, new Arguments(args));
+        return onTab(sender, new Arguments(args), new ArrayList<>());
     }
 
 }

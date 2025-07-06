@@ -46,7 +46,7 @@ public abstract class Menu extends UtilsManagers implements InventoryHolder {
 
     public abstract void setMenuItems();
 
-    public abstract void handleMenu(InventoryClickEvent var1) throws MenuManagerNotSetupException, MenuManagerException;
+    public abstract void handleMenu(InventoryClickEvent event) throws MenuManagerNotSetupException, MenuManagerException;
 
     public void handleMenuClose() {}
 

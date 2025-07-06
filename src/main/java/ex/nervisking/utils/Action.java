@@ -358,47 +358,34 @@ public class Action {
             player.closeInventory();
         } else if (action.equalsIgnoreCase("[refresh_inventory]")) {
             if (topInventory.getHolder() instanceof Menu menu) {
-                switch (menu) {
-                    case CustomizablePaginatedMenu customizablePaginatedMenu -> customizablePaginatedMenu.refreshData();
-                    case PaginatedMenu paginatedMenu -> paginatedMenu.refreshData();
-                    case MenuPages menuPages -> menuPages.refreshData();
-                    default -> menu.reloadItems();
+                if (menu instanceof MenuPages menuPages) {
+                    menuPages.refreshData();
+                } else {
+                    menu.reloadItems();
                 }
             }
         } else if (action.equalsIgnoreCase("[inventory_first-page]")) {
             if (topInventory.getHolder() instanceof Menu menu) {
-                switch (menu) {
-                    case CustomizablePaginatedMenu customizablePaginatedMenu -> customizablePaginatedMenu.firstPage();
-                    case PaginatedMenu paginatedMenu -> paginatedMenu.firstPage();
-                    case MenuPages menuPages -> menuPages.firstPage();
-                    default -> {}
+                if (menu instanceof MenuPages menuPages) {
+                    menuPages.firstPage();
                 }
             }
         } else if (action.equalsIgnoreCase("[inventory_last-page]")) {
             if (topInventory.getHolder() instanceof Menu menu) {
-                switch (menu) {
-                    case CustomizablePaginatedMenu customizablePaginatedMenu -> customizablePaginatedMenu.lastPage();
-                    case PaginatedMenu paginatedMenu -> paginatedMenu.lastPage();
-                    case MenuPages menuPages -> menuPages.lastPage();
-                    default -> {}
+                if (menu instanceof MenuPages menuPages) {
+                    menuPages.lastPage();
                 }
             }
         } else if (action.equalsIgnoreCase("[inventory_prev-page]")) {
             if (topInventory.getHolder() instanceof Menu menu) {
-                switch (menu) {
-                    case CustomizablePaginatedMenu customizablePaginatedMenu -> customizablePaginatedMenu.prevPage();
-                    case PaginatedMenu paginatedMenu -> paginatedMenu.prevPage();
-                    case MenuPages menuPages -> menuPages.prevPage();
-                    default -> {}
+                if (menu instanceof MenuPages menuPages) {
+                    menuPages.prevPage();
                 }
             }
         } else if (action.equalsIgnoreCase("[inventory_next-page]")) {
             if (topInventory.getHolder() instanceof Menu menu) {
-                switch (menu) {
-                    case CustomizablePaginatedMenu customizablePaginatedMenu -> customizablePaginatedMenu.nextPage();
-                    case PaginatedMenu paginatedMenu -> paginatedMenu.nextPage();
-                    case MenuPages menuPages -> menuPages.nextPage();
-                    default -> {}
+                if (menu instanceof MenuPages menuPages) {
+                    menuPages.nextPage();
                 }
             }
         }

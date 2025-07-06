@@ -23,8 +23,8 @@ import java.util.HashMap;
 public class ExApi {
 
     private static JavaPlugin plugin;
-    public static UtilsManagers utilsManagers;
-    public static Utils utils;
+    private static UtilsManagers utilsManagers;
+    private static Utils utils;
     public static ServerVersion serverVersion;
 
     private static final HashMap<Player, PlayerMenuUtility> playerMenuUtilityMap = new HashMap<>();
@@ -88,7 +88,7 @@ public class ExApi {
         }
 
         if (!isAlreadyRegistered) {
-            plugin.getServer().getPluginManager().registerEvents(new MenuListener(plugin), plugin);
+            plugin.getServer().getPluginManager().registerEvents(new MenuListener(playerMenuUtilityMap), plugin);
         }
     }
 
@@ -104,11 +104,6 @@ public class ExApi {
         } catch (NoSuchMethodException var6) {
             throw new MenuManagerException("No se pudo encontrar el constructor de la clase de menú", var6);
         }
-    }
-
-    public static void removePlayerMenuUtility(Player p) {
-        if (!isMenu) return;
-        playerMenuUtilityMap.remove(p);
     }
 
     public static void closeInventorys() {
@@ -180,8 +175,8 @@ public class ExApi {
         return wgPlugin != null && wgPlugin.isEnabled();
     }
 
-    public static void setIsMenu(boolean isMenu) {
-        ExApi.isMenu = isMenu;
+    public static boolean isIsMenu() {
+        return isMenu;
     }
 
     public static UtilsManagers getUtilsManagers() {
