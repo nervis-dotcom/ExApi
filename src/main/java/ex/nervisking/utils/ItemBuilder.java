@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import ex.nervisking.ExApi;
+import ex.nervisking.ModelManager.Logger;
 import ex.nervisking.itemsManager.ItemUtils;
 import ex.nervisking.itemsManager.RDMaterial;
 import org.bukkit.*;
@@ -351,7 +352,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setName(String name) {
-        if (error) {
+        if (error || name == null || name.isEmpty()) {
             return this;
         }
         if (player != null) {
@@ -363,7 +364,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setLore(String... lore) {
-        if (error) {
+        if (error || lore == null || lore.length == 0) {
             return this;
         }
         List<String> currentLore = new ArrayList<>();
@@ -380,7 +381,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setLore(List<String> lore) {
-        if (error) {
+        if (error || lore == null || lore.isEmpty()) {
             return this;
         }
         List<String> coloredLore = new ArrayList<>();
@@ -395,12 +396,12 @@ public class ItemBuilder {
         return this;
     }
 
-    public ItemBuilder addLore(String... lines) {
-        if (error) {
+    public ItemBuilder addLore(String... lore) {
+        if (error || lore == null || lore.length == 0) {
             return this;
         }
         List<String> currentLore = meta.hasLore() ? new ArrayList<>(Objects.requireNonNull(meta.getLore())) : new ArrayList<>();
-        for (String line : lines) {
+        for (String line : lore) {
             if (player != null) {
                 currentLore.add(ExApi.getUtils().setPlaceholders(player, line));
             } else {
@@ -411,12 +412,12 @@ public class ItemBuilder {
         return this;
     }
 
-    public ItemBuilder addLore(List<String> lines) {
-        if (error) {
+    public ItemBuilder addLore(List<String> lore) {
+        if (error || lore == null || lore.isEmpty()) {
             return this;
         }
         List<String> currentLore = meta.hasLore() ? new ArrayList<>(Objects.requireNonNull(meta.getLore())) : new ArrayList<>();
-        for (String line : lines) {
+        for (String line : lore) {
             if (player != null) {
                 currentLore.add(ExApi.getUtils().setPlaceholders(player, line));
             } else {
@@ -428,7 +429,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder addItemFlags(ItemFlag... flags) {
-        if (error) {
+        if (error || flags == null || flags.length == 0) {
             return this;
         }
         meta.addItemFlags(flags);
@@ -446,7 +447,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder addItemFlagsByName(String... flags) {
-        if (error) {
+        if (error || flags == null) {
             return this;
         }
         for (String name : flags) {
@@ -475,6 +476,22 @@ public class ItemBuilder {
         return this;
     }
 
+    /**
+     * @since 1.1.0
+     */
+    public ItemBuilder addEnchant(Map<String, Integer> enchantments) {
+        if (error || enchantments == null || enchantments.isEmpty()) {
+            return this;
+        }
+        for (Map.Entry<String, Integer> enchantment : enchantments.entrySet()) {
+            Enchantment enchant = Enchantment.getByName(enchantment.getKey().toUpperCase());
+            if (enchant != null) {
+                meta.addEnchant(enchant, enchantment.getValue(), true);
+            }
+        }
+        return this;
+    }
+
     public ItemBuilder addEnchantByName(String name, int level, boolean ignoreLevelRestriction) {
         if (error) {
             return this;
@@ -492,9 +509,8 @@ public class ItemBuilder {
         }
         if (meta instanceof Damageable d) {
             d.setDamage(damage);
-            return this;
         }
-        throw new IllegalArgumentException("Item does not support durability");
+        return this;
     }
 
     public ItemBuilder setMaxDamage(int damage) {
@@ -503,9 +519,8 @@ public class ItemBuilder {
         }
         if (meta instanceof Damageable damageable) {
             damageable.setMaxDamage(damage);
-            return this;
         }
-        throw new IllegalArgumentException("Item does not support durability");
+        return this;
     }
 
     public ItemBuilder setRepairCost(int repairCost) {
@@ -514,9 +529,8 @@ public class ItemBuilder {
         }
         if (meta instanceof Repairable repairable) {
             repairable.setRepairCost(repairCost);
-            return this;
         }
-        throw new IllegalArgumentException("Item is not repairable");
+        return this;
     }
 
     public <T, Z> ItemBuilder setPersistentData(NamespacedKey key, PersistentDataType<T, Z> type, Z data) {
@@ -535,7 +549,7 @@ public class ItemBuilder {
         return this;
     }
 
-    @Deprecated
+    @Deprecated(since = "1.0.0", forRemoval = true)
     public <T, Z> ItemBuilder addPersistentData(NamespacedKey key, PersistentDataType<T, Z> type, Z data) {
         if (error) {
             return this;
@@ -544,7 +558,7 @@ public class ItemBuilder {
         return this;
     }
 
-    @Deprecated
+    @Deprecated(since = "1.0.0", forRemoval = true)
     public <T, Z> ItemBuilder addPersistentData(String key, PersistentDataType<T, Z> type, Z data) {
         if (error) {
             return this;
@@ -569,7 +583,7 @@ public class ItemBuilder {
             Attribute attribute = Attribute.valueOf(attributeName.toUpperCase());
             meta.addAttributeModifier(attribute, modifier);
         } catch (IllegalArgumentException e) {
-            System.out.println("Advertencia: Atributo inválido '" + attributeName + "'");
+            ExApi.getUtilsManagers().sendLogger(Logger.WARNING,"Atributo inválido '" + attributeName + "'");
         }
         return this;
     }
@@ -660,7 +674,7 @@ public class ItemBuilder {
         return this;
     }
 
-    @Deprecated
+    @Deprecated(since = "1.0.0", forRemoval = true)
     public ItemBuilder SkullTexture(String texture) {
         if (error) {
             return this;
@@ -765,7 +779,24 @@ public class ItemBuilder {
         return this;
     }
 
+    @Deprecated(since = "1.0.0", forRemoval = true)
     public ItemBuilder setEnchantmentGlintOverride(boolean value) {
+        if (error) {
+            return this;
+        }
+        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
+            meta.setEnchantmentGlintOverride(value);
+        } else if (value) {
+            addEnchant(Enchantment.LURE, 1, true);
+            addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        }
+        return this;
+    }
+
+    /**
+     * @since 1.1.0
+     */
+    public ItemBuilder setGlintOverride(boolean value) {
         if (error) {
             return this;
         }
@@ -852,7 +883,7 @@ public class ItemBuilder {
             try {
                 meta.setRarity(ItemRarity.valueOf(rarityName.toUpperCase()));
             } catch (IllegalArgumentException e) {
-                System.out.println("Rarity inválido: " + rarityName);
+                ExApi.getUtilsManagers().sendLogger(Logger.WARNING, "Rarity inválido: " + rarityName);
             }
         }
         return this;
@@ -866,6 +897,16 @@ public class ItemBuilder {
             for (PotionEffect effect : effects) {
                 potionMeta.addCustomEffect(effect, true);
             }
+        }
+        return this;
+    }
+
+    public ItemBuilder setPotionEffect(PotionEffect effect) {
+        if (error) {
+            return this;
+        }
+        if (meta instanceof PotionMeta potionMeta) {
+            potionMeta.addCustomEffect(effect, true);
         }
         return this;
     }

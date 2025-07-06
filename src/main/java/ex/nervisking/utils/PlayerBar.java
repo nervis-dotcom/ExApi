@@ -1,8 +1,7 @@
-package ex.nervisking.utils.methods;
+package ex.nervisking.utils;
 
 import ex.nervisking.ExApi;
 import ex.nervisking.ModelManager.Logger;
-import ex.nervisking.utils.UtilsManagers;
 import org.bukkit.Bukkit;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarFlag;
@@ -98,13 +97,6 @@ public class PlayerBar {
     public PlayerBar removePlayer(Player player) {
         this.players.remove(player);
         this.bossBar.removePlayer(player);
-        return this;
-    }
-
-    public PlayerBar clearPlayers() {
-        bossBar.removeAll();
-        bossBar.setVisible(false);
-        players.clear();
         return this;
     }
 
@@ -213,9 +205,15 @@ public class PlayerBar {
         if (task != null) {
             task.cancel();
         }
-        clearPlayers();
+        this.clearPlayers();
         this.bossBar = null;
         this.running = false;
+    }
+
+    public void clearPlayers() {
+        bossBar.removeAll();
+        bossBar.setVisible(false);
+        players.clear();
     }
 
     public void pause() {

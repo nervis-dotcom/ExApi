@@ -46,6 +46,7 @@ public class Utils {
      * @param text Texto a procesar.
      * @return Componente de texto de BungeeCord con los colores aplicados.
      */
+    @Deprecated(since = "1.0.0")
     public net.md_5.bungee.api.chat.TextComponent setColoredComponent(@NotNull String text) {
         String colored = setColoredMessage(text);
         net.md_5.bungee.api.chat.TextComponent base = new net.md_5.bungee.api.chat.TextComponent();
@@ -203,7 +204,6 @@ public class Utils {
         return insideBrackets;
     }
 
-
     public String applyGradient(String text, Color start, Color end) {
         StringBuilder builder = new StringBuilder();
 
@@ -236,25 +236,41 @@ public class Utils {
         placeholders.put("%max_player%", String.valueOf(Bukkit.getMaxPlayers()));
 
         if (player != null) {
-            placeholders.put("%player%", player.getName());
-            placeholders.put("%display_name%", player.getDisplayName());
-            placeholders.put("%world%", player.getWorld().getName());
-            placeholders.put("%heal%", String.valueOf((int) player.getHealth()));
-            placeholders.put("%food%", String.valueOf(player.getFoodLevel()));
-            placeholders.put("%heal_bar%", getBar((int) Math.ceil(player.getHealth()), "❤", "&#b90000", "&#ff4d4d"));
-            placeholders.put("%food_bar%", getBar(player.getFoodLevel(), "🍗", "&#995c00", "&#ff9933"));
-            placeholders.put("%kills%", String.valueOf(player.getStatistic(Statistic.PLAYER_KILLS)));
-            placeholders.put("%deaths%", String.valueOf(player.getStatistic(Statistic.DEATHS)));
-            placeholders.put("%ping%", String.valueOf(player.getPing()));
-            placeholders.put("%x%", String.format("%.0f", player.getLocation().getX()));
-            placeholders.put("%y%", String.format("%.0f", player.getLocation().getY()));
-            placeholders.put("%z%", String.format("%.0f", player.getLocation().getZ()));
+
+            placeholders.put("%player%", safeString(player.getName()));
+            placeholders.put("%display_name%", safeString(player.getDisplayName()));
+            placeholders.put("%world%", safeString(player.getWorld().getName()));
+            placeholders.put("%heal%", safeString(String.valueOf(player.getHealth())));
+            placeholders.put("%food%", safeString(String.valueOf(player.getFoodLevel())));
+            placeholders.put("%heal_bar%", safeString(createBar((int) Math.ceil(player.getHealth()), "❤", "&#b90000", "&#ff4d4d")));
+            placeholders.put("%food_bar%", safeString(createBar(player.getFoodLevel(), "🍗", "&#995c00", "&#ff9933")));
+            placeholders.put("%kills%", safeString(String.valueOf(player.getStatistic(Statistic.PLAYER_KILLS))));
+            placeholders.put("%deaths%", safeString(String.valueOf(player.getStatistic(Statistic.DEATHS))));
+            placeholders.put("%ping%", safeString(getPing(player)));
+            placeholders.put("%x%", safeString(String.format("%.0f", player.getLocation().getX())));
+            placeholders.put("%y%", safeString(String.format("%.0f", player.getLocation().getY())));
+            placeholders.put("%z%", safeString(String.format("%.0f", player.getLocation().getZ())));
             return placeholders;
         }
         return placeholders;
     }
 
-    private String getBar(int valor, String symbol, String fullColor, String midColor) {
+    private String getPing(Player player) {
+        int ping;
+        try {
+            ping = player.getPing();
+        } catch (Exception e) {
+            ping = 0;
+        }
+
+        return String.valueOf(ping);
+    }
+
+    private String safeString(String value) {
+        return value != null ? value : "N/A";
+    }
+
+    public String createBar(int valor, String symbol, String fullColor, String midColor) {
         int total = 10; // Número de iconos en la barra
         int amount = (int) ((double) valor / 20 * total);
         int midPoint = total / 2;
@@ -272,33 +288,20 @@ public class Utils {
 
         return bar.toString();
     }
+    public String formatTime(long time, boolean fromMillis) {
+        return FormatTime.formatTime(time, fromMillis, FormatTime.TimeFormatType.DIGITAL);
+    }
 
-    /**
-     * Formatea un tiempo en segundos a un string legible.
-     * Ejemplos: 60 -> "01:00", 3600 -> "01:00:00", 86400 -> "1 día(s) 00:00:00"
-     *
-     * @param timeSeconds Tiempo en segundos a formatear.
-     * @return String formateado.
-     */
-    public String formatTime(long timeSeconds) {
-        if (timeSeconds < 0) return "00:00";
-        long seconds = timeSeconds;
-        long days = seconds / (24 * 60 * 60);
-        seconds %= (24 * 60 * 60);
-        long hours = seconds / 3600;
-        seconds %= 3600;
-        long minutes = seconds / 60;
-        seconds %= 60;
+    public String formatTime(long seconds) {
+        return FormatTime.formatTime(seconds, FormatTime.TimeFormatType.DIGITAL);
+    }
 
-        if (days > 0) {
-            return String.format("%d día(s) %02d:%02d:%02d", days, hours, minutes, seconds);
-        } else if (hours > 0) {
-            return String.format("%02d:%02d:%02d", hours, minutes, seconds);
-        } else if (minutes > 0) {
-            return String.format("%02d:%02d", minutes, seconds);
-        } else {
-            return String.format("%02d segundo(s)", seconds);
-        }
+    public String formatTime(long time, boolean fromMillis, FormatTime.TimeFormatType timeFormatType) {
+        return FormatTime.formatTime(time, fromMillis, timeFormatType);
+    }
+
+    public String formatTime(long timeSeconds, FormatTime.TimeFormatType timeFormatType) {
+        return FormatTime.formatTime(timeSeconds, timeFormatType);
     }
 
     /**
@@ -475,8 +478,7 @@ public class Utils {
 
     public String getLocationString(Location location) {
         if (location == null) return "no data";
-        return String.format("X: %.2f, Y: %.2f, Z: %.2f, World: %s",
-                location.getX(), location.getY(), location.getZ(), location.getWorld().getName());
+        return String.format("X: %.2f, Y: %.2f, Z: %.2f, World: %s", location.getX(), location.getY(), location.getZ(), location.getWorld().getName());
     }
 }
 
