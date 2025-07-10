@@ -2,127 +2,99 @@ package ex.nervisking.command;
 
 import ex.nervisking.ExApi;
 import ex.nervisking.utils.UtilsManagers;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-@Deprecated(since = "1.0.0")
 public abstract class CustomCommand extends UtilsManagers implements BaseCommand {
 
-    private final Map<String, String> permission;
+    private final String name;
+    private final String description;
+    private final boolean permissionRequired;
+    private final List<String> aliases;
 
-    @Deprecated(since = "1.0.0")
     public CustomCommand() {
-        this.permission = new HashMap<>();
+        CommandInfo info = this.getClass().getAnnotation(CommandInfo.class);
+        if (info != null) {
+            this.name = info.name();
+            this.description = info.description();
+            this.permissionRequired = info.permission();
+            this.aliases = Arrays.asList(info.aliases());
+        } else {
+            throw new IllegalStateException("Falta @CommandInfo en: " + getClass().getName());
+        }
     }
 
-    @Deprecated(since = "1.0.0")
-    public abstract String getName();
+    @Override
+    public String getName() {
+        return name;
+    }
 
-    @Deprecated(since = "1.0.0")
-    public abstract String getDescription();
+    @Override
+    public String getDescription() {
+        return description;
+    }
 
-    @Deprecated(since = "1.0.0")
-    public abstract boolean getPermission();
+    @Override
+    public boolean getPermission() {
+        return permissionRequired;
+    }
 
-    @Deprecated(since = "1.0.0")
+    @Override
     public List<String> getAliases() {
-        return Collections.emptyList();
+        return aliases;
     }
 
-    @Deprecated(since = "1.0.0")
-    public Map<String, String> getPermissions() {
-        return permission;
+    public boolean hasPermission(Sender sender) {
+        return hasPermission(sender.getCommandSender(), "command." + getName());
     }
 
-    @Deprecated(since = "1.0.0")
-    public void addPermission(String description, String permission) {
-        this.permission.put(description, permission);
+    public void noPermission(Sender sender) {
+        sendMessage(sender.getCommandSender(), ExApi.getPermissionMessage());
     }
 
-    @Deprecated(since = "1.0.0")
-    public boolean hasPermission(CommandSender sender) {
-        return hasPermission(sender, "command." + getName());
-    }
-
-    @Deprecated(since = "1.0.0")
-    public boolean hasSubPermission(CommandSender sender, String subPermission) {
-        return hasPermission(sender, "command." + getName() + "." + subPermission);
-    }
-
-    public void noPermission(CommandSender sender) {
-        sendMessage(sender, ExApi.getPermissionMessage());
-    }
-
-    @Deprecated(since = "1.0.0")
-    public void neverConnected(CommandSender sender, String target) {
-        sendMessage(sender, ExApi.getNeverConnected().replace("%player%", target));
-    }
-
-    @Deprecated(since = "1.0.0")
-    public void noConsole(CommandSender sender) {
-        sendMessage(sender, ExApi.getConsoleMessage());
-    }
-
-    @Deprecated(since = "1.0.0")
-    public void invalidityAmount(CommandSender sender) {
-        sendMessage(sender, ExApi.getInvalidityAmountMessage());
-    }
-
-    @Deprecated(since = "1.0.0")
-    public void noOnline(CommandSender sender, String target) {
-        sendMessage(sender, ExApi.getNoOnlineMessage().replace("%player%", target));
-    }
-
-    @Deprecated(since = "1.0.0")
-    public void help(CommandSender sender, String... args) {
+    public void help(Sender sender, String... args) {
         help(sender, args == null ? List.of() : Arrays.asList(args));
     }
 
-    @Deprecated(since = "1.0.0")
-    public void help(CommandSender sender, List<String> args) {
-        sendMessage(sender, ExApi.getUsage().replace("%command%", getName()));
+    public void help(Sender sender, List<String> args) {
+        sendMessage(sender.getCommandSender(), ExApi.getUsage().replace("%command%", getName()));
 
         if (args != null && !args.isEmpty()) {
-            sendMessage(sender, " ");
+            sendMessage(sender.getCommandSender(), " ");
             for (String arg : args) {
-                sendMessage(sender, arg);
+                sendMessage(sender.getCommandSender(), arg);
             }
-            sendMessage(sender, " ");
+            sendMessage(sender.getCommandSender(), " ");
         }
 
-        if (sender.isOp() || hasOp(sender)) {
+        if (sender.getCommandSender().isOp() || hasOp(sender.getCommandSender())) {
             if (!getDescription().isEmpty()) {
-                sendMessage(sender, ExApi.getDescription().replace("%description%", getDescription()));
+                sendMessage(sender.getCommandSender(), ExApi.getDescription().replace("%description%", getDescription()));
             }
             if (!getAliases().isEmpty()) {
-                sendMessage(sender, ExApi.getAliases().replace("%aliases%", String.join(", ", getAliases())));
+                sendMessage(sender.getCommandSender(), ExApi.getAliases().replace("%aliases%", String.join(", ", getAliases())));
             }
             if (getPermission()) {
-                sendMessage(sender, ExApi.getPermissions().replace("%permission%",
+                sendMessage(sender.getCommandSender(), ExApi.getPermissions().replace("%permission%",
                         ExApi.getPlugin().getName().toLowerCase() + ".command." + getName()));
-            }
-
-            if (!permission.isEmpty()) {
-                sendMessage(sender, ExApi.getSubsPermissions());
-                List<String> list = new ArrayList<>();
-                for (Map.Entry<String, String> map : permission.entrySet()) {
-                    list.add("&f" + map.getKey() + " &7» " + ExApi.getPlugin().getName().toLowerCase() + ".command." + getName() + "." + map.getValue());
-                }
-                sendMessage(sender, list);
             }
         }
     }
 
-
-    @Override @Deprecated(since = "1.0.0")
-    public abstract boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args);
-
-    @Override @Deprecated(since = "1.0.0")
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String @NotNull [] args) {
-        return List.of();
+    @Override
+    public final boolean onCommand(@NotNull CommandSender sender, org.bukkit.command.@NotNull Command cmd, @NotNull String label, String @NotNull [] args) {
+        return this.onCommand(Sender.of(sender), Arguments.of(args));
     }
 
+    @Override
+    public final List<String> onTabComplete(@NotNull CommandSender sender, org.bukkit.command.@NotNull Command cmd, @NotNull String alias, String @NotNull [] args) {
+        return this.onTab(Sender.of(sender), Arguments.of(args), Completions.of());
+    }
+
+    public abstract boolean onCommand(Sender sender, Arguments args);
+    public List<String> onTab(Sender sender, Arguments args, Completions completions) {
+        return completions.asList();
+    }
 }

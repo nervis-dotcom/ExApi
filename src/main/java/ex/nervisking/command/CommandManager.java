@@ -44,51 +44,29 @@ public class CommandManager {
         }
     }
 
+    public void registerCommand(CommandExecutor command) {
+        String name = command.getName();
+        PluginCommand pluginCommand = createPluginCommand(name);
+        if (pluginCommand != null) {
+            pluginCommand.setExecutor(command);
+            pluginCommand.setTabCompleter(command);
+            if (!command.getAliases().isEmpty()) {
+                pluginCommand.setAliases(command.getAliases());
+            }
+            if (!command.getDescription().isEmpty()) {
+                pluginCommand.setDescription(command.getDescription());
+            }
+            if (command.getPermission()) {
+                pluginCommand.setPermission(plugin.getName().toLowerCase() + ".command." + command.getName());
+            }
+
+            registerBukkitCommand(pluginCommand);
+        } else {
+            utilsManagers.sendLogger(Logger.WARNING,"No se pudo registrar el comando: " + name);
+        }
+    }
+
     public void registerCommand(CustomCommand command) {
-        String name = command.getName();
-        PluginCommand pluginCommand = createPluginCommand(name);
-        if (pluginCommand != null) {
-            pluginCommand.setExecutor(command);
-            pluginCommand.setTabCompleter(command);
-            if (!command.getAliases().isEmpty()) {
-                pluginCommand.setAliases(command.getAliases());
-            }
-            if (!command.getDescription().isEmpty()) {
-                pluginCommand.setDescription(command.getDescription());
-            }
-            if (command.getPermission()) {
-                pluginCommand.setPermission(plugin.getName().toLowerCase() + ".command." + command.getName());
-            }
-
-            registerBukkitCommand(pluginCommand);
-        } else {
-            utilsManagers.sendLogger(Logger.WARNING,"No se pudo registrar el comando: " + name);
-        }
-    }
-
-    public void registerCommand(MyCommand command) {
-        String name = command.getName();
-        PluginCommand pluginCommand = createPluginCommand(name);
-        if (pluginCommand != null) {
-            pluginCommand.setExecutor(command);
-            pluginCommand.setTabCompleter(command);
-            if (!command.getAliases().isEmpty()) {
-                pluginCommand.setAliases(command.getAliases());
-            }
-            if (!command.getDescription().isEmpty()) {
-                pluginCommand.setDescription(command.getDescription());
-            }
-            if (command.getPermission()) {
-                pluginCommand.setPermission(plugin.getName().toLowerCase() + ".command." + command.getName());
-            }
-
-            registerBukkitCommand(pluginCommand);
-        } else {
-            utilsManagers.sendLogger(Logger.WARNING,"No se pudo registrar el comando: " + name);
-        }
-    }
-
-    public void registerCommand(ExCommand command) {
         String name = command.getName();
         PluginCommand pluginCommand = createPluginCommand(name);
         if (pluginCommand != null) {

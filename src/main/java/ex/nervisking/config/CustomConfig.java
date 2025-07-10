@@ -15,6 +15,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+* @since 1.0.0
+*/
 public class CustomConfig {
 
     private final JavaPlugin plugin;
@@ -105,7 +108,7 @@ public class CustomConfig {
      */
     public ItemBuilder createItem(String path) {
         FileConfiguration config = getConfig();
-        String id = config.getString(path + ".material", "ASB");
+        String id = config.getString(path + ".id", "ASB");
         String name = config.getString(path + ".name", "");
         int amount = config.getInt(path + ".amount", 1);
         List<String> lore = config.getStringList(path + ".lore");
@@ -134,8 +137,8 @@ public class CustomConfig {
 //                }
 //            }
 //        }
-        int durability = config.getInt(path + ".durability", 0);
-        int maxDamage = config.getInt(path + ".max-durability", 0);
+        int durability = config.getInt(path + ".durability", -1);
+        int maxDamage = config.getInt(path + ".max-durability", -1);
         List<String> flags = config.getStringList(path + ".flags");
         boolean glow = config.getBoolean(path + ".glow", false);
         boolean unbreakable = config.getBoolean(path + ".unbreakable", false);
@@ -159,13 +162,13 @@ public class CustomConfig {
                 .setLore(lore)
                 .setAmount(amount)
                 .addEnchant(enchantments)
-                .setDamage(durability)
-                .setMaxDamage(maxDamage)
                 .setGlintOverride(glow)
                 .setUnbreakable(unbreakable)
                 .addItemFlagsByName(flags)
                 .setCustomModelData(modelData);
 
+        if (maxDamage != -1) item.setMaxDamage(maxDamage);
+        if (durability != -1) item.setDamage(durability);
         if (color != null) item.setColor(color);
 
         //for (AttributeData attr : attributes) item.addAttribute(attr);

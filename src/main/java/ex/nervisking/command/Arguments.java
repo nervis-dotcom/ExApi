@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.UUID;
 
 /**
+ * @since 1.0.0
  * Clase que encapsula los argumentos de un comando y provee métodos
  * convenientes para acceder y convertir dichos argumentos.
  */
@@ -22,6 +23,13 @@ public class Arguments {
      */
     public Arguments(String[] args) {
         this.args = args;
+    }
+
+    /**
+     * @since 1.1.0
+     */
+    public static Arguments of(String[] args) {
+       return new Arguments(args);
     }
 
     /**

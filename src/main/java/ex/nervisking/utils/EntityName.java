@@ -8,8 +8,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 
 public class EntityName {
-	
-	
+
 	public static String getDeathCause(Player player) {
         if (player.getLastDamageCause() != null) {
             EntityDamageEvent lastDamageEvent = player.getLastDamageCause();

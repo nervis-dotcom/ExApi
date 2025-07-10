@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 /**
+ * @since 1.0.0
  * Clase base para comandos personalizados.
  */
 public abstract class Command extends UtilsManagers implements BaseCommand {

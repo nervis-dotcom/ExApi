@@ -230,6 +230,14 @@ public class ItemBuilder {
 
     // ======= Static Helpers =======
 
+    public static ItemBuilder of(Material material) {
+        return new ItemBuilder(material);
+    }
+
+    public static ItemBuilder of(String material) {
+        return new ItemBuilder(material);
+    }
+
     private static ItemStack createErrorItem() {
         ItemStack errorItem = new ItemStack(Material.BARRIER);
         ItemMeta meta = errorItem.getItemMeta();
@@ -773,6 +781,7 @@ public class ItemBuilder {
         return this;
     }
 
+    @Deprecated(since = "1.0.0", forRemoval = true)
     public ItemBuilder setEnchantmentGlintOverride() {
         if (error.isStatus()) {
             return this;
@@ -1137,12 +1146,14 @@ public class ItemBuilder {
      * @since 1.1.0
      */
     public ItemBuilder setPlayer(Player player) {
+        if (error.isStatus()) {
+            return this;
+        }
         this.player = player;
         return this;
     }
 
     // ======= Finalizer =======
-
     public boolean isError() {
         boolean status = error.isStatus();
         if (error.isStatus()) {
@@ -1155,6 +1166,50 @@ public class ItemBuilder {
         item.setItemMeta(meta);
         error.setCause(null); // Reset error state after building
         return item;
+    }
+
+    /**
+     * @since 1.1.0
+     */
+    public boolean give() {
+        if (error.isStatus()) {
+            ExApi.getUtilsManagers().sendLogger(Logger.WARNING, "no se pudo construir el item.");
+            return false;
+        }
+        if (player == null) {
+            ExApi.getUtilsManagers().sendLogger(Logger.WARNING, "player es null.");
+            return false;
+        }
+        if (!player.isOnline()) {
+            ExApi.getUtilsManagers().sendLogger(Logger.WARNING, "player no online.");
+            return false;
+        }
+
+        Map<Integer, ItemStack> stackHashMap = player.getInventory().addItem(item);
+
+        if (!stackHashMap.isEmpty()) {
+            for (ItemStack leftover : stackHashMap.values()) {
+                player.getWorld().dropItem(player.getLocation(), leftover);
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * @since 1.1.0
+     */
+    public void give(String message) {
+        if (give()) {
+            ExApi.getUtilsManagers().sendMessage(player, message);
+        }
+    }
+
+    /**
+     * @since 1.1.0
+     */
+    public void drop(Location location) {
+        location.getWorld().dropItem(location, item);
     }
 
     /**

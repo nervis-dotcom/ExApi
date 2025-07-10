@@ -6,7 +6,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarFlag;
 import org.bukkit.boss.BarStyle;
-import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -17,10 +16,10 @@ import java.util.Set;
 /**
  * @since 1.1.0
  */
-public class PlayerBar {
+public class BossBar {
 
     private final UtilsManagers utilsManagers = ExApi.getUtilsManagers();
-    private BossBar bossBar;
+    private org.bukkit.boss.BossBar bossBar;
     private final Set<Player> players;
     private final Set<BarFlag> barFlags;
     private BukkitRunnable task;
@@ -34,7 +33,7 @@ public class PlayerBar {
     private String title;
     private boolean deleteAnDeath;
 
-    public PlayerBar() {
+    public BossBar() {
         this.running = false;
         this.players = new HashSet<>();
         this.barFlags = new HashSet<>();
@@ -46,7 +45,7 @@ public class PlayerBar {
         this.createBossBar();
     }
 
-    public PlayerBar(String title) {
+    public BossBar(String title) {
         this.running = false;
         this.players = new HashSet<>();
         this.barFlags = new HashSet<>();
@@ -58,7 +57,7 @@ public class PlayerBar {
         this.createBossBar();
     }
 
-    public PlayerBar(String title, BarColor barColor) {
+    public BossBar(String title, BarColor barColor) {
         this.running = false;
         this.players = new HashSet<>();
         this.barFlags = new HashSet<>();
@@ -70,7 +69,7 @@ public class PlayerBar {
         this.createBossBar();
     }
 
-    public PlayerBar(String title, BarStyle barStyle) {
+    public BossBar(String title, BarStyle barStyle) {
         this.running = false;
         this.players = new HashSet<>();
         this.barFlags = new HashSet<>();
@@ -82,7 +81,7 @@ public class PlayerBar {
         this.createBossBar();
     }
 
-    public PlayerBar(String title, BarColor barColor, BarStyle barStyle) {
+    public BossBar(String title, BarColor barColor, BarStyle barStyle) {
         this.running = false;
         this.players = new HashSet<>();
         this.barFlags = new HashSet<>();
@@ -94,7 +93,7 @@ public class PlayerBar {
         this.createBossBar();
     }
 
-    public PlayerBar(String title, BarColor barColor, BarStyle barStyle, BarFlag... flag) {
+    public BossBar(String title, BarColor barColor, BarStyle barStyle, BarFlag... flag) {
         this.running = false;
         this.players = new HashSet<>();
         this.barFlags = new HashSet<>();
@@ -107,40 +106,17 @@ public class PlayerBar {
         this.createBossBar();
     }
 
-    public PlayerBar start() {
-        if (running) {
-            utilsManagers.sendLogger(Logger.WARNING, "Ya hay una bossbar activa. No se puede iniciar otra.", true);
-            return this;
-        }
-
-        if (timeLeft <= 0) {
-            utilsManagers.sendLogger(Logger.WARNING, "No se puede iniciar la bossbar sin haber asignado un tiempo.", true);
-            return this;
-        }
-
-        if (players.isEmpty()) {
-            utilsManagers.sendLogger(Logger.WARNING, "No se puede iniciar la bossbar sin jugadores asignados.", true);
-            return this;
-        }
-
-        this.running = true;
-        this.totalTime = timeLeft;
-        this.initialTime = timeLeft; // 🔸 Guarda el tiempo inicial
-        startTimer();
-        return this;
-    }
-
-    public PlayerBar onFinish(Runnable runnable) {
+    public BossBar onFinish(Runnable runnable) {
         this.onFinish = runnable;
         return this;
     }
 
-    public PlayerBar setVisibleAll(boolean status) {
+    public BossBar setVisibleAll(boolean status) {
         this.bossBar.setVisible(status);
         return this;
     }
 
-    public PlayerBar addPlayers(Set<Player> newPlayers) {
+    public BossBar addPlayers(Set<Player> newPlayers) {
         this.players.addAll(newPlayers);
         for (Player player : newPlayers) {
             bossBar.addPlayer(player);
@@ -148,19 +124,19 @@ public class PlayerBar {
         return this;
     }
 
-    public PlayerBar addPlayer(Player player) {
+    public BossBar addPlayer(Player player) {
         this.players.add(player);
         bossBar.addPlayer(player);
         return this;
     }
 
-    public PlayerBar removePlayer(Player player) {
+    public BossBar removePlayer(Player player) {
         this.players.remove(player);
         this.bossBar.removePlayer(player);
         return this;
     }
 
-    public PlayerBar addTime(String seconds) {
+    public BossBar addTime(String seconds) {
         long millis;
         try {
             millis = utilsManagers.parseTime(seconds);
@@ -172,25 +148,25 @@ public class PlayerBar {
         return this;
     }
 
-    public PlayerBar setTitle(String title) {
+    public BossBar setTitle(String title) {
         this.title = title;
         this.bossBar.setTitle(utilsManagers.setColoredMessage(title));
         return this;
     }
 
-    public PlayerBar setColor(BarColor color) {
+    public BossBar setColor(BarColor color) {
         this.color = color;
         this.bossBar.setColor(color);
         return this;
     }
 
-    public PlayerBar setStyle(BarStyle style) {
+    public BossBar setStyle(BarStyle style) {
         this.style = style;
         this.bossBar.setStyle(style);
         return this;
     }
 
-    public PlayerBar setColor(String color) {
+    public BossBar setColor(String color) {
         BarColor barColor;
         try {
             barColor = BarColor.valueOf(color.toUpperCase());
@@ -202,7 +178,7 @@ public class PlayerBar {
         return setColor(barColor);
     }
 
-    public PlayerBar setStyle(String style) {
+    public BossBar setStyle(String style) {
         BarStyle barStyle;
         try {
             barStyle = BarStyle.valueOf(style.toUpperCase());
@@ -214,7 +190,7 @@ public class PlayerBar {
         return setStyle(barStyle);
     }
 
-    public PlayerBar addFlag(BarFlag flag) {
+    public BossBar addFlag(BarFlag flag) {
         this.barFlags.add(flag);
         if (bossBar != null) {
             this.bossBar.addFlag(flag);
@@ -222,7 +198,7 @@ public class PlayerBar {
         return this;
     }
 
-    public PlayerBar removeFlag(BarFlag flag) {
+    public BossBar removeFlag(BarFlag flag) {
         this.barFlags.remove(flag);
         if (bossBar != null) {
             this.bossBar.removeFlag(flag);
@@ -230,7 +206,7 @@ public class PlayerBar {
         return this;
     }
 
-    public PlayerBar clearFlags() {
+    public BossBar clearFlags() {
         this.barFlags.clear();
         if (bossBar != null) {
             for (BarFlag flag : BarFlag.values()) {
@@ -240,7 +216,7 @@ public class PlayerBar {
         return this;
     }
 
-    public PlayerBar removeAnDeath(boolean value) {
+    public BossBar removeAnDeath(boolean value) {
         this.deleteAnDeath = value;
         return this;
     }
@@ -251,7 +227,7 @@ public class PlayerBar {
         }
         // Usa los flags configurados:
         this.bossBar = Bukkit.createBossBar(title, color, style, barFlags.toArray(new BarFlag[0]));
-        this. bossBar.setVisible(true);
+        this.bossBar.setVisible(true);
         // Re-agrega los jugadores actuales
         for (Player p : players) {
             this.bossBar.addPlayer(p);
@@ -283,6 +259,28 @@ public class PlayerBar {
 
     public boolean iaVisible() {
         return this.bossBar.isVisible();
+    }
+
+    public void start() {
+        if (running) {
+            utilsManagers.sendLogger(Logger.WARNING, "Ya hay una bossbar activa. No se puede iniciar otra.", true);
+            return;
+        }
+
+        if (timeLeft <= 0) {
+            utilsManagers.sendLogger(Logger.WARNING, "No se puede iniciar la bossbar sin haber asignado un tiempo.", true);
+            return;
+        }
+
+        if (players.isEmpty()) {
+            utilsManagers.sendLogger(Logger.WARNING, "No se puede iniciar la bossbar sin jugadores asignados.", true);
+            return;
+        }
+
+        this.running = true;
+        this.totalTime = timeLeft;
+        this.initialTime = timeLeft; // 🔸 Guarda el tiempo inicial
+        startTimer();
     }
 
     public void pause() {
@@ -378,7 +376,7 @@ public class PlayerBar {
         return this.totalTime;
     }
 
-    public BossBar getBossBar() {
+    public org.bukkit.boss.BossBar getBossBar() {
         return this.bossBar;
     }
 

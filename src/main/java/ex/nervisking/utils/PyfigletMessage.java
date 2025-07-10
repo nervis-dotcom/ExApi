@@ -16,6 +16,7 @@ public class PyfigletMessage {
 
     private final UtilsManagers utilsManagers;
     private boolean status;
+    private boolean clear;
     private Color startColor;
     private Color endColor;
     private final Set<String> pluginsSet;
@@ -39,6 +40,7 @@ public class PyfigletMessage {
     public PyfigletMessage() {
         this.utilsManagers = ExApi.getUtilsManagers();
         this.status = true;
+        this.clear = false;
         this.startColor = CustomColor.YELLOW.getColor();
         this.endColor = CustomColor.WHITE.getColor();
         this.pluginsSet = new LinkedHashSet<>();
@@ -47,6 +49,11 @@ public class PyfigletMessage {
 
     public PyfigletMessage setStatus(boolean value) {
         this.status = value;
+        return this;
+    }
+
+    public PyfigletMessage setClear(boolean value) {
+        this.clear = value;
         return this;
     }
 
@@ -112,13 +119,15 @@ public class PyfigletMessage {
     }
 
     public PyfigletMessage clearInfo() {
+        if (clear) return this;
         this.infos.clear();
         return this;
     }
 
     public PyfigletMessage clear() {
-        this.infos.clear();
         this.pluginsSet.clear();
+        if (clear) return this;
+        this.infos.clear();
         return this;
     }
 
