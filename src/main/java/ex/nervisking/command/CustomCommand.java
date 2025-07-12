@@ -7,6 +7,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
+/**
+ * @since 1.0.0
+ * Clase base para comandos personalizados.
+ */
 public abstract class CustomCommand extends UtilsManagers implements BaseCommand {
 
     private final String name;
@@ -50,8 +54,48 @@ public abstract class CustomCommand extends UtilsManagers implements BaseCommand
         return hasPermission(sender.getCommandSender(), "command." + getName());
     }
 
+    public boolean hasSubPermission(Sender sender, String subPermission) {
+        return hasPermission(sender.getCommandSender(), "command." + getName() + "." + subPermission);
+    }
+
+    public void sendMessage(Sender sender, String message) {
+        this.sendMessage(sender.getCommandSender(), message);
+    }
+
+    public void sendMessage(Sender sender, String... message) {
+        this.sendMessage(sender.getCommandSender(), message);
+    }
+
+    public void sendMessage(Sender sender, List<String> messages) {
+        this.sendMessage(sender.getCommandSender(), messages);
+    }
+
+    // Ayudas y mensajes
     public void noPermission(Sender sender) {
-        sendMessage(sender.getCommandSender(), ExApi.getPermissionMessage());
+        sendMessage(sender, ExApi.getPermissionMessage());
+    }
+
+    public void neverConnected(Sender sender, String target) {
+        sendMessage(sender, ExApi.getNeverConnected().replace("%player%", target));
+    }
+
+    public void noConsole(Sender sender) {
+        sendMessage(sender, ExApi.getConsoleMessage());
+    }
+
+    public void invalidityAmount(Sender sender) {
+        sendMessage(sender, ExApi.getInvalidityAmountMessage());
+    }
+
+    public void noOnline(Sender sender, String target) {
+        sendMessage(sender, ExApi.getNoOnlineMessage().replace("%player%", target));
+    }
+
+    public void sendHelp(Sender sender, String... usages) {
+        sendMessage(sender, "%prefix% &eUso del comando:");
+        for (String usage : usages) {
+            sendMessage(sender, "&7 - /" + getName() + " " + usage);
+        }
     }
 
     public void help(Sender sender, String... args) {
@@ -59,25 +103,25 @@ public abstract class CustomCommand extends UtilsManagers implements BaseCommand
     }
 
     public void help(Sender sender, List<String> args) {
-        sendMessage(sender.getCommandSender(), ExApi.getUsage().replace("%command%", getName()));
+        sendMessage(sender, ExApi.getUsage().replace("%command%", getName()));
 
         if (args != null && !args.isEmpty()) {
-            sendMessage(sender.getCommandSender(), " ");
+            sendMessage(sender, " ");
             for (String arg : args) {
-                sendMessage(sender.getCommandSender(), arg);
+                sendMessage(sender, arg);
             }
-            sendMessage(sender.getCommandSender(), " ");
+            sendMessage(sender, " ");
         }
 
-        if (sender.getCommandSender().isOp() || hasOp(sender.getCommandSender())) {
+        if (sender.isOp() || hasOp(sender.getCommandSender())) {
             if (!getDescription().isEmpty()) {
-                sendMessage(sender.getCommandSender(), ExApi.getDescription().replace("%description%", getDescription()));
+                sendMessage(sender, ExApi.getDescription().replace("%description%", getDescription()));
             }
             if (!getAliases().isEmpty()) {
-                sendMessage(sender.getCommandSender(), ExApi.getAliases().replace("%aliases%", String.join(", ", getAliases())));
+                sendMessage(sender, ExApi.getAliases().replace("%aliases%", String.join(", ", getAliases())));
             }
             if (getPermission()) {
-                sendMessage(sender.getCommandSender(), ExApi.getPermissions().replace("%permission%",
+                sendMessage(sender, ExApi.getPermissions().replace("%permission%",
                         ExApi.getPlugin().getName().toLowerCase() + ".command." + getName()));
             }
         }
@@ -85,16 +129,17 @@ public abstract class CustomCommand extends UtilsManagers implements BaseCommand
 
     @Override
     public final boolean onCommand(@NotNull CommandSender sender, org.bukkit.command.@NotNull Command cmd, @NotNull String label, String @NotNull [] args) {
-        return this.onCommand(Sender.of(sender), Arguments.of(args));
+        this.onCommand(Sender.of(sender), Arguments.of(args));
+        return true;
     }
 
     @Override
     public final List<String> onTabComplete(@NotNull CommandSender sender, org.bukkit.command.@NotNull Command cmd, @NotNull String alias, String @NotNull [] args) {
-        return this.onTab(Sender.of(sender), Arguments.of(args), Completions.of());
+        return this.onTab(Sender.of(sender), Arguments.of(args), Completions.of()).asList();
     }
 
-    public abstract boolean onCommand(Sender sender, Arguments args);
-    public List<String> onTab(Sender sender, Arguments args, Completions completions) {
-        return completions.asList();
+    public abstract void onCommand(Sender sender, Arguments args);
+    public Completions onTab(Sender sender, Arguments args, Completions completions) {
+        return completions;
     }
 }

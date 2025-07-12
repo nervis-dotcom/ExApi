@@ -33,6 +33,13 @@ public class Arguments {
     }
 
     /**
+     * @since 1.1.0
+     */
+    public static Arguments of() {
+       return new Arguments(new String[0]);
+    }
+
+    /**
      * Obtiene la cantidad total de argumentos.
      *
      * @return Número total de argumentos.

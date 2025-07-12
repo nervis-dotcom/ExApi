@@ -14,7 +14,7 @@ import java.util.function.Consumer;
  */
 public class Sender {
 
-    public final UtilsManagers utilsManagers;
+    private final UtilsManagers utilsManagers;
     private final CommandSender commandSender;
 
     public Sender(CommandSender commandSender) {
@@ -46,6 +46,10 @@ public class Sender {
         if (isPlayer()) {
             action.accept(asPlayer());
         }
+    }
+
+    public boolean isOp() {
+        return commandSender.isOp();
     }
 
     public String getName() {

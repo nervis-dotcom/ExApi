@@ -10,29 +10,34 @@ import java.util.List;
  */
 public interface CommandExecutor extends BaseCommand {
 
+    @Override
     String getName();
 
+    @Override
     String getDescription();
 
+    @Override
     boolean getPermission();
 
+    @Override
     default List<String> getAliases() {
         return List.of();
     }
 
-    boolean onCommand(Sender sender, Arguments args);
+    void onCommand(Sender sender, Arguments args);
 
-    default List<String> onTab(Sender sender, Arguments args, Completions completions) {
-        return completions.asList();
+    default Completions onTab(Sender sender, Arguments args, Completions completions) {
+        return completions;
     }
 
     @Override
     default boolean onCommand(@NotNull CommandSender sender, org.bukkit.command.@NotNull Command command, @NotNull String label, String @NotNull [] args) {
-        return onCommand(Sender.of(sender), Arguments.of(args));
+        this.onCommand(Sender.of(sender), Arguments.of(args));
+        return true;
     }
 
     @Override
     default List<String> onTabComplete(@NotNull CommandSender sender, org.bukkit.command.@NotNull Command command, @NotNull String alias, String @NotNull [] args) {
-        return onTab(Sender.of(sender), Arguments.of(args), Completions.of());
+        return this.onTab(Sender.of(sender), Arguments.of(args), Completions.of()).asList();
     }
 }

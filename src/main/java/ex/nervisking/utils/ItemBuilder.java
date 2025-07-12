@@ -1215,6 +1215,15 @@ public class ItemBuilder {
     /**
      * @since 1.1.0
      */
+    public void drop() {
+        if (player != null) {
+            drop(player.getLocation());
+        }
+    }
+
+    /**
+     * @since 1.1.0
+     */
     private static class Error {
 
         private String cause;
