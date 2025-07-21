@@ -51,6 +51,14 @@ public abstract class MenuPages extends Menu {
         }
     }
 
+    public boolean hasBack() {
+        return this.getCurrentPage() > 1;
+    }
+
+    public boolean hasNext() {
+        return this.getTotalPages() > this.getCurrentPage();
+    }
+
     public boolean prevPage() {
         if (this.page == 0) {
             return false;

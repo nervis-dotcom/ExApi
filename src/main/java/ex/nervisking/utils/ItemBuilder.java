@@ -115,7 +115,7 @@ public class ItemBuilder {
 
     public ItemBuilder(String value, int count) {
         if (value == null) {
-            error.setCause("Material incorrecto: " + value);
+            error.setCause("Material incorrecto");
             this.item = createErrorItem();
             this.meta = item.getItemMeta();
             this.container = meta.getPersistentDataContainer();
@@ -149,38 +149,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder(String value) {
-        if (value == null || value.isEmpty()) {
-            error.setCause("Material incorrecto: " + value);
-            this.item = createErrorItem();
-            this.meta = item.getItemMeta();
-            this.container = meta.getPersistentDataContainer();
-            return;
-        }
-
-        Material material = getMaterial(value);
-        if (material != Material.AIR) {
-            this.item = new ItemStack(material, 1);
-        } else if (value.startsWith("ey") || value.startsWith("[texture]")) {
-            this.item = texture(value.startsWith("[texture]") ? value.substring("[texture]".length()).trim() : value, 1);
-        } else if (value.startsWith("[user]")) {
-            this.item = createSkullFromUsername(value.substring("[user]".length()).trim());
-        } else if (value.toLowerCase().startsWith("[random]")) {
-            RDMaterial type = RDMaterial.fromString(value.substring("[random]".length()).trim());
-            if (type != null) {
-                Material mat = type.getRandom();
-                this.item = new ItemStack(mat, 1);
-            } else {
-                this.item = createErrorItem();
-            }
-        } else {
-            this.item = createSkullFromUsername(value);
-        }
-
-        if (item.getItemMeta() == null)
-            throw new IllegalArgumentException("ItemMeta cannot be null.");
-
-        this.meta = item.getItemMeta();
-        this.container = meta.getPersistentDataContainer();
+        this(value, 1);
     }
 
     public ItemBuilder(Player player, String value) {
@@ -230,12 +199,52 @@ public class ItemBuilder {
 
     // ======= Static Helpers =======
 
+    public static ItemBuilder of(Player player, Material material, int count) {
+        return new ItemBuilder(player, material, count);
+    }
+
+    public static ItemBuilder of(Material material, int count) {
+        return new ItemBuilder(material, count);
+    }
+
+    public static ItemBuilder of(String material, int count) {
+        return new ItemBuilder(material, count);
+    }
+
+    public static ItemBuilder of(Player player, Material material) {
+        return new ItemBuilder(player, material);
+    }
+
     public static ItemBuilder of(Material material) {
         return new ItemBuilder(material);
     }
 
+    public static ItemBuilder of(ItemStack ItemStack) {
+        return new ItemBuilder(ItemStack);
+    }
+
+    public static ItemBuilder of(Player player, RDMaterial rdMaterial) {
+        return new ItemBuilder(player, rdMaterial);
+    }
+
+    public static ItemBuilder of(RDMaterial rdMaterial) {
+        return new ItemBuilder(rdMaterial);
+    }
+
     public static ItemBuilder of(String material) {
         return new ItemBuilder(material);
+    }
+
+    public static ItemBuilder of(Player player, String material) {
+        return new ItemBuilder(player, material);
+    }
+
+    public static ItemBuilder of(UUID uuid) {
+        return new ItemBuilder(uuid);
+    }
+
+    public static ItemBuilder of(Player player, UUID uuid) {
+        return new ItemBuilder(player, uuid);
     }
 
     private static ItemStack createErrorItem() {
@@ -249,6 +258,7 @@ public class ItemBuilder {
     }
 
     private static @NotNull Material getMaterial(String name) {
+        if (name == null || name.isEmpty()) return Material.AIR;
         try {
             return Material.valueOf(name.toUpperCase());
         } catch (IllegalArgumentException e) {
@@ -825,6 +835,22 @@ public class ItemBuilder {
         return this;
     }
 
+    /**
+     * @since 1.1.0
+     */
+    public ItemBuilder setGlintOverride() {
+        if (error.isStatus()) {
+            return this;
+        }
+        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
+            meta.setEnchantmentGlintOverride(true);
+        } else {
+            addEnchant(Enchantment.LURE, 1, true);
+            addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        }
+        return this;
+    }
+
     public ItemBuilder setGlider() {
         if (error.isStatus()) {
             return this;
@@ -1185,7 +1211,7 @@ public class ItemBuilder {
             return false;
         }
 
-        Map<Integer, ItemStack> stackHashMap = player.getInventory().addItem(item);
+        Map<Integer, ItemStack> stackHashMap = player.getInventory().addItem(this.build());
 
         if (!stackHashMap.isEmpty()) {
             for (ItemStack leftover : stackHashMap.values()) {
@@ -1209,7 +1235,7 @@ public class ItemBuilder {
      * @since 1.1.0
      */
     public void drop(Location location) {
-        location.getWorld().dropItem(location, item);
+        location.getWorld().dropItem(location, this.build());
     }
 
     /**

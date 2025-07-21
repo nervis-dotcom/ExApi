@@ -430,15 +430,6 @@ public class Utils {
         return cleaned;
     }
 
-    /**
-     * Verifica si un texto cumple con una expresión regular y longitud mínima/máxima.
-     *
-     * @param input         Texto a validar.
-     * @param regex         Expresión regular a usar (por defecto: solo letras, números, espacios, guion y guion bajo).
-     * @param minLength     Longitud mínima permitida (por defecto: 3).
-     * @param maxLength     Longitud máxima permitida (por defecto: 16).
-     * @return true si el texto es válido, false si no.
-     */
     public boolean isValidText(String input, String regex, Integer minLength, Integer maxLength) {
         if (input == null || input.isEmpty()) return false;
         // Valores por defecto
@@ -455,16 +446,22 @@ public class Utils {
         return !input.matches(pattern);
     }
 
-    /**
-     * Retorna el texto si es válido según los parámetros, o el valor por defecto si es null/vacío,
-     * o null si no pasa la validación.
-     *
-     * @param input         Texto a validar.
-     * @param regex         Expresión regular a usar (por defecto: solo letras, números, espacios, guion y guion bajo).
-     * @param minLength     Longitud mínima permitida (por defecto: 3).
-     * @param maxLength     Longitud máxima permitida (por defecto: 16).
-     * @return El texto válido o null si no cumple con la validación.
-     */
+    public boolean isValidText(String input) {
+        return this.isValidText(input, null, null, null);
+    }
+
+    public boolean isValidText(String input, String regex) {
+        return this.isValidText(input, regex, null, null);
+    }
+
+    public boolean isValidText(String input, String regex, Integer minLength) {
+        return this.isValidText(input, regex, minLength, null);
+    }
+
+    public boolean isValidText(String input, String regex, int maxLength) {
+        return this.isValidText(input, regex, null, maxLength);
+    }
+
     public String getValidatedText(String input, String regex, Integer minLength, Integer maxLength) {
         if (input == null || input.isEmpty()) return "";
 
@@ -473,6 +470,22 @@ public class Utils {
         int max = (maxLength != null) ? maxLength : 16;
 
         return (input.length() >= min && input.length() <= max && input.matches(pattern)) ? input : "";
+    }
+
+    public String getValidatedText(String input, String regex, Integer maxLength) {
+        return this.getValidatedText(input, regex, null, maxLength);
+    }
+
+    public String getValidatedText(String input, String regex, int minLength) {
+        return this.getValidatedText(input, regex, minLength, null);
+    }
+
+    public String getValidatedText(String input, String regex) {
+        return this.getValidatedText(input, regex, null, null);
+    }
+
+    public String getValidatedText(String input) {
+        return this.getValidatedText(input, null, null, null);
     }
 
     public String getLocationString(Location location) {

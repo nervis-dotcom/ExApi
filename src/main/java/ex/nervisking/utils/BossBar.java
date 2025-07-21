@@ -9,22 +9,21 @@ import org.bukkit.boss.BarStyle;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
- * @since 1.1.0
+ * @since 1.0.1
  */
 public class BossBar {
 
     private final UtilsManagers utilsManagers = ExApi.getUtilsManagers();
-    private org.bukkit.boss.BossBar bossBar;
-    private final Set<Player> players;
+    private final Set<UUID> players;
     private final Set<BarFlag> barFlags;
+    private org.bukkit.boss.BossBar bossBar;
     private BukkitRunnable task;
     private boolean running;
     private Runnable onFinish;
+    private BossBarTick onTick;
     private long initialTime = -1;
     private BarColor color;
     private BarStyle style;
@@ -34,51 +33,19 @@ public class BossBar {
     private boolean deleteAnDeath;
 
     public BossBar() {
-        this.running = false;
-        this.players = new HashSet<>();
-        this.barFlags = new HashSet<>();
-        this.title = " ";
-        this.color = BarColor.WHITE;
-        this.style = BarStyle.SOLID;
-        this.timeLeft = 0L;
-        this.totalTime = 0L;
-        this.createBossBar();
+        this(" ");
     }
 
     public BossBar(String title) {
-        this.running = false;
-        this.players = new HashSet<>();
-        this.barFlags = new HashSet<>();
-        this.title = title;
-        this.color = BarColor.WHITE;
-        this.style = BarStyle.SOLID;
-        this.timeLeft = 0L;
-        this.totalTime = 0L;
-        this.createBossBar();
+        this(title, BarColor.WHITE, BarStyle.SOLID);
     }
 
     public BossBar(String title, BarColor barColor) {
-        this.running = false;
-        this.players = new HashSet<>();
-        this.barFlags = new HashSet<>();
-        this.title = title;
-        this.color = barColor;
-        this.style = BarStyle.SOLID;
-        this.timeLeft = 0L;
-        this.totalTime = 0L;
-        this.createBossBar();
+        this(title, barColor, BarStyle.SOLID);
     }
 
     public BossBar(String title, BarStyle barStyle) {
-        this.running = false;
-        this.players = new HashSet<>();
-        this.barFlags = new HashSet<>();
-        this.title = title;
-        this.color = BarColor.WHITE;
-        this.style = barStyle;
-        this.timeLeft = 0L;
-        this.totalTime = 0L;
-        this.createBossBar();
+        this(title, BarColor.WHITE, barStyle);
     }
 
     public BossBar(String title, BarColor barColor, BarStyle barStyle) {
@@ -93,17 +60,24 @@ public class BossBar {
         this.createBossBar();
     }
 
-    public BossBar(String title, BarColor barColor, BarStyle barStyle, BarFlag... flag) {
-        this.running = false;
-        this.players = new HashSet<>();
-        this.barFlags = new HashSet<>();
-        this.title = title;
-        this.color = barColor;
-        this.style = barStyle;
-        this.barFlags.addAll(Arrays.asList(flag));
-        this.timeLeft = 0L;
-        this.totalTime = 0L;
-        this.createBossBar();
+    public static BossBar of() {
+        return new BossBar();
+    }
+
+    public static BossBar of(String title) {
+        return new BossBar(title);
+    }
+
+    public static BossBar of(String title, BarColor barColor) {
+        return new BossBar(title, barColor);
+    }
+
+    public static BossBar of(String title, BarStyle barStyle) {
+        return new BossBar(title, barStyle);
+    }
+
+    public static BossBar of(String title, BarColor barColor, BarStyle barStyle) {
+        return new BossBar(title, barColor, barStyle);
     }
 
     public BossBar onFinish(Runnable runnable) {
@@ -117,21 +91,30 @@ public class BossBar {
     }
 
     public BossBar addPlayers(Set<Player> newPlayers) {
-        this.players.addAll(newPlayers);
         for (Player player : newPlayers) {
+            UUID uuid = player.getUniqueId();
+            players.add(uuid);
             bossBar.addPlayer(player);
         }
         return this;
     }
 
     public BossBar addPlayer(Player player) {
-        this.players.add(player);
+        this.players.add(player.getUniqueId());
         bossBar.addPlayer(player);
         return this;
     }
 
+    public boolean hasPlayer(Player player) {
+        return this.players.contains(player.getUniqueId());
+    }
+
+    public boolean hasPlayer(UUID uuid) {
+        return this.players.contains(uuid);
+    }
+
     public BossBar removePlayer(Player player) {
-        this.players.remove(player);
+        this.players.remove(player.getUniqueId());
         this.bossBar.removePlayer(player);
         return this;
     }
@@ -141,7 +124,7 @@ public class BossBar {
         try {
             millis = utilsManagers.parseTime(seconds);
         } catch (NumberFormatException e) {
-            millis = 10 * 1000L;
+            millis = 1000L;
         }
         this.timeLeft += millis;
         this.totalTime = Math.max(this.totalTime, this.timeLeft);
@@ -192,7 +175,7 @@ public class BossBar {
 
     public BossBar addFlag(BarFlag flag) {
         this.barFlags.add(flag);
-        if (bossBar != null) {
+        if (this.bossBar != null) {
             this.bossBar.addFlag(flag);
         }
         return this;
@@ -221,34 +204,66 @@ public class BossBar {
         return this;
     }
 
+    @FunctionalInterface
+    public interface BossBarTick {
+        void run(BossBar bossBar);
+    }
+
+    public BossBar onTick(BossBarTick tick) {
+        this.onTick = tick;
+        return this;
+    }
+
     private void createBossBar() {
         if (bossBar != null) {
             this.bossBar.removeAll();
         }
-        // Usa los flags configurados:
         this.bossBar = Bukkit.createBossBar(title, color, style, barFlags.toArray(new BarFlag[0]));
         this.bossBar.setVisible(true);
-        // Re-agrega los jugadores actuales
-        for (Player p : players) {
-            this.bossBar.addPlayer(p);
+        for (UUID uuid : players) {
+            Player player = Bukkit.getPlayer(uuid);
+            if (player != null && player.isOnline()) {
+                this.bossBar.addPlayer(player);
+            }
         }
     }
 
     public void remove() {
         if (task != null) {
             task.cancel();
+            task = null;
         }
-        this.bossBar.removeAll();
-        this.players.clear();
+
+        if (bossBar != null) {
+            bossBar.removeAll();
+            bossBar.setVisible(false);
+        }
+
+        players.clear();
+        running = false;
+        this.timeLeft = 0L;
+        this.totalTime = 0L;
     }
 
     public void stop() {
         if (task != null) {
             this.task.cancel();
+            this.task = null;
         }
-        this.clearPlayers();
-        this.bossBar = null;
         this.running = false;
+        this.timeLeft = 0L;
+        this.totalTime = 0L;
+
+        if (this.bossBar != null) {
+            this.clearPlayers();
+            this.bossBar.removeAll();
+            this.bossBar.setVisible(false);
+        }
+    }
+
+    public void destroy() {
+        stop();
+        this.bossBar = null;
     }
 
     public void clearPlayers() {
@@ -280,7 +295,12 @@ public class BossBar {
         this.running = true;
         this.totalTime = timeLeft;
         this.initialTime = timeLeft; // 🔸 Guarda el tiempo inicial
-        startTimer();
+        if (bossBar == null) {
+            this.createBossBar();
+        } else {
+            this.bossBar.setVisible(true);
+        }
+        this.startTimer();
     }
 
     public void pause() {
@@ -348,16 +368,31 @@ public class BossBar {
                     return;
                 }
 
-                for (Player player : players) {
-                    if (!player.isOnline() || (deleteAnDeath && player.isDead())) {
-                        bossBar.removePlayer(player);
-                        players.remove(player);
+                var iterator = players.iterator();
+                while (iterator.hasNext()) {
+                    UUID uuid = iterator.next();
+                    Player player = Bukkit.getPlayer(uuid);
+
+                    if (player == null || !player.isOnline() || (deleteAnDeath && player.isDead())) {
+                        if (player != null) bossBar.removePlayer(player);
+                        iterator.remove();
                     }
                 }
 
-                double progress = Math.max(0, Math.min(1, timeLeft / (double) totalTime));
-                bossBar.setProgress(progress);
-                bossBar.setTitle(utilsManagers.setColoredMessage(title.replace("%time%", utilsManagers.formatTime(timeLeft))));
+                if (onTick != null) {
+                    try {
+                        onTick.run(BossBar.this);
+                    } catch (Exception e) {
+                        utilsManagers.sendLogger(Logger.WARNING, "Error en onTick de la bossbar: " + e.getMessage());
+                    }
+                }
+
+                if (bossBar != null) {
+                    double progress = Math.max(0, Math.min(1, timeLeft / (double) totalTime));
+                    bossBar.setProgress(progress);
+                    bossBar.setTitle(utilsManagers.setColoredMessage(title.replace("%time%", utilsManagers.formatTime(timeLeft, true))));
+                }
+
                 timeLeft -= 1000;
             }
         };
@@ -365,7 +400,9 @@ public class BossBar {
     }
 
     private boolean hasOnlinePlayers() {
-        return players.stream().anyMatch(Player::isOnline);
+        return players.stream()
+                .map(Bukkit::getPlayer)
+                .anyMatch(player -> player != null && player.isOnline());
     }
 
     public long getTimeLeft() {
@@ -388,7 +425,7 @@ public class BossBar {
         return this.task;
     }
 
-    public Set<Player> getPlayers() {
+    public Set<UUID> getPlayers() {
         return this.players;
     }
 }

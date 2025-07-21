@@ -54,6 +54,10 @@ public abstract class CustomCommand extends UtilsManagers implements BaseCommand
         return hasPermission(sender.getCommandSender(), "command." + getName());
     }
 
+    public boolean hasPermission(Sender sender, String permission) {
+        return hasPermission(sender.getCommandSender(), permission);
+    }
+
     public boolean hasSubPermission(Sender sender, String subPermission) {
         return hasPermission(sender.getCommandSender(), "command." + getName() + "." + subPermission);
     }

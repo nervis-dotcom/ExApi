@@ -36,6 +36,10 @@ public class DiscordWebhooks {
         this.fields = new ArrayList<>();
     }
 
+    public static DiscordWebhooks of(String discordHook) {
+        return new DiscordWebhooks(discordHook);
+    }
+
     public DiscordWebhooks setBotName(String name) {
         if (rootBuilder.length() > 0) rootBuilder.append(",");
         rootBuilder.append("\"username\": \"").append(escapeJson(name)).append("\"");

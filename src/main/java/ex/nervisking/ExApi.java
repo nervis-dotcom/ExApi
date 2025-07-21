@@ -23,6 +23,7 @@ import java.util.HashMap;
 public class ExApi {
 
     private static JavaPlugin plugin;
+    private static BungeeMessagingManager bungeeMessagingManager;
     private static UtilsManagers utilsManagers;
     private static Utils utils;
     public static ServerVersion serverVersion;
@@ -51,6 +52,7 @@ public class ExApi {
     public ExApi(JavaPlugin plugin, boolean menu) {
         this.setVersion();
         ExApi.plugin = plugin;
+        bungeeMessagingManager = new BungeeMessagingManager(plugin);
         utilsManagers = new UtilsManagers();
         utils = new Utils();
         sVar = plugin.getServer().getBukkitVersion().split("-")[0];
@@ -60,6 +62,10 @@ public class ExApi {
             registerMenuListener(plugin);
             isMenu = true;
         }
+    }
+
+    public static BungeeMessagingManager getBungeeMessagingManager() {
+        return bungeeMessagingManager;
     }
 
     public static String getPluginVersion() {
@@ -154,6 +160,11 @@ public class ExApi {
                 break;
             case "1.21.5":
                 serverVersion = ServerVersion.v1_21_R4;
+                break;
+            case "1.21.6":
+            case "1.21.7":
+            case "1.21.8":
+                serverVersion = ServerVersion.v1_21_R5;
                 break;
             default:
                 serverVersion = ServerVersion.valueOf(packageName.replace("org.bukkit.craftbukkit.", ""));

@@ -3,7 +3,6 @@ package ex.nervisking.command;
 import ex.nervisking.ExApi;
 import ex.nervisking.utils.UtilsManagers;
 import org.bukkit.command.*;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -25,23 +24,19 @@ public abstract class Command extends UtilsManagers implements BaseCommand {
 
     @Override
     public List<String> getAliases() {
-        return Collections.emptyList();
+        return List.of();
     }
 
-    public boolean hasPermission(CommandSender sender) {
-        return hasPermission(sender, "command." + getName());
+    public boolean hasPermission(Sender sender) {
+        return hasPermission(sender.getCommandSender(), "command." + getName());
     }
 
-    public boolean hasSubPermission(CommandSender sender, String subPermission) {
-        return hasPermission(sender, "command." + getName() + "." + subPermission);
+    public boolean hasPermission(Sender sender, String permission) {
+        return hasPermission(sender.getCommandSender(), permission);
     }
 
-    public boolean isPlayer(CommandSender sender) {
-        return sender instanceof Player;
-    }
-
-    public Player asPlayer(CommandSender sender) {
-        return (sender instanceof Player player) ? player : null;
+    public boolean hasSubPermission(Sender sender, String permission) {
+        return hasPermission(sender.getCommandSender(), "command." + getName() + "." + permission);
     }
 
     public void noPermission(Sender sender) {

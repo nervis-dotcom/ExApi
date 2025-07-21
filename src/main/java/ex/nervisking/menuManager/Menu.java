@@ -22,12 +22,12 @@ public abstract class Menu extends UtilsManagers implements InventoryHolder {
     protected PlayerMenuUtility playerMenuUtility;
     protected Player player;
     protected Inventory inventory;
-    protected ItemStack FILLER_GLASS;
+    protected ItemStack FILLER;
     protected int pages = 1;
     protected int total_pages = 1;
 
     public Menu(PlayerMenuUtility playerMenuUtility) {
-        this.FILLER_GLASS = new ItemBuilder(ItemBuilder.GRAY).setHideTooltip().build();
+        this.FILLER = new ItemBuilder(ItemBuilder.GRAY).setHideTooltip().build();
         this.playerMenuUtility = playerMenuUtility;
         this.player = playerMenuUtility.getOwner();
     }
@@ -48,7 +48,8 @@ public abstract class Menu extends UtilsManagers implements InventoryHolder {
 
     public abstract void handleMenu(InventoryClickEvent event) throws MenuManagerNotSetupException, MenuManagerException;
 
-    public void handleMenuClose() {}
+    public void handleMenuClose() {
+    }
 
     public boolean isCancelClose() {
         return false;
@@ -75,7 +76,6 @@ public abstract class Menu extends UtilsManagers implements InventoryHolder {
         for (int i = 0; i < this.inventory.getSize(); ++i) {
             this.inventory.setItem(i, null);
         }
-
         this.setMenuItems();
     }
 
@@ -92,20 +92,19 @@ public abstract class Menu extends UtilsManagers implements InventoryHolder {
         return this.inventory;
     }
 
-    public void setFillerGlass() {
+    public void setItem() {
         for (int i = 0; i < this.inventory.getSize(); ++i) {
             if (this.inventory.getItem(i) == null) {
-                this.inventory.setItem(i, this.FILLER_GLASS);
+                this.inventory.setItem(i, this.FILLER);
             }
         }
-
     }
 
-    public void setFILLER_GLASS(ItemBuilder itemBuilder) {
-        this.FILLER_GLASS = itemBuilder.build();
+    public void setItem(ItemBuilder itemBuilder) {
+        this.FILLER = itemBuilder.build();
     }
 
-    public void setFillerGlass(ItemStack itemStack) {
+    public void setItem(ItemStack itemStack) {
         for (int i = 0; i < this.inventory.getSize(); ++i) {
             if (this.inventory.getItem(i) == null) {
                 this.inventory.setItem(i, itemStack);
@@ -113,40 +112,36 @@ public abstract class Menu extends UtilsManagers implements InventoryHolder {
         }
     }
 
-    public void setFillerGlass(ItemStack itemStack, List<Integer> list) {
+    public void setItem(ItemStack itemStack, List<Integer> list) {
         for (int i : list) {
             this.inventory.setItem(i, itemStack);
         }
     }
 
-    public void setFillerGlass(ItemBuilder itemBuilder, List<Integer> list) {
+    public void setItem(ItemBuilder itemBuilder, List<Integer> list) {
         for (int i : list) {
             this.inventory.setItem(i, itemBuilder.build());
         }
     }
 
-    public void setFillerGlass(ItemStack itemStack, Integer... list) {
+    public void setItem(ItemStack itemStack, Integer... list) {
         for (int i : list) {
             this.inventory.setItem(i, itemStack);
         }
     }
 
-    public void setFillerGlass(ItemBuilder itemBuilder, Integer... list) {
+    public void setItem(ItemBuilder itemBuilder, Integer... list) {
         for (int i : list) {
             this.inventory.setItem(i, itemBuilder.build());
         }
     }
 
-    public void addItem(int slot, ItemStack itemStack) {
-        if (slot >= 0 && slot < this.inventory.getSize()) {
-            this.inventory.setItem(slot, itemStack);
-        }
+    public void setItem(int slot, ItemStack itemStack) {
+        this.inventory.setItem(slot, itemStack);
     }
 
-    public void addItem(int slot, ItemBuilder itemBuilder) {
-        if (slot >= 0 && slot < this.inventory.getSize()) {
-            this.inventory.setItem(slot, itemBuilder.build());
-        }
+    public void setItem(int slot, ItemBuilder itemBuilder) {
+        this.inventory.setItem(slot, itemBuilder.build());
     }
 
     public String getSoundForText() {

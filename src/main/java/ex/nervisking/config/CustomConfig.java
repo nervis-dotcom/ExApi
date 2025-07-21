@@ -11,6 +11,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -123,20 +124,7 @@ public class CustomConfig {
                 }
             }
         }
-//        // Atributos
-//        List<Attribute> attributes = new ArrayList<>();
-//        if (config.isConfigurationSection(path + ".attributes")) {
-//            ConfigurationSection attrSection = config.getConfigurationSection(path + ".attributes");
-//            if (attrSection != null) {
-//                for (String attr : attrSection.getKeys(false)) {
-//                    String base = path + ".attributes." + attr;
-//                    double amount = config.getDouble(base + ".amount");
-//                    String operation = config.getString(base + ".operation", "ADD_NUMBER");
-//                    String slot = config.getString(base + ".slot", "HAND");
-//                    attributes.add(new Attribute(attr, amount, operation, slot));
-//                }
-//            }
-//        }
+
         int durability = config.getInt(path + ".durability", -1);
         int maxDamage = config.getInt(path + ".max-durability", -1);
         List<String> flags = config.getStringList(path + ".flags");
@@ -157,7 +145,7 @@ public class CustomConfig {
         }
 
         // Crear item
-        ItemBuilder item = new ItemBuilder(id)
+        ItemBuilder item = ItemBuilder.of(id)
                 .setName(name)
                 .setLore(lore)
                 .setAmount(amount)
@@ -171,11 +159,13 @@ public class CustomConfig {
         if (durability != -1) item.setDamage(durability);
         if (color != null) item.setColor(color);
 
-        //for (AttributeData attr : attributes) item.addAttribute(attr);
-
         // Otros componentes
         item.setHideTooltip(config.getBoolean(path + ".hide-tooltip", false));
-        item.setRarity(config.getString(path + ".rarity", "COMMON"));
+
+        String rarity = config.getString(path + ".rarity");
+        if (rarity != null) {
+            item.setRarity(rarity);
+        }
 
 
         if (config.isConfigurationSection(path + ".item-model")) {
@@ -184,7 +174,7 @@ public class CustomConfig {
                 item.setItemModel(model.getString("namespace"), model.getString("key"));
             }
         }
-        //item.setBookEnchant(config.getBoolean(path + ".BookEnchant", false));
+
         int maxStack = config.getInt(path + ".max-stack", -1);
         if (maxStack != -1) {
             item.setMaxStackSize(maxStack);
@@ -205,25 +195,28 @@ public class CustomConfig {
             item.setTrimByName(pattern, material);
         }
 
-//        // PotionEffects
-//        if (config.isList(path + ".PotionEffects")) {
-//            List<String> effects = config.getStringList(path + ".PotionEffects");
-//            for (String line : effects) {
-//                String[] parts = line.split(";");
-//                if (parts.length >= 2) {
-//                    String type = parts[0];
-//                    int duration = Integer.parseInt(parts[1]);
-//                    int amplifier = parts.length >= 3 ? Integer.parseInt(parts[2]) : 0;
-//                    item.setPotionEffects(type, duration, amplifier);
-//                }
-//            }
-//        }
+//        if(config.contains(path+".custom_model_component_data")) {
+//            List<String> cFlags = new ArrayList<>();
+//            List<String> cFloats = new ArrayList<>();
+//            List<String> cColors = new ArrayList<>();
+//            List<String> cStrings = new ArrayList<>();
 //
-//        // ComponentFlags / ComponentStrings / ComponentFloats / ComponentColors
-//        item.setComponentFlags(config.getStringList(path + ".ComponentFlags"));
-//        item.setComponentStrings(config.getConfigurationSection(path + ".ComponentStrings"));
-//        item.setComponentFloats(config.getConfigurationSection(path + ".ComponentFloats"));
-//        item.setComponentColors(config.getConfigurationSection(path + ".ComponentColors"));
+//            if(config.contains(path+".custom_model_component_data.flags")) {
+//                cFlags = config.getStringList(path+".custom_model_component_data.flags");
+//            }
+//            if(config.contains(path+".custom_model_component_data.floats")) {
+//                cFloats = config.getStringList(path+".custom_model_component_data.floats");
+//            }
+//            if(config.contains(path+".custom_model_component_data.colors")) {
+//                cColors = config.getStringList(path+".custom_model_component_data.colors");
+//            }
+//            if(config.contains(path+".custom_model_component_data.strings")) {
+//                cStrings = config.getStringList(path+".custom_model_component_data.strings");
+//            }
+//
+//            item.setComponentFloats(cFloats).setComponentColorsByName(cColors).setComponentStrings(cStrings);
+//        }
+
         return item;
     }
 

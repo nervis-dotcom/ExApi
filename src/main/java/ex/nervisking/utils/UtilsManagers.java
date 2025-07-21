@@ -506,15 +506,21 @@ public class UtilsManagers extends Utils {
     public void teleport(Player player, String actionLine) {
         if (actionLine != null && !actionLine.isEmpty()) {
             String[] sep = actionLine.split(";");
-            if (sep.length > 6) {
+            if (sep.length >= 4) {
                 World world = Bukkit.getWorld(sep[0]);
                 double x = Double.parseDouble(sep[1]);
                 double y = Double.parseDouble(sep[2]);
                 double z = Double.parseDouble(sep[3]);
-                float yaw = Float.parseFloat(sep[4]);
-                float pitch = Float.parseFloat(sep[5]);
+                float yaw = 0;
+                float pitch = 0;
+                if (sep.length >= 6) {
+                    yaw = Float.parseFloat(sep[4]);
+                    pitch = Float.parseFloat(sep[5]);
+                }
                 Location l = new Location(world, x, y, z, yaw, pitch);
                 player.teleport(l);
+            } else {
+                sendLogger(Logger.ERROR, "Se necesitan al menos 4 partes para teletransportar al jugador.");
             }
         }
     }
@@ -685,12 +691,14 @@ public class UtilsManagers extends Utils {
         }
     }
 
+    @Deprecated(since = "1.0.2")
     public void sendSpigotSendMessage(Player player, String message){
         if (message == null || message.isEmpty()) return;
         TextComponent mainComponent = new TextComponent(TextComponent.fromLegacyText(setPlaceholders(player, message)));
         player.spigot().sendMessage(mainComponent);
     }
 
+    @Deprecated(since = "1.0.2")
     public void sendSpigotSendMessage(Player player, TextComponent mainComponent){
         if (mainComponent == null) return;
         player.spigot().sendMessage(mainComponent);
@@ -700,13 +708,8 @@ public class UtilsManagers extends Utils {
      * Kicks a player with a colored message.
      *
      * @param player  Player to kick
-     * @param message Message to send on kick
+     * @param messages Message to send on kick
      */
-    public void kickPlayer(Player player, String message) {
-        if (message == null || message.isEmpty()) return;
-        player.kickPlayer(setColoredMessage(message));
-    }
-
     public void kickPlayer(Player player, String... messages) {
         if (messages == null || messages.length == 0) return;
         String message = String.join("\n", messages);
@@ -738,11 +741,6 @@ public class UtilsManagers extends Utils {
         for (String message : messages) {
             consoleMessage(logger.getName() + message);
         }
-    }
-
-    public void sendLogger(Logger logger, String message) {
-        if (message == null || message.isEmpty()) return;
-        consoleMessage(getPrefix() + logger.getName() + message);
     }
 
     public void sendLogger(Logger logger, String message, boolean online) {
@@ -818,6 +816,10 @@ public class UtilsManagers extends Utils {
         }
 
         return null;
+    }
+
+    public void sendToServer(Player player,String actionLine) {
+        ExApi.getBungeeMessagingManager().sendToServer(player, actionLine);
     }
 
     public void getKnockback(Player player, String message) {

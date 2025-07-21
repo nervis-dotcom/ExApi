@@ -76,8 +76,8 @@ public abstract class FolderConfigLoand {
 
     private void create() {
         for (Configurate files : createConfigFiles()) {
-            CustomConfig configFile = new CustomConfig(files.fileName(), files.folderName(), false);
-            configFile.registerConfig();
+            CustomConfig config = new CustomConfig(files.fileName(), files.folderName() == null ? folderName : files.folderName(), false);
+            config.registerConfig();
         }
     }
 

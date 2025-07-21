@@ -26,6 +26,14 @@ public class JSONMessage {
         this.root = new TextComponent("");
     }
 
+    public static JSONMessage of(Player player) {
+        return new JSONMessage(player);
+    }
+
+    public static JSONMessage of() {
+        return new JSONMessage();
+    }
+
     /**
      * Enum para definir las acciones que se pueden realizar con los mensajes JSON.
      * Cada acción corresponde a un tipo de evento de clic en el mensaje.

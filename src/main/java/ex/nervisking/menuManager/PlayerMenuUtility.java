@@ -1,6 +1,7 @@
 package ex.nervisking.menuManager;
 
 import java.util.Stack;
+
 import org.bukkit.entity.Player;
 
 public class PlayerMenuUtility {

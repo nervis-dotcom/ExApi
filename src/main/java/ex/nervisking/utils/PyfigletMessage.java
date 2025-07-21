@@ -47,6 +47,10 @@ public class PyfigletMessage {
         this.infos = new ArrayList<>();
     }
 
+    public static PyfigletMessage of() {
+        return new PyfigletMessage();
+    }
+
     public PyfigletMessage setStatus(boolean value) {
         this.status = value;
         return this;
@@ -136,6 +140,7 @@ public class PyfigletMessage {
         for (String line : pyfiglet) {
             line = CustomColor.applyGradient(line.replace("%server%", ExApi.getsVar())
                     .replace("%version%", ExApi.getPluginVersion())
+                    .replace("%var%", ExApi.getPluginDescriptionFile().getVersion())
                     .replace("%autor%", ExApi.getPluginAuthor())
                     .replace("%status%", status ? "Iniciado" : "Apagado")
                     .replace("%plugin%", ExApi.getPlugin().getName()), startColor, endColor);

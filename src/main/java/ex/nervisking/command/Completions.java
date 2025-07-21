@@ -69,6 +69,15 @@ public class Completions {
         }
     }
 
+    public void add(Set<String> values) {
+        if (values == null) return;
+        for (String val : values) {
+            if (val != null && !val.isBlank()) {
+                completions.add(val.toLowerCase());
+            }
+        }
+    }
+
     public void add(Integer... values) {
         if (values == null) return;
         for (Integer val : values) {

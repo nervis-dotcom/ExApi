@@ -11,7 +11,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 
-@SuppressWarnings("CallToPrintStackTrace")
 public class CommandManager {
 
     private final JavaPlugin plugin;

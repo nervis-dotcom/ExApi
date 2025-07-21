@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * @since 1.0.0
+ */
 public enum CustomColor {
 
     BLACK("&0", "#000000"),
@@ -23,7 +26,6 @@ public enum CustomColor {
     LIGHT_PURPLE("&d", "#FF55FF"),
     YELLOW("&e", "#FFFF55"),
     WHITE("&f", "#FFFFFF"),
-
     RANDOM("&r", null) {
         @Override
         public Color getColor() {
@@ -38,6 +40,30 @@ public enum CustomColor {
         @Override
         public String getCode() {
             return "&r";
+        }
+    },
+
+    /**
+     * @since 1.0.2
+     */
+    PURE_RANDOM("&z", null) {
+        @Override
+        public Color getColor() {
+            int r = ThreadLocalRandom.current().nextInt(256);
+            int g = ThreadLocalRandom.current().nextInt(256);
+            int b = ThreadLocalRandom.current().nextInt(256);
+            return new Color(r, g, b);
+        }
+
+        @Override
+        public String getHex() {
+            Color color = getColor();
+            return String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
+        }
+
+        @Override
+        public String getCode() {
+            return "&z"; // Código personalizado para distinguirlo
         }
     };
 
@@ -113,6 +139,20 @@ public enum CustomColor {
         }
 
         return gradientText.toString();
+    }
+
+    /**
+     * Aplica un gradiente entre dos colores completamente aleatorios (RGB puro).
+     * @since 1.0.2
+     */
+    public static String applyPureGradientRandom(String text) {
+        Color start = PURE_RANDOM.getColor();
+        Color end = PURE_RANDOM.getColor();
+        // Evitar que ambos colores sean exactamente iguales
+        while (start.equals(end)) {
+            end = PURE_RANDOM.getColor();
+        }
+        return applyGradient(text, start, end);
     }
 
     public static String toMinecraftHexColor(String hex) {

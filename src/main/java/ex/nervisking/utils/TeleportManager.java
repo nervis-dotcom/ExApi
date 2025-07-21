@@ -33,6 +33,16 @@ public class TeleportManager {
     private static final Set<UUID> teleportingPlayers = new HashSet<>();
     private TeleportAnimation teleportAnimation;
 
+    public TeleportManager(Player player, Location destination) {
+        this.player = player;
+        this.destination = destination;
+        this.utilsManagers = ExApi.getUtilsManagers();
+    }
+
+    public static TeleportManager of(Player player, Location destination) {
+        return new TeleportManager(player, destination);
+    }
+
     /**
      * Establece la animación de teletransporte.
      * @param animation Tipo de animación.
@@ -63,12 +73,6 @@ public class TeleportManager {
             }
         }
         return this;
-    }
-
-    public TeleportManager(Player player, Location destination) {
-        this.player = player;
-        this.destination = destination;
-        this.utilsManagers = ExApi.getUtilsManagers();
     }
 
     public TeleportManager setMessage(String message) {

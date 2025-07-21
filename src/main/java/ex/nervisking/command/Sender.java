@@ -2,8 +2,13 @@ package ex.nervisking.command;
 
 import ex.nervisking.ExApi;
 import ex.nervisking.utils.UtilsManagers;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.PlayerInventory;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,7 +27,8 @@ public class Sender {
         this.utilsManagers = ExApi.getUtilsManagers();
     }
 
-    public static Sender of(CommandSender sender) {
+    @Contract(value = "_ -> new", pure = true)
+    public static @NotNull Sender of(CommandSender sender) {
         return new Sender(sender);
     }
 
@@ -48,12 +54,28 @@ public class Sender {
         }
     }
 
+    public boolean equals(Player player) {
+        return commandSender instanceof Player p && p.equals(player);
+    }
+
     public boolean isOp() {
         return commandSender.isOp();
     }
 
     public String getName() {
-        return commandSender.getName();
+        return isPlayer() ? asPlayer().getName() : commandSender.getName();
+    }
+
+    public Location getLocation() {
+        return isPlayer() ? asPlayer().getLocation() : null;
+    }
+
+    public PlayerInventory getInventory() {
+        return isPlayer() ? asPlayer().getInventory() : null;
+    }
+
+    public World getWorld() {
+        return isPlayer() ? asPlayer().getWorld() : null;
     }
 
     public UUID getUniqueId() {
@@ -74,5 +96,9 @@ public class Sender {
 
     public boolean hasPermission(String permission) {
         return utilsManagers.hasPermission(commandSender, permission);
+    }
+
+    public boolean hasSubPermission(String permission) {
+        return utilsManagers.hasPermission(commandSender, "command." + getName() + "." + permission);
     }
 }

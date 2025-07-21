@@ -120,6 +120,10 @@ public class Arguments {
         }
     }
 
+    public int getInt(int index) throws NumberFormatException{
+        return Integer.parseInt(get(index));
+    }
+
     /**
      * Intenta convertir el argumento en el índice dado a double.
      *
@@ -130,6 +134,40 @@ public class Arguments {
     public double getDouble(int index, double def) {
         try {
             return Double.parseDouble(get(index));
+        } catch (Exception e) {
+            return def;
+        }
+    }
+
+    public double getDouble(int index) throws NumberFormatException{
+        return Double.parseDouble(get(index));
+    }
+
+    /**
+     * Intenta convertir el argumento en el índice dado a double.
+     *
+     * @param index Índice del argumento.
+     * @param def Valor por defecto si no se puede convertir.
+     * @return El valor long del argumento o el valor por defecto.
+     */
+    public long getLong(int index, long def) {
+        try {
+            return Long.parseLong(get(index));
+        } catch (Exception e) {
+            return def;
+        }
+    }
+
+    /**
+     * Intenta convertir el argumento en el índice dado a double.
+     *
+     * @param index Índice del argumento.
+     * @param def Valor por defecto si no se puede convertir.
+     * @return El valor float del argumento o el valor por defecto.
+     */
+    public float getFloat(int index, float def) {
+        try {
+            return Float.parseFloat(get(index)); // ← corrección aquí
         } catch (Exception e) {
             return def;
         }
@@ -185,6 +223,21 @@ public class Arguments {
     public boolean isInt(int index) {
         try {
             Integer.parseInt(get(index));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Verifica si el argumento en el índice indicado es un entero válido.
+     *
+     * @param index Índice del argumento.
+     * @return true si es un entero válido, false en caso contrario.
+     */
+    public boolean isLong(int index) {
+        try {
+            Long.parseLong(get(index));
             return true;
         } catch (Exception e) {
             return false;
@@ -288,7 +341,7 @@ public class Arguments {
      * @param required la cantidad mínima de argumentos necesarios
      * @return true si hay al menos {@code required} argumentos, false en caso contrario
      */
-    public boolean hasMinArgs(int required) {
+    public boolean hasMaxArgs(int required) {
         return args.length >= required;
     }
 
@@ -298,7 +351,7 @@ public class Arguments {
      * @param required la cantidad mínima de argumentos necesarios
      * @return true si hay al menos {@code required} argumentos, false en caso contrario
      */
-    public boolean hasMaxArgs(int required) {
+    public boolean hasMinArgs(int required) {
         return args.length <= required;
     }
 
