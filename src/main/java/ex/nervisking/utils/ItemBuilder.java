@@ -350,6 +350,53 @@ public class ItemBuilder {
 
     // ======= Modifiers =======
 
+    private final Map<String, String> customVariables = new HashMap<>();
+
+    public ItemBuilder setVariable(String key, String value) {
+        if (key != null && value != null) {
+            customVariables.put(key, value);
+        }
+        return this;
+    }
+
+    public ItemBuilder replaceVariables() {
+        if (error.isStatus()) return this;
+
+        // Reemplazar nombre
+        if (meta.hasDisplayName()) {
+            meta.setDisplayName(parse(meta.getDisplayName()));
+        }
+
+        // Reemplazar lore
+        if (meta.hasLore()) {
+            List<String> newLore = new ArrayList<>();
+            for (String line : Objects.requireNonNull(meta.getLore())) {
+                newLore.add(parse(line));
+            }
+            meta.setLore(newLore);
+        }
+
+        customVariables.clear();
+        return this;
+    }
+
+    private String parse(String text) {
+        if (text == null || text.isEmpty()) return "";
+
+        // Reemplazo de variables personalizadas
+        for (Map.Entry<String, String> entry : customVariables.entrySet()) {
+            text = text.replace(entry.getKey(), entry.getValue());
+        }
+
+        // PlaceholderAPI (si hay player)
+        if (player != null) {
+           return ExApi.getUtils().setPlaceholders(player, text);
+        }
+
+        // Colores
+        return ExApi.getUtils().setColoredMessage(text);
+    }
+
     public ItemBuilder setType(Material material) {
         if (error.isStatus() || material == null || material.isEmpty()) {
             return this;
@@ -380,11 +427,7 @@ public class ItemBuilder {
         if (error.isStatus() || name == null || name.isEmpty()) {
             return this;
         }
-        if (player != null) {
-            meta.setDisplayName(ExApi.getUtils().setPlaceholders(player, name));
-        } else {
-            meta.setDisplayName(ExApi.getUtils().setColoredMessage(name));
-        }
+        meta.setDisplayName(parse(name));
         return this;
     }
 
@@ -394,11 +437,7 @@ public class ItemBuilder {
         }
         List<String> currentLore = new ArrayList<>();
         for (String line : lore) {
-            if (player != null) {
-                currentLore.add(ExApi.getUtils().setPlaceholders(player, line));
-            } else {
-                currentLore.add(ExApi.getUtils().setColoredMessage(line));
-            }
+            currentLore.add(parse(line));
         }
         meta.setLore(currentLore);
 
@@ -411,11 +450,7 @@ public class ItemBuilder {
         }
         List<String> coloredLore = new ArrayList<>();
         for (String line : lore) {
-            if (player != null) {
-                coloredLore.add(ExApi.getUtils().setPlaceholders(player, line));
-            } else {
-                coloredLore.add(ExApi.getUtils().setColoredMessage(line));
-            }
+            coloredLore.add(parse(line));
         }
         meta.setLore(coloredLore);
         return this;
@@ -427,11 +462,7 @@ public class ItemBuilder {
         }
         List<String> currentLore = meta.hasLore() ? new ArrayList<>(Objects.requireNonNull(meta.getLore())) : new ArrayList<>();
         for (String line : lore) {
-            if (player != null) {
-                currentLore.add(ExApi.getUtils().setPlaceholders(player, line));
-            } else {
-                currentLore.add(ExApi.getUtils().setColoredMessage(line));
-            }
+            currentLore.add(parse(line));
         }
         meta.setLore(currentLore);
         return this;
@@ -443,11 +474,7 @@ public class ItemBuilder {
         }
         List<String> currentLore = meta.hasLore() ? new ArrayList<>(Objects.requireNonNull(meta.getLore())) : new ArrayList<>();
         for (String line : lore) {
-            if (player != null) {
-                currentLore.add(ExApi.getUtils().setPlaceholders(player, line));
-            } else {
-                currentLore.add(ExApi.getUtils().setColoredMessage(line));
-            }
+            currentLore.add(parse(line));
         }
         meta.setLore(currentLore);
         return this;
@@ -665,10 +692,11 @@ public class ItemBuilder {
         return this;
     }
 
-    private ItemBuilder Skull(String user) {
+    public ItemBuilder setSkull(String user) {
         if (error.isStatus()) {
             return this;
         }
+
         if (meta instanceof SkullMeta skullMeta) {
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(user);
             if (offlinePlayer.hasPlayedBefore()) {
@@ -678,14 +706,16 @@ public class ItemBuilder {
                     return setSkullTexture(OFFLINE);
                 }
             }
+            item.setItemMeta(skullMeta);
         }
         return this;
     }
 
-    private ItemBuilder Skull(UUID uuid) {
+    public ItemBuilder setSkull(UUID uuid) {
         if (error.isStatus()) {
             return this;
         }
+
         if (meta instanceof SkullMeta skullMeta) {
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
             if (offlinePlayer.hasPlayedBefore()) {
@@ -695,6 +725,7 @@ public class ItemBuilder {
                     return setSkullTexture(OFFLINE);
                 }
             }
+            item.setItemMeta(skullMeta);
         }
         return this;
     }
@@ -820,7 +851,7 @@ public class ItemBuilder {
     }
 
     /**
-     * @since 1.1.0
+     * @since 1.0.1
      */
     public ItemBuilder setGlintOverride(boolean value) {
         if (error.isStatus()) {
@@ -836,7 +867,7 @@ public class ItemBuilder {
     }
 
     /**
-     * @since 1.1.0
+     * @since 1.0.1
      */
     public ItemBuilder setGlintOverride() {
         if (error.isStatus()) {
@@ -1169,7 +1200,7 @@ public class ItemBuilder {
     }
 
     /**
-     * @since 1.1.0
+     * @since 1.0.1
      */
     public ItemBuilder setPlayer(Player player) {
         if (error.isStatus()) {
@@ -1188,6 +1219,16 @@ public class ItemBuilder {
         return status;
     }
 
+    /**
+     * @since 1.0.2
+     */
+    public ItemBuilder clearError() {
+        if (error.isStatus()) {
+            error.setCause(null); // Reset error state after checking
+        }
+        return this;
+    }
+
     public ItemStack build() {
         item.setItemMeta(meta);
         error.setCause(null); // Reset error state after building
@@ -1195,7 +1236,7 @@ public class ItemBuilder {
     }
 
     /**
-     * @since 1.1.0
+     * @since 1.0.1
      */
     public boolean give() {
         if (error.isStatus()) {
@@ -1223,7 +1264,7 @@ public class ItemBuilder {
     }
 
     /**
-     * @since 1.1.0
+     * @since 1.0.1
      */
     public void give(String message) {
         if (give()) {
@@ -1232,14 +1273,14 @@ public class ItemBuilder {
     }
 
     /**
-     * @since 1.1.0
+     * @since 1.0.1
      */
     public void drop(Location location) {
         location.getWorld().dropItem(location, this.build());
     }
 
     /**
-     * @since 1.1.0
+     * @since 1.0.1
      */
     public void drop() {
         if (player != null) {
@@ -1248,7 +1289,7 @@ public class ItemBuilder {
     }
 
     /**
-     * @since 1.1.0
+     * @since 1.0.1
      */
     private static class Error {
 

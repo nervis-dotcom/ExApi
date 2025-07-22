@@ -109,7 +109,7 @@ public class CustomConfig {
      */
     public ItemBuilder createItem(String path) {
         FileConfiguration config = getConfig();
-        String id = config.getString(path + ".id", "ASB");
+        String id = config.getString(path + ".id", "barrier");
         String name = config.getString(path + ".name", "");
         int amount = config.getInt(path + ".amount", 1);
         List<String> lore = config.getStringList(path + ".lore");
@@ -217,7 +217,6 @@ public class CustomConfig {
 //            item.setComponentFloats(cFloats).setComponentColorsByName(cColors).setComponentStrings(cStrings);
 //        }
 
-        return item;
+        return item.clearError();
     }
-
 }

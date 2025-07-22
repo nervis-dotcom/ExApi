@@ -137,7 +137,6 @@ public class Completions {
         return this;
     }
 
-
     // Métodos para eliminar o limpiar
     public boolean remove(String value) {
         if (value == null) return false;
@@ -146,5 +145,17 @@ public class Completions {
 
     public void clear() {
         completions.clear();
+    }
+
+    /**
+     * Agrega una cantidad específica de números consecutivos a completions.
+     *
+     * @param cantidad número de elementos a agregar (desde 1 hasta cantidad)
+     */
+    public void addConsecutive(int cantidad) {
+        if (cantidad <= 0) return;
+        for (int i = 1; i <= cantidad; i++) {
+            completions.add(String.valueOf(i));
+        }
     }
 }

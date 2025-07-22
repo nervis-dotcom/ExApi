@@ -54,7 +54,12 @@ public class Sender {
         }
     }
 
+    @Deprecated(since = "1.0.2")
     public boolean equals(Player player) {
+        return commandSender instanceof Player p && p.equals(player);
+    }
+
+    public boolean parse(Player player) {
         return commandSender instanceof Player p && p.equals(player);
     }
 

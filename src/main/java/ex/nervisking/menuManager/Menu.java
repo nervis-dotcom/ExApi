@@ -22,12 +22,12 @@ public abstract class Menu extends UtilsManagers implements InventoryHolder {
     protected PlayerMenuUtility playerMenuUtility;
     protected Player player;
     protected Inventory inventory;
-    protected ItemStack FILLER;
+    protected ItemStack FILTER;
     protected int pages = 1;
     protected int total_pages = 1;
 
     public Menu(PlayerMenuUtility playerMenuUtility) {
-        this.FILLER = new ItemBuilder(ItemBuilder.GRAY).setHideTooltip().build();
+        this.FILTER = new ItemBuilder(ItemBuilder.GRAY).setHideTooltip().build();
         this.playerMenuUtility = playerMenuUtility;
         this.player = playerMenuUtility.getOwner();
     }
@@ -92,16 +92,16 @@ public abstract class Menu extends UtilsManagers implements InventoryHolder {
         return this.inventory;
     }
 
-    public void setItem() {
+    public void setFilter() {
         for (int i = 0; i < this.inventory.getSize(); ++i) {
             if (this.inventory.getItem(i) == null) {
-                this.inventory.setItem(i, this.FILLER);
+                this.inventory.setItem(i, this.FILTER);
             }
         }
     }
 
-    public void setItem(ItemBuilder itemBuilder) {
-        this.FILLER = itemBuilder.build();
+    public void setItemFilter(ItemBuilder itemBuilder) {
+        this.FILTER = itemBuilder.build();
     }
 
     public void setItem(ItemStack itemStack) {
@@ -114,34 +114,50 @@ public abstract class Menu extends UtilsManagers implements InventoryHolder {
 
     public void setItem(ItemStack itemStack, List<Integer> list) {
         for (int i : list) {
-            this.inventory.setItem(i, itemStack);
+            if (isValidSlot(i)) {
+                this.inventory.setItem(i, itemStack);
+            }
         }
     }
 
     public void setItem(ItemBuilder itemBuilder, List<Integer> list) {
         for (int i : list) {
-            this.inventory.setItem(i, itemBuilder.build());
+            if (isValidSlot(i)) {
+                this.inventory.setItem(i, itemBuilder.build());
+            }
         }
     }
 
     public void setItem(ItemStack itemStack, Integer... list) {
         for (int i : list) {
-            this.inventory.setItem(i, itemStack);
+            if (isValidSlot(i)) {
+                this.inventory.setItem(i, itemStack);
+            }
         }
     }
 
     public void setItem(ItemBuilder itemBuilder, Integer... list) {
         for (int i : list) {
-            this.inventory.setItem(i, itemBuilder.build());
+            if (isValidSlot(i)) {
+                this.inventory.setItem(i, itemBuilder.build());
+            }
         }
     }
 
     public void setItem(int slot, ItemStack itemStack) {
-        this.inventory.setItem(slot, itemStack);
+        if (isValidSlot(slot)) {
+            this.inventory.setItem(slot, itemStack);
+        }
     }
 
     public void setItem(int slot, ItemBuilder itemBuilder) {
-        this.inventory.setItem(slot, itemBuilder.build());
+        if (isValidSlot(slot)) {
+            this.inventory.setItem(slot, itemBuilder.build());
+        }
+    }
+
+    private boolean isValidSlot(int slot) {
+        return slot >= 0 && slot < inventory.getSize();
     }
 
     public String getSoundForText() {
