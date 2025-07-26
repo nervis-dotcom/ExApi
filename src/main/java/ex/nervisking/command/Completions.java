@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * Clase que gestiona una lista de autocompletados (completions) para comandos.
@@ -157,5 +158,26 @@ public class Completions {
         for (int i = 1; i <= cantidad; i++) {
             completions.add(String.valueOf(i));
         }
+    }
+
+    /**
+     * Filtra las completions y deja solo las que comienzan con el prefijo dado.
+     *
+     * @param prefix Prefijo a filtrar (case-insensitive).
+     */
+    public void filterStartsWith(String prefix) {
+        if (prefix == null || prefix.isBlank()) return;
+        String lower = prefix.toLowerCase();
+        completions.removeIf(s -> !s.startsWith(lower));
+    }
+
+    /**
+     * Filtra las completions usando una condición personalizada.
+     *
+     * @param condition Predicate que define si un elemento debe mantenerse.
+     */
+    public void filter(Predicate<String> condition) {
+        if (condition == null) return;
+        completions.removeIf(condition.negate());
     }
 }

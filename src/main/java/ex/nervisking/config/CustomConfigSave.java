@@ -13,14 +13,15 @@ public abstract class CustomConfigSave {
 
     protected final JavaPlugin plugin;
     protected final String fileName;
-    protected FileConfiguration config = null;
     protected final String folderName;
-    private File file = null;
+    protected FileConfiguration config;
+    private File file;
 
     public CustomConfigSave() {
         this.plugin = ExApi.getPlugin();
         this.fileName = fileName();
         this.folderName = folderName();
+        this.config = null;
 
         if (folderName != null) {
             file = new File(plugin.getDataFolder() + File.separator + folderName, fileName);
@@ -98,8 +99,6 @@ public abstract class CustomConfigSave {
         }
         this.loadConfigs();
     }
-
-
 
     public abstract void loadConfigs();
     public abstract void saveData();

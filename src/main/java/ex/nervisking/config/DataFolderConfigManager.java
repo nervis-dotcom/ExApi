@@ -73,7 +73,7 @@ public abstract class DataFolderConfigManager {
     }
 
     public CustomConfig registerConfigFile(String pathName) {
-        CustomConfig config = new CustomConfig(pathName, folderName, true);
+        CustomConfig config = CustomConfig.of(pathName, folderName, true);
         config.registerConfig();
         configFiles.add(config);
 
@@ -82,7 +82,7 @@ public abstract class DataFolderConfigManager {
 
     private void create() {
         for (Configurate files : createConfigFiles()) {
-            CustomConfig configFile = new CustomConfig(files.fileName(), files.folderName(), false);
+            CustomConfig configFile = CustomConfig.of(files.fileName(), files.folderName(), false);
             configFile.registerConfig();
         }
     }

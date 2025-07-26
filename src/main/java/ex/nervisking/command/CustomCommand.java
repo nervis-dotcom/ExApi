@@ -2,7 +2,9 @@ package ex.nervisking.command;
 
 import ex.nervisking.ExApi;
 import ex.nervisking.utils.UtilsManagers;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -138,8 +140,18 @@ public abstract class CustomCommand extends UtilsManagers implements BaseCommand
     }
 
     @Override
-    public final List<String> onTabComplete(@NotNull CommandSender sender, org.bukkit.command.@NotNull Command cmd, @NotNull String alias, String @NotNull [] args) {
-        return this.onTab(Sender.of(sender), Arguments.of(args), Completions.of()).asList();
+    public final List<String> onTabComplete(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command cmd, @NotNull String alias, @NotNull String @NotNull [] args) {
+        Arguments arguments = Arguments.of(args);
+        Completions completions = this.onTab(Sender.of(sender), arguments, Completions.of());
+
+        if (!arguments.isEmpty()) {
+            String lastArg = arguments.get(arguments.size() - 1);
+            completions.filter(s -> s.startsWith(lastArg.toLowerCase()));
+        } else {
+            completions.add(Bukkit.getOnlinePlayers().stream().map(Player::getName).toList());
+        }
+
+        return completions.asList();
     }
 
     public abstract void onCommand(Sender sender, Arguments args);

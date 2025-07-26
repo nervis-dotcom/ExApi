@@ -21,7 +21,8 @@ public class LicenseManager {
         boolean status = false;
         License license = new License();
         try {
-            URL url = new URL("http://216.173.77.230:25578/validate?license=" + key);
+            // URL url = new URL("http://216.173.77.230:25578/validate?license=" + key);
+            URL url = new URL("http://key.neovex.net:25579/validate?license=" + key);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setConnectTimeout(5000);
             con.setReadTimeout(5000);

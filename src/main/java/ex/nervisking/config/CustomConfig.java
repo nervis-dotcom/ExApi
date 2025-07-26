@@ -1,6 +1,7 @@
 package ex.nervisking.config;
 
 import ex.nervisking.ExApi;
+import ex.nervisking.ModelManager.Coordinate;
 import ex.nervisking.utils.ItemBuilder;
 import org.bukkit.Color;
 import org.bukkit.configuration.ConfigurationSection;
@@ -8,10 +9,11 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,16 +25,41 @@ public class CustomConfig {
 
     private final JavaPlugin plugin;
     private final String fileName;
-    private FileConfiguration fileConfiguration = null;
-    private File file = null;
     private final String folderName;
     private final boolean newFile;
+    private FileConfiguration fileConfiguration;
+    private File file;
 
     public CustomConfig(String fileName, String folderName, boolean newFile) {
+        this.plugin = ExApi.getPlugin();
         this.fileName = fileName;
         this.folderName = folderName;
-        this.plugin = ExApi.getPlugin();
         this.newFile = newFile;
+        this.fileConfiguration = null;
+        this.file = null;
+    }
+
+    /**
+     * @since 1.0.2
+     */
+    public CustomConfig(String fileName, boolean newFile) {
+        this(fileName, null, newFile);
+    }
+
+    /**
+     * @since 1.0.2
+     */
+    @Contract(value = "_, _, _ -> new", pure = true)
+    public static @NotNull CustomConfig of(String fileName, String folderName, boolean newFile) {
+        return new CustomConfig(fileName, folderName, newFile);
+    }
+
+    /**
+     * @since 1.0.2
+     */
+    @Contract(value = "_, _ -> new", pure = true)
+    public static @NotNull CustomConfig of(String fileName, boolean newFile) {
+        return new CustomConfig(fileName, newFile);
     }
 
     public String getPath() {
@@ -195,28 +222,95 @@ public class CustomConfig {
             item.setTrimByName(pattern, material);
         }
 
-//        if(config.contains(path+".custom_model_component_data")) {
-//            List<String> cFlags = new ArrayList<>();
-//            List<String> cFloats = new ArrayList<>();
-//            List<String> cColors = new ArrayList<>();
-//            List<String> cStrings = new ArrayList<>();
-//
-//            if(config.contains(path+".custom_model_component_data.flags")) {
-//                cFlags = config.getStringList(path+".custom_model_component_data.flags");
-//            }
-//            if(config.contains(path+".custom_model_component_data.floats")) {
-//                cFloats = config.getStringList(path+".custom_model_component_data.floats");
-//            }
-//            if(config.contains(path+".custom_model_component_data.colors")) {
-//                cColors = config.getStringList(path+".custom_model_component_data.colors");
-//            }
-//            if(config.contains(path+".custom_model_component_data.strings")) {
-//                cStrings = config.getStringList(path+".custom_model_component_data.strings");
-//            }
-//
-//            item.setComponentFloats(cFloats).setComponentColorsByName(cColors).setComponentStrings(cStrings);
-//        }
-
         return item.clearError();
+    }
+
+    public CustomItem fromConfig(String path) {
+        FileConfiguration config = getConfig();
+        CustomItem item = new CustomItem();
+
+        item.setId(config.getString(path + ".id", "barrier"));
+        item.setName(config.getString(path + ".name", ""));
+        item.setAmount(config.getInt(path + ".amount", 1));
+        item.setLore(config.getStringList(path + ".lore"));
+        item.setFlags(config.getStringList(path + ".flags"));
+        item.setGlow(config.getBoolean(path + ".glow", false));
+        item.setUnbreakable(config.getBoolean(path + ".unbreakable", false));
+        item.setModelData(config.getInt(path + ".custom-model-data", -1));
+        item.setDurability(config.getInt(path + ".durability", -1));
+        item.setMaxDurability(config.getInt(path + ".max-durability", -1));
+        item.setHideTooltip(config.getBoolean(path + ".hide-tooltip", false));
+        item.setRarity(config.getString(path + ".rarity"));
+        item.setMaxStack(config.getInt(path + ".max-stack", -1));
+
+        // Encantamientos
+        if (config.isConfigurationSection(path + ".enchantments")) {
+            ConfigurationSection enchantSection = config.getConfigurationSection(path + ".enchantments");
+            if (enchantSection != null) {
+                Map<String, Integer> enchantments = new HashMap<>();
+                for (String key : enchantSection.getKeys(false)) {
+                    enchantments.put(key, enchantSection.getInt(key));
+                }
+                item.setEnchantments(enchantments);
+            }
+        }
+
+        // Color
+        String[] colorSplit = config.getString(path + ".color", "").split(";");
+        if (colorSplit.length >= 3) {
+            try {
+                int r = Integer.parseInt(colorSplit[0]);
+                int g = Integer.parseInt(colorSplit[1]);
+                int b = Integer.parseInt(colorSplit[2]);
+                item.setColor(Color.fromRGB(r, g, b));
+            } catch (NumberFormatException ignored) {}
+        }
+
+        // Modelo personalizado
+        if (config.isConfigurationSection(path + ".item-model")) {
+            ConfigurationSection model = config.getConfigurationSection(path + ".item-model");
+            if (model != null) {
+                item.setModelNamespace(model.getString("namespace"));
+                item.setModelKey(model.getString("key"));
+            }
+        }
+
+        // Food component
+        if (config.isConfigurationSection(path + ".food-component")) {
+            ConfigurationSection food = config.getConfigurationSection(path + ".food-component");
+            if (food != null) {
+                item.setFoodHunger(food.getInt("hunger"));
+                item.setFoodSaturation((float) food.getDouble("saturation"));
+                item.setCanAlwaysEat(food.getBoolean("can-always-eat", false));
+            }
+        }
+
+        // Armor Trim
+        if (config.isConfigurationSection(path + ".armor-trim")) {
+            item.setTrimPattern(config.getString(path + ".armor-trim.pattern"));
+            item.setTrimMaterial(config.getString(path + ".armor-trim.material"));
+        }
+
+        return item;
+    }
+
+    public @NotNull Coordinate getCoordinate(String path) {
+        FileConfiguration config = getConfig();
+
+        String world = config.getString(path + "world");
+
+        double x, y, z;
+        float yaw, pith;
+        try {
+            x = config.getDouble(path + "x");
+            y = config.getDouble(path + "y");
+            z = config.getDouble(path + "z");
+            yaw = (float) config.getDouble(path + "yaw");
+            pith = (float) config.getDouble(path + "pith");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return Coordinate.of(world, x, y, z, yaw, pith);
     }
 }

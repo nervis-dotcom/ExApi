@@ -29,6 +29,9 @@ public abstract class ExPlugin extends JavaPlugin {
     protected boolean menu() {
         return false;
     }
+    public void Reload() {
+        ExApi.closeInventorys();
+    }
     protected abstract void Enabled();
     protected abstract void Disable();
 
