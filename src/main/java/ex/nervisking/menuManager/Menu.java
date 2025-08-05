@@ -32,6 +32,10 @@ public abstract class Menu extends UtilsManagers implements InventoryHolder {
         this.player = playerMenuUtility.getOwner();
     }
 
+    public Menu(Player player) throws MenuManagerNotSetupException {
+        this(ExApi.getPlayerMenuUtility(player));
+    }
+
     public abstract String getMenuName();
 
     public abstract int getSlots();
@@ -104,7 +108,7 @@ public abstract class Menu extends UtilsManagers implements InventoryHolder {
         this.FILTER = itemBuilder.build();
     }
 
-    public void setItem(ItemStack itemStack) {
+    public void setItemFilter(ItemStack itemStack) {
         for (int i = 0; i < this.inventory.getSize(); ++i) {
             if (this.inventory.getItem(i) == null) {
                 this.inventory.setItem(i, itemStack);

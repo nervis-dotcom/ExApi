@@ -19,8 +19,8 @@ import java.util.function.Consumer;
  */
 public class Sender {
 
-    private final UtilsManagers utilsManagers;
     private final CommandSender commandSender;
+    private final UtilsManagers utilsManagers;
 
     public Sender(CommandSender commandSender) {
         this.commandSender = commandSender;

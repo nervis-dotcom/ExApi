@@ -148,16 +148,16 @@ public class PyfigletMessage {
         }
 
         if (!infos.isEmpty()) {
-            utilsManagers.consoleMessage(" ");
+            utilsManagers.sendConsoleMessage(" ");
             for (String info : infos) {
-                utilsManagers.consoleMessage(info);
+                utilsManagers.sendConsoleMessage(info);
             }
         }
 
         if (!pluginsSet.isEmpty()) {
-            utilsManagers.consoleMessage(" ");
+            utilsManagers.sendConsoleMessage(" ");
             for (String name : pluginsSet) {
-                utilsManagers.consoleMessage("&e‖ &f{0} &7» &7[{1}&7]".replace("{0}", name).replace("{1}", ExApi.isPlugin(name) ? "&a✓" : "&c✘"));
+                utilsManagers.sendConsoleMessage("&e‖ &f{0} &7» &7[{1}&7]".replace("{0}", name).replace("{1}", ExApi.isPlugin(name) ? "&a✓" : "&c✘"));
             }
         }
     }

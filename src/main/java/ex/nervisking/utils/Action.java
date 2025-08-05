@@ -1,7 +1,7 @@
 package ex.nervisking.utils;
 
-import ex.nervisking.ExApi;
 import ex.nervisking.ModelManager.Logger;
+import ex.nervisking.ModelManager.Scheduler;
 import ex.nervisking.menuManager.*;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
@@ -9,7 +9,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
@@ -30,9 +29,7 @@ public class Action {
     public void executeActions(Player player, List<String> actions) {
         if (actions == null || actions.isEmpty()) return;
 
-        BukkitScheduler scheduler = Bukkit.getScheduler();
         long delay = 0L;
-
         for (String action : actions) {
             String trimmed = action.trim().toLowerCase();
 
@@ -41,9 +38,7 @@ public class Action {
                 try {
                     int seconds = Integer.parseInt(action.substring("[wait]".length()).trim());
                     delay += (seconds * 20L); // segundos a ticks
-                } catch (NumberFormatException ignored) {
-                    // ignora si el número es inválido
-                }
+                } catch (NumberFormatException ignored) {}
                 continue;
             }
 
@@ -52,15 +47,13 @@ public class Action {
                 try {
                     int ticks = Integer.parseInt(action.substring("[wait_tick]".length()).trim());
                     delay += ticks;
-                } catch (NumberFormatException ignored) {
-                    // ignora si el número es inválido
-                }
+                } catch (NumberFormatException ignored) {}
                 continue;
             }
 
             // Ejecutar acción con delay acumulado
             if (delay > 0) {
-                scheduler.runTaskLater(ExApi.getPlugin(), () -> executeAction(player, action), delay);
+                Scheduler.runLater(() -> executeAction(player, action), delay);
             } else {
                 executeAction(player, action);
             }
@@ -201,7 +194,7 @@ public class Action {
         } else if (action.startsWith("[message]")) {
             utilsManagers.sendMessage(player, action.substring("[message]".length()).trim());
         } else if (action.startsWith("[message_center]")) {
-            utilsManagers. centeredMessage(player, action.substring("[message_center]".length()).trim());
+            utilsManagers.sendCenteredMessage(player, action.substring("[message_center]".length()).trim());
         } else if (action.startsWith("[action_bar]")) {
             utilsManagers.sendActionBar(player, action.substring("[action_bar]".length()).trim());
         } else if (action.startsWith("[sound]")) {
@@ -351,7 +344,7 @@ public class Action {
                 } catch (NumberFormatException ignored) {}
             }
         } else if (action.toLowerCase().startsWith("[broadcast]")) {
-            utilsManagers.broadcastMessage(action.substring("[broadcast]".length()).trim());
+            utilsManagers.sendBroadcastMessage(action.substring("[broadcast]".length()).trim());
         } else if (action.equalsIgnoreCase("[clear_inventory]")) {
             player.getInventory().clear();
         } else if (action.equalsIgnoreCase("[close_inventory]")) {

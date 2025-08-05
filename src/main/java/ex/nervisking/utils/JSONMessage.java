@@ -14,16 +14,22 @@ public class JSONMessage {
     private final UtilsManagers utilsManagers;
     private final TextComponent root;
 
-    public JSONMessage(Player player) {
+    public JSONMessage(Player player, String message) {
         this.player = player;
         this.utilsManagers = ExApi.getUtilsManagers();
-        this.root = new TextComponent("");
+        this.root = new TextComponent(message);
+    }
+
+    public JSONMessage(Player player) {
+        this(player, "");
+    }
+
+    public JSONMessage(String message) {
+        this(null, message);
     }
 
     public JSONMessage() {
-        this.player = null;
-        this.utilsManagers = ExApi.getUtilsManagers();
-        this.root = new TextComponent("");
+        this(null, "");
     }
 
     public static JSONMessage of(Player player) {
@@ -32,6 +38,14 @@ public class JSONMessage {
 
     public static JSONMessage of() {
         return new JSONMessage();
+    }
+
+    public static JSONMessage of(Player player, String message) {
+        return new JSONMessage(player, message);
+    }
+
+    public static JSONMessage of(String message) {
+        return new JSONMessage(message);
     }
 
     /**
@@ -67,54 +81,23 @@ public class JSONMessage {
         private ClickEvent clickEvent;
 
         public Part(Player player, String text) {
-            this.text = utilsManagers.setPlaceholders(player, text);
+            this.text = player == null ? utilsManagers.setColoredMessage(text) : utilsManagers.setPlaceholders(player, text);
         }
 
         public Part(String text) {
-            if (player == null) {
-                this.text = utilsManagers.setColoredMessage(text);
-            } else {
-                this.text = utilsManagers.setPlaceholders(player, text);
-            }
-        }
-
-        public Part hover(Player player, List<String> lines) {
-            if (lines == null || lines.isEmpty()) {
-                hover = null;
-                return this;
-            }
-
-            hover = new BaseComponent[lines.size()];
-            for (int i = 0; i < lines.size(); i++) {
-                String line = utilsManagers.setPlaceholders(player, lines.get(i));
-                if (i != lines.size() - 1) {
-                    line += "\n";
-                }
-                hover[i] = new TextComponent(TextComponent.fromLegacyText(line));
-            }
-            return this;
+            this(player, text);
         }
 
         public Part hover(List<String> lines) {
-            if (lines == null || lines.isEmpty()) {
-                hover = null;
-                return this;
-            }
+            return hover(lines != null ? lines.toArray(new String[0]) : null);
+        }
 
-            hover = new BaseComponent[lines.size()];
-            for (int i = 0; i < lines.size(); i++) {
-                String line;
-                if (player == null) {
-                    line = utilsManagers.setColoredMessage(lines.get(i));
-                } else {
-                    line = utilsManagers.setPlaceholders(player, lines.get(i));
-                }
-                if (i != lines.size() - 1) {
-                    line += "\n";
-                }
-                hover[i] = new TextComponent(TextComponent.fromLegacyText(line));
-            }
-            return this;
+        public Part hover(Player player, List<String> lines) {
+            return hover(player, lines != null ? lines.toArray(new String[0]) : null);
+        }
+
+        public Part hover(String... lines) {
+            return this.hover(player, lines);
         }
 
         public Part hover(Player player, String... lines) {
@@ -125,7 +108,7 @@ public class JSONMessage {
 
             hover = new BaseComponent[lines.length];
             for (int i = 0; i < lines.length; i++) {
-                String line = utilsManagers.setPlaceholders(player, lines[i]);
+                String line = player == null ? utilsManagers.setColoredMessage(text) : utilsManagers.setPlaceholders(player, text);
                 if (i != lines.length - 1) {
                     line += "\n";
                 }
@@ -134,26 +117,8 @@ public class JSONMessage {
             return this;
         }
 
-        public Part hover(String... lines) {
-            if (lines == null || lines.length == 0) {
-                hover = null;
-                return this;
-            }
-
-            hover = new BaseComponent[lines.length];
-            for (int i = 0; i < lines.length; i++) {
-                String line;
-                if (player == null) {
-                    line = utilsManagers.setColoredMessage(lines[i]);
-                } else {
-                    line = utilsManagers.setPlaceholders(player, lines[i]);
-                }
-                if (i != lines.length - 1) {
-                    line += "\n";
-                }
-                hover[i] = new TextComponent(TextComponent.fromLegacyText(line));
-            }
-            return this;
+        public Part action(Action action, String value) {
+           return this.action(player, action, value);
         }
 
         public Part action(Player player, Action action, String value) {
@@ -161,37 +126,12 @@ public class JSONMessage {
                 utilsManagers.sendLogger(Logger.ERROR, "Action or value cannot be null or empty.");
                 return this;
             }
-
-            value = utilsManagers.setPlaceholders(player, value);
+            String parsedValue = player != null ? utilsManagers.setPlaceholders(player, value) : utilsManagers.setColoredMessage(value);
             return switch (action) {
-                case SUGGEST -> suggest(value);
-                case EXECUTE -> run(value);
-                case OPEN -> openUrl(value);
-                case COPY -> copy(value);
-                case NONE -> {
-                    clickEvent = null;
-                    utilsManagers.sendLogger(Logger.ERROR, "Invalid action specified: " + action);
-                    yield this;
-                }
-            };
-        }
-
-        public Part action(Action action, String value) {
-            if (action == null || value == null || value.isEmpty()) {
-                utilsManagers.sendLogger(Logger.ERROR, "Action or value cannot be null or empty.");
-                return this;
-            }
-
-            if (player != null) {
-                value = utilsManagers.setPlaceholders(player, value);
-            } else {
-                value = utilsManagers.setColoredMessage(value);
-            }
-            return switch (action) {
-                case SUGGEST -> suggest(value);
-                case EXECUTE -> run(value);
-                case OPEN -> openUrl(value);
-                case COPY -> copy(value);
+                case SUGGEST -> suggest(parsedValue);
+                case EXECUTE -> run(parsedValue);
+                case OPEN -> openUrl(parsedValue);
+                case COPY -> copy(parsedValue);
                 case NONE -> {
                     clickEvent = null;
                     utilsManagers.sendLogger(Logger.ERROR, "Invalid action specified: " + action);
@@ -201,21 +141,37 @@ public class JSONMessage {
         }
 
         private Part suggest(String command) {
+            if (command == null || command.isEmpty()) {
+                utilsManagers.sendLogger(Logger.ERROR, "Command cannot be null or empty for suggest action.");
+                return this;
+            }
             this.clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command);
             return this;
         }
 
         private Part run(String command) {
+            if (command == null || command.isEmpty()) {
+                utilsManagers.sendLogger(Logger.ERROR, "Command cannot be null or empty for suggest action.");
+                return this;
+            }
             this.clickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND, command);
             return this;
         }
 
         private Part openUrl(String url) {
+            if (url == null || url.isEmpty()) {
+                utilsManagers.sendLogger(Logger.ERROR, "Command cannot be null or empty for suggest action.");
+                return this;
+            }
             this.clickEvent = new ClickEvent(ClickEvent.Action.OPEN_URL, url);
             return this;
         }
 
         private Part copy(String text) {
+            if (text == null || text.isEmpty()) {
+                utilsManagers.sendLogger(Logger.ERROR, "Command cannot be null or empty for suggest action.");
+                return this;
+            }
             this.clickEvent = new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, text);
             return this;
         }
@@ -242,18 +198,28 @@ public class JSONMessage {
     }
 
     public JSONMessage add(Player player, String text) {
-        root.addExtra(new TextComponent(TextComponent.fromLegacyText(utilsManagers.setPlaceholders(player, text))));
+        if (text == null || text.isEmpty()) {
+            return this;
+        }
+
+        text =  player != null ? utilsManagers.setPlaceholders(player, text) : utilsManagers.setColoredMessage(text);
+        root.addExtra(new TextComponent(TextComponent.fromLegacyText(text)));
         return this;
     }
 
     public JSONMessage add(String text) {
-        if (player != null) {
-            text = utilsManagers.setPlaceholders(player, text);
-        } else {
-            text = utilsManagers.setColoredMessage(text);
+        return this.add(player, text);
+    }
+
+    public JSONMessage addLine(Player player, String text) {
+        if (text == null || text.isEmpty()) {
+            return this;
         }
-        root.addExtra(new TextComponent(TextComponent.fromLegacyText(text)));
-        return this;
+        return add(player, "\n" + text);
+    }
+
+    public JSONMessage addLine(String text) {
+        return addLine(player, text);
     }
 
     public void send() {

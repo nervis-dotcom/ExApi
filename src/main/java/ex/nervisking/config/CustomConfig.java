@@ -32,7 +32,7 @@ public class CustomConfig {
 
     public CustomConfig(String fileName, String folderName, boolean newFile) {
         this.plugin = ExApi.getPlugin();
-        this.fileName = fileName;
+        this.fileName = fileName.endsWith(".yml") ? fileName : fileName + ".yml";
         this.folderName = folderName;
         this.newFile = newFile;
         this.fileConfiguration = null;
@@ -49,6 +49,20 @@ public class CustomConfig {
     /**
      * @since 1.0.2
      */
+    public CustomConfig(String fileName) {
+        this(fileName, null, false);
+    }
+
+    /**
+     * @since 1.0.2
+     */
+    public CustomConfig(String fileName, String folderName) {
+        this(fileName, folderName, false);
+    }
+
+    /**
+     * @since 1.0.2
+     */
     @Contract(value = "_, _, _ -> new", pure = true)
     public static @NotNull CustomConfig of(String fileName, String folderName, boolean newFile) {
         return new CustomConfig(fileName, folderName, newFile);
@@ -58,8 +72,24 @@ public class CustomConfig {
      * @since 1.0.2
      */
     @Contract(value = "_, _ -> new", pure = true)
+    public static @NotNull CustomConfig of(String fileName, String folderName) {
+        return new CustomConfig(fileName, folderName);
+    }
+
+    /**
+     * @since 1.0.2
+     */
+    @Contract(value = "_, _ -> new", pure = true)
     public static @NotNull CustomConfig of(String fileName, boolean newFile) {
         return new CustomConfig(fileName, newFile);
+    }
+
+    /**
+     * @since 1.0.2
+     */
+    @Contract(value = "_ -> new", pure = true)
+    public static @NotNull CustomConfig of(String fileName) {
+        return new CustomConfig(fileName);
     }
 
     public String getPath() {

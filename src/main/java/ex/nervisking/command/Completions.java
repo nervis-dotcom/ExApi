@@ -1,5 +1,7 @@
 package ex.nervisking.command;
 
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -158,6 +160,76 @@ public class Completions {
         for (int i = 1; i <= cantidad; i++) {
             completions.add(String.valueOf(i));
         }
+    }
+
+    /**
+     * Agrega los nombres de todos los jugadores en línea a completions.
+     */
+    public void addPlayerOnline() {
+        add(Bukkit.getOnlinePlayers().stream().map(Player::getName).toList());
+    }
+
+    /**
+     * Agrega jugadores en línea que cumplan una condición personalizada.
+     *
+     * @param filter Filtro para determinar qué jugadores agregar.
+     */
+    public void addPlayerOnline(Predicate<Player> filter) {
+        if (filter == null) return;
+        Bukkit.getOnlinePlayers().stream()
+                .filter(filter)
+                .map(Player::getName)
+                .forEach(name -> completions.add(name.toLowerCase()));
+    }
+
+    /**
+     * Agrega jugadores en línea que cumplan una condición personalizada.
+     * Versión encadenable para usar en cadena de métodos.
+     *
+     * @param filter Filtro para determinar qué jugadores agregar.
+     * @return esta misma instancia de Completions.
+     */
+    public Completions withPlayerOnline(Predicate<Player> filter) {
+        if (filter != null) {
+            Bukkit.getOnlinePlayers().stream()
+                    .filter(filter)
+                    .map(Player::getName)
+                    .forEach(name -> completions.add(name.toLowerCase()));
+        }
+        return this;
+    }
+
+    /**
+     * Agrega valores de completion si se cumple una condición.
+     *
+     * @param condition Condición que debe cumplirse.
+     * @param values    Valores a agregar si la condición es verdadera.
+     */
+    public void addIf(boolean condition, List<String> values) {
+        if (condition && values != null) {
+            add(values);
+        }
+    }
+
+    public Completions withIf(boolean condition, List<String> values) {
+        addIf(condition, values);
+        return this;
+    }
+
+    public void addIf(boolean condition, String... values) {
+        this.addIf(condition, List.of(values));
+    }
+
+    public Completions withIf(boolean condition, String... values) {
+        return this.withIf(condition, List.of(values));
+    }
+
+    /**
+     * Agrega valores booleanos comunes a completions.
+     * Incluye "true" y "false".
+     */
+    public void addBooleanValues() {
+        add("true", "false");
     }
 
     /**

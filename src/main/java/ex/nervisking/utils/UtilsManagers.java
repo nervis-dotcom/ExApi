@@ -25,6 +25,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @SuppressWarnings("deprecation")
@@ -37,9 +38,9 @@ public class UtilsManagers extends Utils {
         this.plugin = ExApi.getPlugin();
     }
 
-    public boolean getCooldown(String string){
+    public boolean sendCooldown(String string, int time){
         if (cooldowns.containsKey(string)) {
-            long secondsLeft = (cooldowns.get(string) + 500) - System.currentTimeMillis();
+            long secondsLeft = (cooldowns.get(string) + time) - System.currentTimeMillis();
             if (secondsLeft > 0) {
                 return true;
             }
@@ -49,11 +50,16 @@ public class UtilsManagers extends Utils {
         return false;
     }
 
+    public boolean sendCooldown(String string){
+        return sendCooldown(string, 500);
+    }
+
     public boolean hasPermission(CommandSender sender, String permission){
         return sender.hasPermission(plugin.getName().toLowerCase() + "." + permission);
     }
+
     public boolean hasOp(CommandSender sender){
-        return sender.hasPermission(plugin.getName().toLowerCase() + ".owner");
+        return hasPermission(sender,"owner");
     }
 
     /**
@@ -69,7 +75,7 @@ public class UtilsManagers extends Utils {
         if (actionLine == null || actionLine.equals("none")) return;
         String[] sep = actionLine.split(";");
         if (sep.length < 3) {
-            sendLogger(Logger.ERROR,"se necesitan minimo 3 partes para reproducir un sonido");
+            sendLogger(Logger.ERROR,"se necesitan mínimo 3 partes para reproducir un sonido");
             return;
         }
 
@@ -158,22 +164,35 @@ public class UtilsManagers extends Utils {
         if (actionLine == null || actionLine.equals("none")) return;
 
         String[] sep = actionLine.split(";");
-        int fadeIn = Integer.parseInt(sep[2]);
-        int stay = Integer.parseInt(sep[3]);
-        int fadeOut = Integer.parseInt(sep[4]);
+        if (sep.length >= 2) {
 
-        String title = sep[0];
-        String subtitle = sep[1];
-        if (title.equals("none")) {
-            title = "";
-        }
-        if (subtitle.equals("none")) {
-            subtitle = "";
-        }
+            String title = sep[0];
+            String subtitle = sep[1];
+            if (title.equals("none")) {
+                title = "";
+            }
+            if (subtitle.equals("none")) {
+                subtitle = "";
+            }
 
-        title = setPlaceholders(player, title);
-        subtitle = setPlaceholders(player, subtitle);
-        player.sendTitle(title, subtitle, fadeIn, stay, fadeOut);
+            int fadeIn = 10;
+            int stay = 10;
+            int fadeOut = 10;
+            if (sep.length >= 5) {
+                try {
+                    fadeIn = Integer.parseInt(sep[2]);
+                    stay = Integer.parseInt(sep[3]);
+                    fadeOut = Integer.parseInt(sep[4]);
+                } catch (NumberFormatException e) {
+                    fadeIn = 10;
+                    stay = 10;
+                }
+            }
+
+            title = setPlaceholders(player, title);
+            subtitle = setPlaceholders(player, subtitle);
+            player.sendTitle(title, subtitle, fadeIn, stay, fadeOut);
+        }
     }
 
     /**
@@ -226,73 +245,25 @@ public class UtilsManagers extends Utils {
         }
     }
 
-    /**
-     * Ejecuta un comando en consola con soporte para placeholders.
-     * <p>
-     * Los placeholders compatibles se reemplazarán usando el contexto del jugador antes de ejecutar el comando.
-     *
-     * @param player  Jugador cuyo contexto se usará para reemplazar los placeholders.
-     * @param commands Comando a ejecutar (puede incluir placeholders como {@code %player_name%}, {@code %vault_eco_balance%}, etc.)
-     *
-     * <p><b>Ejemplo de uso:</b></p>
-     * <pre>{@code
-     * utilsManagers.sendConsoleCommand(player, "say %player_name% ha usado un ítem especial");
-     * }</pre>
-     */
-
     public void sendConsoleCommand(Player player, String... commands) {
         if (commands == null) return;
         for (String cmd : commands) {
-            sendConsoleCommand(player, cmd);
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), setPlaceholders(player, cmd));
         }
     }
     public void sendConsoleCommand(Player player, List<String> commands) {
-        if (commands == null) return;
-        for (String cmd : commands) {
-            sendConsoleCommand(player, cmd);
+      this.sendConsoleCommand(player, commands.toArray(new String[0]));
+    }
+
+    public void sendPerformCommand(Player player, String... command) {
+        this.sendPerformCommand(player, List.of(command));
+    }
+
+    public void sendPerformCommand(Player player, List<String> command) {
+        if (command == null) return;
+        for (var msg : command) {
+            player.performCommand(setPlaceholders(player, msg));
         }
-    }
-
-    public void sendConsoleCommand(Player player, String command) {
-        if (command == null || command.isEmpty()) return;
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), setPlaceholders(player, command));
-    }
-
-    /**
-     * Hace que el jugador ejecute un comando con soporte para placeholders.
-     * <p>
-     * Los placeholders compatibles se reemplazarán usando el contexto del jugador antes de ejecutar el comando.
-     *
-     * @param player  Jugador que ejecutará el comando.
-     * @param command Comando a ejecutar (puede incluir placeholders como {@code %player_name%}, {@code %vault_eco_balance%}, etc.)
-     *
-     * <p><b>Ejemplo de uso:</b></p>
-     * <pre>{@code
-     * utilsManagers.sendPerformCommand(player, "warp %player_name%");
-     * }</pre>
-     */
-    public void sendPerformCommand(Player player, Object command) {
-        switch (command) {
-            case String string -> sendPerformCommand(player, string);
-            case List<?> list -> {
-                for (Object msg : list) {
-                    if (msg instanceof String m) {
-                        sendPerformCommand(player, m);
-                    }
-                }
-            }
-            case String[] array -> {
-                for (String msg : array) {
-                    sendPerformCommand(player, msg);
-                }
-            }
-            case null, default -> {}
-        }
-    }
-
-    private void sendPerformCommand(Player player, String command) {
-        if (command == null || command.isEmpty()) return;
-        player.performCommand(setPlaceholders(player, command));
     }
 
     /**
@@ -585,43 +556,36 @@ public class UtilsManagers extends Utils {
     }
 
     // messages
-    public void centeredMessage(Player player, String message) {
+    public void sendCenteredMessage(Player player, String message) {
         if (message == null || message.isEmpty()) return;
         String coloredMessage = setPlaceholders(player, message);
         String centeredMessage = getCenteredMessage(coloredMessage);
         player.sendMessage(centeredMessage);
     }
 
-    public void centeredMessage(Player player, String... messages) {
-        if (messages == null) return;
-        for (String message : messages) {
-            centeredMessage(player, message);
-        }
+    public void sendCenteredMessage(Player player, String... messages) {
+        this.sendCenteredMessage(player, List.of(messages));
     }
 
-    public void centeredMessage(Player player, List<String> messages) {
+    public void sendCenteredMessage(Player player, List<String> messages) {
         if (messages == null || messages.isEmpty()) return;
         for (String message : messages) {
-            centeredMessage(player, message);
+            sendCenteredMessage(player, message);
         }
     }
 
     public void sendMessage(CommandSender sender, String message) {
-        if (message == null || message.isEmpty()) return;
-        message(sender, message);
+        this.message(sender, message);
     }
 
     public void sendMessage(CommandSender sender, String... messages) {
-        if (messages == null) return;
-        for (String message : messages) {
-            message(sender, message);
-        }
+        this.sendMessage(sender, List.of(messages));
     }
 
     public void sendMessage(CommandSender sender, List<String> messages) {
         if (messages == null) return;
         for (String message : messages) {
-            message(sender, message);
+            this.message(sender, message);
         }
     }
 
@@ -634,61 +598,37 @@ public class UtilsManagers extends Utils {
         }
     }
 
-    public void broadcastMessage(String message) {
-        if (message == null || message.isEmpty()) return;
-        Bukkit.getOnlinePlayers().forEach(player -> sendMessage(player, message));
-    }
-
-    public void broadcastMessage(String... messages) {
+    public void sendBroadcastMessage(String... messages) {
         if (messages == null) return;
         for (String message : messages) {
-            broadcastMessage(message);
+            Bukkit.getOnlinePlayers().forEach(player -> sendMessage(player, message));
         }
     }
 
-    public void broadcastMessage(List<String> messages) {
-        if (messages == null || messages.isEmpty()) return;
-        for (String message : messages) {
-            broadcastMessage(message);
-        }
+    public void sendBroadcastMessage(List<String> messages) {
+        this.sendBroadcastMessage(messages.toArray(new String[0]));
     }
 
-    public void broadcastMessageCenter(String message) {
-        if (message == null || message.isEmpty()) return;
-        Bukkit.getOnlinePlayers().forEach(player -> centeredMessage(player, message));
-    }
-
-    public void broadcastMessageCenter(String... messages) {
+    public void sendBroadcastMessageCenter(String... messages) {
         if (messages == null) return;
         for (String message : messages) {
-            broadcastMessageCenter(message);
+            Bukkit.getOnlinePlayers().forEach(player -> sendCenteredMessage(player, message));
         }
     }
 
-    public void broadcastMessageCenter(List<String> messages) {
-        if (messages == null || messages.isEmpty()) return;
-        for (String message : messages) {
-            broadcastMessageCenter(message);
-        }
+    public void sendBroadcastMessageCenter(List<String> messages) {
+       this.sendBroadcastMessageCenter(messages.toArray(new String[0]));
     }
 
-    public void consoleMessage(String message) {
-        if (message == null || message.isEmpty()) return;
-        Bukkit.getConsoleSender().sendMessage(setColoredMessage(message));
-    }
-
-    public void consoleMessage(String... messages) {
+    public void sendConsoleMessage(String... messages) {
         if (messages == null) return;
         for (String message : messages) {
-            consoleMessage(message);
+            Bukkit.getConsoleSender().sendMessage(setColoredMessage(message));
         }
     }
 
-    public void consoleMessage(List<String> messages) {
-        if (messages == null || messages.isEmpty()) return;
-        for (String message : messages) {
-            consoleMessage(message);
-        }
+    public void sendConsoleMessage(List<String> messages) {
+        this.sendConsoleMessage(messages.toArray(new String[0]));
     }
 
     @Deprecated(since = "1.0.2")
@@ -704,6 +644,16 @@ public class UtilsManagers extends Utils {
         player.spigot().sendMessage(mainComponent);
     }
 
+    public void giveItem(Player player, ItemStack itemStack) {
+        Map<Integer, ItemStack> stackHashMap = player.getInventory().addItem(itemStack);
+
+        if (!stackHashMap.isEmpty()) {
+            for (ItemStack leftover : stackHashMap.values()) {
+                player.getWorld().dropItem(player.getLocation(), leftover);
+            }
+        }
+    }
+
     /**
      * Kicks a player with a colored message.
      *
@@ -717,35 +667,32 @@ public class UtilsManagers extends Utils {
     }
 
     public void kickPlayer(Player player, List<String> messages) {
-        if (messages == null || messages.isEmpty()) return;
-        String message = String.join("\n", messages);
-        player.kickPlayer(setColoredMessage(message));
+        this.kickPlayer(player, messages.toArray(new String[0]));
     }
 
     /**
      * Envía un mensaje al log de la consola con el prefijo del plugin.
      */
     public void sendLogger(Logger logger, List<String> messages) {
-        if (messages == null || messages.isEmpty()) return;
-
-        consoleMessage(getPrefix());
-        for (String message : messages) {
-            consoleMessage(logger.getName() + message);
-        }
+       this.sendLogger(logger, messages.toArray(new String[0]));
     }
 
     public void sendLogger(Logger logger, String... messages) {
         if (messages == null || messages.length == 0) return;
+        if (messages.length == 1) {
+            sendConsoleMessage(getPrefix() + logger.getName() + messages[0]);
+            return;
+        }
 
-        consoleMessage(getPrefix());
+        sendConsoleMessage(getPrefix());
         for (String message : messages) {
-            consoleMessage(logger.getName() + message);
+            sendConsoleMessage(logger.getName() + message);
         }
     }
 
     public void sendLogger(Logger logger, String message, boolean online) {
         if (message == null || message.isEmpty()) return;
-        consoleMessage(getPrefix() + logger.getName() + message);
+        sendConsoleMessage(getPrefix() + logger.getName() + message);
         if (online) {
             Bukkit.getOnlinePlayers().forEach(player -> {
                 if (hasOp(player)) {
@@ -822,13 +769,12 @@ public class UtilsManagers extends Utils {
         ExApi.getBungeeMessagingManager().sendToServer(player, actionLine);
     }
 
+    @Deprecated(since = "1.0.2", forRemoval = true)
     public void getKnockback(Player player, String message) {
         Vector knockback = player.getLocation().getDirection().multiply(-1).setY(0.5);
         player.setVelocity(knockback);
         sendMessage(player, "%prefix% " + message);
     }
-
-    // actions
 
     /**
      * Ejecuta una lista de acciones sobre un jugador. Esta utilidad puede utilizarse en secciones del plugin que acepten
@@ -895,9 +841,6 @@ public class UtilsManagers extends Utils {
      * @param actions Lista de acciones a ejecutar
      */
     public void executeActions(Player player, List<String> actions) {
-        if (actions == null || actions.isEmpty()) return;
-        Action action = new Action(this);
-        action.executeActions(player, actions);
+        new Action(this).executeActions(player, actions);
     }
-
 }

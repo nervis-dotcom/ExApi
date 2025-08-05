@@ -772,12 +772,20 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setSkullTexture(String texture) {
+        return this.texture(texture, UUID.randomUUID());
+    }
+
+    public ItemBuilder setSkullTextureId(String texture) {
+        return this.texture(texture, UUID.fromString("00000000-0000-0000-0000-000000000000"));
+    }
+
+    private ItemBuilder texture(String texture, UUID uuid) {
         if (error.isStatus()) {
             return this;
         }
         if (meta instanceof SkullMeta skullMeta) {
             if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_20_R2)) {
-                PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID());
+                PlayerProfile profile = Bukkit.createPlayerProfile(uuid);
                 PlayerTextures textures = profile.getTextures();
                 URL url;
                 try {
@@ -796,7 +804,7 @@ public class ItemBuilder {
 
                 skullMeta.setOwnerProfile(profile);
             } else {
-                GameProfile profile = new GameProfile(UUID.randomUUID(), "");
+                GameProfile profile = new GameProfile(uuid, "");
                 profile.getProperties().put("textures", new Property("textures", texture));
 
                 try {
