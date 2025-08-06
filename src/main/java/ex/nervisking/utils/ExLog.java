@@ -68,11 +68,11 @@ public class ExLog {
         }
     }
 
-    public static void sendInfo(String tag, List<String> messages) {
+    public static void sendInfoTag(String tag, List<String> messages) {
         send(messages, "&a [" + tag + "] ");
     }
 
-    public static void sendInfo(String tag, String... messages) {
+    public static void sendInfoTag(String tag, String... messages) {
         send(List.of(messages), "&a [" + tag + "] ");
     }
 
