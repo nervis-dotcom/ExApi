@@ -8,20 +8,21 @@ public abstract class MenuPages extends Menu {
 
     protected int page = 0;
     private List<ItemStack> cachedItems;
+    private List<Integer> slots;
 
     public MenuPages(PlayerMenuUtility playerMenuUtility) {
         super(playerMenuUtility);
     }
 
-    public abstract List<ItemStack> dataToItems();
+    public abstract List<ItemStack> addDataItems();
 
-    public abstract List<Integer> getItemSlots();
+    public abstract List<Integer> setSlots();
 
-    public abstract void addCustomMenuBorder();
+    public abstract void setItems();
 
     protected List<ItemStack> getItems() {
         if (this.cachedItems == null) {
-            this.cachedItems = this.dataToItems();
+            this.cachedItems = this.addDataItems();
         }
 
         return this.cachedItems;
@@ -31,13 +32,13 @@ public abstract class MenuPages extends Menu {
         this.cachedItems = null;
     }
 
-    public void setMenuItems() {
+    public void addItems() {
         this.pages = getCurrentPage();
         this.total_pages = getTotalPages();
-        this.addCustomMenuBorder();
+        this.slots = setSlots();
+        this.setItems();
 
         List<ItemStack> items = this.getItems();
-        List<Integer> slots = getItemSlots();
         int start = page * slots.size();
         int end = Math.min(start + slots.size(), items.size());
 
@@ -71,7 +72,7 @@ public abstract class MenuPages extends Menu {
 
     public boolean nextPage() {
         int totalItems = this.getItems().size();
-        int lastPageNumber = (totalItems - 1) / getItemSlots().size();
+        int lastPageNumber = (totalItems - 1) / setSlots().size();
         if (this.page < lastPageNumber) {
             ++this.page;
             this.reloadItems();
@@ -82,20 +83,23 @@ public abstract class MenuPages extends Menu {
     }
 
     public int getMaxItemsPerPage() {
-        return getItemSlots().size();
+        return setSlots().size();
     }
 
     public boolean getSlotIndex(int slot) {
-        return getItemSlots().contains(slot);
+        return setSlots().contains(slot);
     }
 
+    public List<Integer> getSlots() {
+        return slots;
+    }
 
     public int getCurrentPage() {
         return this.page + 1;
     }
 
     public int getTotalPages() {
-        return (this.getItems().size() - 1) / getItemSlots().size() + 1;
+        return (this.getItems().size() - 1) / setSlots().size() + 1;
     }
 
     public void open() {
@@ -119,7 +123,7 @@ public abstract class MenuPages extends Menu {
     }
 
     public boolean lastPage() {
-        int lastPageNum = (this.getItems().size() - 1) / getItemSlots().size();
+        int lastPageNum = (this.getItems().size() - 1) / setSlots().size();
         if (this.page == lastPageNum) {
             return false;
         } else {

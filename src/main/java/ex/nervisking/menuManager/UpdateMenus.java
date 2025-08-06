@@ -7,11 +7,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Map;
 
-public class updateMenus extends BukkitRunnable {
-
-    private static final int LEVEL_OPEN = 0;
-    private static final int LEVEL_RELOAD = 1;
-    private static final int LEVEL_REFRESH = 2;
+public class UpdateMenus extends BukkitRunnable {
 
     @Override
     public void run() {
@@ -20,15 +16,15 @@ public class updateMenus extends BukkitRunnable {
             Inventory topInventory = InventoryUtils.getTopInventory(player);
 
             if (!(topInventory.getHolder() instanceof Menu menu)) continue;
-            if (!menu.update()) continue;
+            if (!menu.setUpdate()) continue;
 
-            int level = menu.levelUpdate();
+            LevelUpdate level = menu.levelUpdate();
 
-            if (level == LEVEL_OPEN) {
+            if (level == LevelUpdate.OPEN) {
                 menu.open();
-            } else if (level == LEVEL_RELOAD) {
+            } else if (level == LevelUpdate.RELOAD_ITEMS) {
                 menu.reloadItems();
-            } else if (level == LEVEL_REFRESH && menu instanceof MenuPages menuPages) {
+            } else if (level == LevelUpdate.REFRESH_ITEMS && menu instanceof MenuPages menuPages) {
                 menuPages.refreshData();
             }
         }

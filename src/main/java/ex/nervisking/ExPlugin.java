@@ -26,7 +26,7 @@ public abstract class ExPlugin extends JavaPlugin {
     public PyfigletMessage pyfigletMessage;
 
     protected void Load() {}
-    protected boolean menu() {
+    protected boolean Menu() {
         return false;
     }
     public void Reload() {
@@ -42,14 +42,14 @@ public abstract class ExPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        new ExApi(this, menu());
+        new ExApi(this, Menu());
         this.utilsManagers = ExApi.getUtilsManagers();
         this.utils = ExApi.getUtils();
         this.commandManager = new CommandManager(this);
         this.pyfigletMessage = new PyfigletMessage();
 
-        if (menu()) {
-            this.gui = Scheduler.runTimer(new updateMenus(), 0, 20);
+        if (Menu()) {
+            this.gui = Scheduler.runTimer(new UpdateMenus(), 0, 20);
         }
 
         PluginManager pm = getServer().getPluginManager();

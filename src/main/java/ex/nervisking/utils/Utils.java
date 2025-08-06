@@ -31,32 +31,16 @@ public class Utils {
     private final LegacyComponentSerializer LEGACY_SERIALIZER = LegacyComponentSerializer.legacySection();
     private final int SERVER_VERSION = Integer.parseInt(Bukkit.getBukkitVersion().split("-")[0].split("\\.")[1]);
 
+    public static Utils of() {
+        return new Utils();
+    }
+
     /**
      * Obtiene el prefijo del plugin ExApi.
      * @return El prefijo del plugin.
      */
     public String getPrefix() {
         return ExApi.getPrefix();
-    }
-
-    /**
-     * Convierte un texto con códigos de color a un componente de texto de BungeeCord.
-     * Si el texto contiene códigos de color antiguos (&a, &f, etc.) o hexadecimales (&#ffffff, #ffffff),
-     * los convierte a un formato compatible con MiniMessage y los aplica.
-     * @param text Texto a procesar.
-     * @return Componente de texto de BungeeCord con los colores aplicados.
-     */
-    @Deprecated(since = "1.0.0")
-    public net.md_5.bungee.api.chat.TextComponent setColoredComponent(@NotNull String text) {
-        String colored = setColoredMessage(text);
-        net.md_5.bungee.api.chat.TextComponent base = new net.md_5.bungee.api.chat.TextComponent();
-        BaseComponent[] converted = net.md_5.bungee.api.chat.TextComponent.fromLegacyText(colored);
-
-        for (BaseComponent comp : converted) {
-            base.addExtra(comp);
-        }
-
-        return base;
     }
 
     /**
@@ -106,6 +90,34 @@ public class Utils {
             return setColoredMessage(text);
         }
         return setColoredMessage(PlaceholderAPI.setPlaceholders(player, text));
+    }
+
+    public static void setColored(String string) {
+        of().setColoredMessage(string);
+    }
+
+    public static void setPlaceholder(final Player player,String string) {
+        of().setPlaceholders(player, string);
+    }
+
+    /**
+     * Convierte un texto con códigos de color a un componente de texto de BungeeCord.
+     * Si el texto contiene códigos de color antiguos (&a, &f, etc.) o hexadecimales (&#ffffff, #ffffff),
+     * los convierte a un formato compatible con MiniMessage y los aplica.
+     * @param text Texto a procesar.
+     * @return Componente de texto de BungeeCord con los colores aplicados.
+     */
+    @Deprecated(since = "1.0.0")
+    public net.md_5.bungee.api.chat.TextComponent setColoredComponent(@NotNull String text) {
+        String colored = setColoredMessage(text);
+        net.md_5.bungee.api.chat.TextComponent base = new net.md_5.bungee.api.chat.TextComponent();
+        BaseComponent[] converted = net.md_5.bungee.api.chat.TextComponent.fromLegacyText(colored);
+
+        for (BaseComponent comp : converted) {
+            base.addExtra(comp);
+        }
+
+        return base;
     }
 
     /**

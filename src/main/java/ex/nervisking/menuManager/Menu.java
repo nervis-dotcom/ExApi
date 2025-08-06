@@ -36,60 +36,67 @@ public abstract class Menu extends UtilsManagers implements InventoryHolder {
         this(ExApi.getPlayerMenuUtility(player));
     }
 
-    public abstract String getMenuName();
+    public abstract String setName();
 
-    public abstract int getSlots();
+    public abstract int setRows();
 
-    public abstract boolean cancelAllClicks();
-
-    public abstract boolean update();
-
-    public abstract boolean getTopInventory();
-
-    public abstract boolean cancelAllDrop();
-
-    public abstract void setMenuItems();
+    public abstract void addItems();
 
     public abstract void handleMenu(InventoryClickEvent event) throws MenuManagerNotSetupException, MenuManagerException;
 
-    public void handleMenuClose() {
+    public boolean setCancelClicks() {
+        return true;
     }
 
-    public boolean isCancelClose() {
+    public boolean setUpdate() {
         return false;
     }
 
-    public int levelUpdate() {
-        return 0;
+    public boolean setTopInventory() {
+        return true;
     }
 
+    public boolean setCancelDrop() {
+        return true;
+    }
+
+    public boolean setCancelClose() {
+        return false;
+    }
+
+    public LevelUpdate levelUpdate() {
+        return LevelUpdate.RELOAD_ITEMS;
+    }
+
+    public void handleMenuClose() {}
+
     public void open() {
-        this.inventory = Bukkit.createInventory(this, Math.max(9, Math.min(54, (this.getSlots() > 0 ? this.getSlots() : 1) * 9)), setPlaceholders(player, this.getMenuName()
+        this.inventory = Bukkit.createInventory(this, Math.max(9, Math.min(54, (this.setRows() > 0 ? this.setRows() : 1) * 9)), setPlaceholders(player, this.setName()
                 .replace("%page%", String.valueOf(pages))
                 .replace("%total_page%", String.valueOf(total_pages))));
-        this.setMenuItems();
+        this.addItems();
         this.playerMenuUtility.getOwner().openInventory(this.inventory);
         this.playerMenuUtility.pushMenu(this);
     }
 
     public void back() throws MenuManagerException, MenuManagerNotSetupException {
-        ExApi.openMenu(this.playerMenuUtility.lastMenu().getClass(), this.playerMenuUtility.getOwner());
+        ExApi.openMenuOf(this.playerMenuUtility.lastMenu().getClass(), this.playerMenuUtility.getOwner());
+    }
+
+    protected void reload() throws MenuManagerException, MenuManagerNotSetupException {
+        this.player.closeInventory();
+        ExApi.openMenuOf(this.getClass(), this.player);
+    }
+
+    public void closeInventory() {
+        this.player.closeInventory();
     }
 
     public void reloadItems() {
         for (int i = 0; i < this.inventory.getSize(); ++i) {
             this.inventory.setItem(i, null);
         }
-        this.setMenuItems();
-    }
-
-    protected void reload() throws MenuManagerException, MenuManagerNotSetupException {
-        this.player.closeInventory();
-        ExApi.openMenu(this.getClass(), this.player);
-    }
-
-    public void closeInventory() {
-        this.player.closeInventory();
+        this.addItems();
     }
 
     public @NotNull Inventory getInventory() {

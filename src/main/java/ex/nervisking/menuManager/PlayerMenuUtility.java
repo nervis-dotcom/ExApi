@@ -1,16 +1,20 @@
 package ex.nervisking.menuManager;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
-
 import org.bukkit.entity.Player;
 
 public class PlayerMenuUtility {
 
     private final Player owner;
-    private final Stack<Menu> history = new Stack<>();
+    private final Stack<Menu> history;
+    private final Map<String, Object> dataGui;
 
     public PlayerMenuUtility(Player player) {
         this.owner = player;
+        this.history = new Stack<>();
+        this.dataGui = new HashMap<>();
     }
 
     public Player getOwner() {
@@ -27,5 +31,19 @@ public class PlayerMenuUtility {
 
     public void pushMenu(Menu menu) {
         this.history.push(menu);
+    }
+
+    public void setData(String key, Object value) {
+        this.dataGui.put(key, value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T getData(String key, Class<T> clazz) {
+        Object value = this.dataGui.get(key);
+        if (value == null) return null;
+        if (clazz.isInstance(value)) {
+            return (T) value;
+        }
+        throw new ClassCastException("Cannot cast " + value.getClass().getName() + " to " + clazz.getName());
     }
 }

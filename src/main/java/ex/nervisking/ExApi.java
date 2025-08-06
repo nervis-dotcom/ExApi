@@ -2,9 +2,11 @@ package ex.nervisking;
 
 import ex.nervisking.ModelManager.ExPl;
 import ex.nervisking.ModelManager.Plugins;
+import ex.nervisking.ModelManager.ToUse;
 import ex.nervisking.exceptions.MenuManagerException;
 import ex.nervisking.exceptions.MenuManagerNotSetupException;
 import ex.nervisking.menuManager.*;
+import ex.nervisking.utils.ExLog;
 import ex.nervisking.utils.ServerVersion;
 import ex.nervisking.utils.Utils;
 import ex.nervisking.utils.UtilsManagers;
@@ -40,7 +42,6 @@ public class ExApi {
     private static String description = "&eDescripción: &f%description%";
     private static String aliases = "&eAlias: &f%aliases%";
     private static String permissions = "&ePermiso: &f%permission%";
-    private static String subsPermissions = "&ePermisos adicionales:";
 
     private static String permissionMessage = "%prefix% &cNo tienes permisos para usar este comando.";
     private static String consoleMessage = "%prefix% &c¡Solo los jugadores pueden usar este comando!";
@@ -64,6 +65,15 @@ public class ExApi {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T extends JavaPlugin> T getPlugin(Class<T> pluginClass) {
+        return (T) plugin;
+    }
+
+    public static JavaPlugin getPlugin() {
+        return plugin;
+    }
+
     public static BungeeMessagingManager getBungeeMessagingManager() {
         return bungeeMessagingManager;
     }
@@ -75,12 +85,14 @@ public class ExApi {
     public static String getPluginAuthor() {
         return descriptionFile != null ? descriptionFile.getAuthors().toString()
                 .replace("[", "")
-                .replace("]", "") : "nervisking";
+                .replace("]", "") : "unknown";
     }
 
     public static PluginDescriptionFile getPluginDescriptionFile() {
         return descriptionFile;
     }
+
+    // menu ------------------------------------------------------------------------------------------------------
 
     private void registerMenuListener(JavaPlugin plugin) {
         boolean isAlreadyRegistered = false;
@@ -98,7 +110,7 @@ public class ExApi {
         }
     }
 
-    public static void openMenu(Class<? extends Menu> menuClass, Player player) throws MenuManagerException, MenuManagerNotSetupException {
+    public static void openMenuOf(Class<? extends Menu> menuClass, Player player) throws MenuManagerException, MenuManagerNotSetupException {
         try {
             menuClass.getConstructor(PlayerMenuUtility.class).newInstance(getPlayerMenuUtility(player)).open();
         } catch (InstantiationException var3) {
@@ -109,6 +121,14 @@ public class ExApi {
             throw new MenuManagerException("Se produjo un error al intentar invocar el constructor de la clase de menú", var5);
         } catch (NoSuchMethodException var6) {
             throw new MenuManagerException("No se pudo encontrar el constructor de la clase de menú", var6);
+        }
+    }
+
+    public static void openMenu(Class<? extends Menu> menuClass, Player player) {
+        try {
+            ExApi.openMenuOf(menuClass, player);
+        } catch (MenuManagerNotSetupException | MenuManagerException e) {
+            ExLog.sendException(e);
         }
     }
 
@@ -138,6 +158,8 @@ public class ExApi {
     public static HashMap<Player, PlayerMenuUtility> getPlayerMenuUtilityMap() {
         return playerMenuUtilityMap;
     }
+
+    // -------------------------------------------------------------------------------------------------------------
 
     private void setVersion() {
         String packageName = Bukkit.getServer().getClass().getPackage().getName();
@@ -171,19 +193,20 @@ public class ExApi {
         }
     }
 
-    public static boolean isPlugin(String plugin) {
-        Plugin wgPlugin = ExApi.plugin.getServer().getPluginManager().getPlugin(plugin);
-        return wgPlugin != null && wgPlugin.isEnabled();
+    @ToUse(description = "verificar si el plugin esta activo")
+    public static boolean isPlugin(String pluginName) {
+        Plugin plugin = ExApi.plugin.getServer().getPluginManager().getPlugin(pluginName);
+        return plugin != null && plugin.isEnabled();
     }
 
+    @ToUse(description = "verificar si el plugin esta activo")
     public static boolean isPlugin(ExPl exPl) {
-        Plugin wgPlugin = ExApi.plugin.getServer().getPluginManager().getPlugin(exPl.getName());
-        return wgPlugin != null && wgPlugin.isEnabled();
+        return ExApi.isPlugin(exPl.getName());
     }
 
+    @ToUse(description = "verificar si el plugin esta activo")
     public static boolean isPlugin(Plugins plugins) {
-        Plugin wgPlugin = ExApi.plugin.getServer().getPluginManager().getPlugin(plugins.getName());
-        return wgPlugin != null && wgPlugin.isEnabled();
+        return ExApi.isPlugin(plugins.getName());
     }
 
     public static boolean isIsMenu() {
@@ -198,10 +221,7 @@ public class ExApi {
         return utils;
     }
 
-    public static JavaPlugin getPlugin() {
-        return plugin;
-    }
-
+    @ToUse()
     public static void setPrefix(String prefix) {
         ExApi.prefix = prefix;
     }
@@ -214,6 +234,7 @@ public class ExApi {
         return usage;
     }
 
+    @ToUse()
     public static void setUsage(String usage) {
         ExApi.usage = usage;
     }
@@ -222,6 +243,7 @@ public class ExApi {
         return description;
     }
 
+    @ToUse()
     public static void setDescription(String description) {
         ExApi.description = description;
     }
@@ -230,6 +252,7 @@ public class ExApi {
         return aliases;
     }
 
+    @ToUse()
     public static void setAliases(String aliases) {
         ExApi.aliases = aliases;
     }
@@ -238,6 +261,7 @@ public class ExApi {
         return permissions;
     }
 
+    @ToUse()
     public static void setPermissions(String permissions) {
         ExApi.permissions = permissions;
     }
@@ -246,6 +270,7 @@ public class ExApi {
         return permissionMessage;
     }
 
+    @ToUse()
     public static void setPermissionMessage(String permissionMessage) {
         ExApi.permissionMessage = permissionMessage;
     }
@@ -254,6 +279,7 @@ public class ExApi {
         return consoleMessage;
     }
 
+    @ToUse()
     public static void setConsoleMessage(String consoleMessage) {
         ExApi.consoleMessage = consoleMessage;
     }
@@ -262,6 +288,7 @@ public class ExApi {
         return invalidityAmountMessage;
     }
 
+    @ToUse()
     public static void setInvalidityAmountMessage(String invalidityAmountMessage) {
         ExApi.invalidityAmountMessage = invalidityAmountMessage;
     }
@@ -270,22 +297,16 @@ public class ExApi {
         return noOnlineMessage;
     }
 
+    @ToUse()
     public static void setNoOnlineMessage(String noOnlineMessage) {
         ExApi.noOnlineMessage = noOnlineMessage;
-    }
-
-    public static String getSubsPermissions() {
-        return subsPermissions;
-    }
-
-    public static void setSubsPermissions(String subsPermissions) {
-        ExApi.subsPermissions = subsPermissions;
     }
 
     public static String getNeverConnected() {
         return neverConnected;
     }
 
+    @ToUse()
     public static void setNeverConnected(String neverConnected) {
         ExApi.neverConnected = neverConnected;
     }
