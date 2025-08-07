@@ -82,6 +82,10 @@ public abstract class ExPlugin extends JavaPlugin {
         return wgPlugin != null && wgPlugin.isEnabled();
     }
 
+    public void setPutOut() {
+        getServer().getPluginManager().disablePlugin(this);
+    }
+
     public UtilsManagers getUtilsManagers() {
         return utilsManagers;
     }

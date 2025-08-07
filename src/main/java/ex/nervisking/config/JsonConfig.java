@@ -3,7 +3,7 @@ package ex.nervisking.config;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import ex.nervisking.ExApi;
-import ex.nervisking.ModelManager.Logger;
+import ex.nervisking.utils.ExLog;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -11,6 +11,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
@@ -43,14 +44,14 @@ public class JsonConfig {
         if (!file.exists()) {
             if (plugin.getResource(resourcePath) != null) {
                 plugin.saveResource(resourcePath, false);
-                ExApi.getUtilsManagers().sendLogger(Logger.INFO, "Archivo por defecto '" + resourcePath + "' copiado al directorio de datos.");
+                ExLog.sendInfo("Archivo por defecto '" + resourcePath + "' copiado al directorio de datos.");
             } else {
                 try {
                     file.createNewFile();
                     root = new JsonObject();
                     save();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    ExLog.sendException(e);
                 }
             }
         }
@@ -58,12 +59,26 @@ public class JsonConfig {
         this.load();
     }
 
+    public JsonConfig(String fileName) {
+        this(fileName, null);
+    }
+
+    @Contract("_, _ -> new")
+    public static @NotNull JsonConfig of(String fileName, String folderName) {
+        return new JsonConfig(fileName, folderName);
+    }
+
+    @Contract("_ -> new")
+    public static @NotNull JsonConfig of(String fileName) {
+        return new JsonConfig(fileName);
+    }
+
     private void load() {
         try (Reader reader = new FileReader(file)) {
             this.root = gson.fromJson(reader, JsonObject.class);
             if (this.root == null) this.root = new JsonObject();
         } catch (IOException e) {
-            e.printStackTrace();
+            ExLog.sendException(e);
             this.root = new JsonObject();
         }
     }
@@ -72,7 +87,7 @@ public class JsonConfig {
         try (Writer writer = new FileWriter(file)) {
             gson.toJson(root, writer);
         } catch (IOException e) {
-            e.printStackTrace();
+            ExLog.sendException(e);
         }
     }
 
@@ -428,7 +443,7 @@ public class JsonConfig {
             int b = json.get("b").getAsInt();
             return Color.fromRGB(r, g, b);
         } catch (Exception e) {
-            e.printStackTrace();
+            ExLog.sendException(e);
             return null;
         }
     }
@@ -466,7 +481,7 @@ public class JsonConfig {
             if (world == null) return null;
             return new Location(world, x, y, z, yaw, pitch);
         } catch (Exception e) {
-            e.printStackTrace();
+            ExLog.sendException(e);
             return null;
         }
     }

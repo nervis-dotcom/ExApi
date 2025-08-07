@@ -78,6 +78,9 @@ public class ExApi {
         return bungeeMessagingManager;
     }
 
+    public static String getPluginName() {
+        return descriptionFile != null ? descriptionFile.getName() : "unknown";
+    }
     public static String getPluginVersion() {
         return descriptionFile != null ? descriptionFile.getVersion() : "0.0.1-SNAPSHOT";
     }
