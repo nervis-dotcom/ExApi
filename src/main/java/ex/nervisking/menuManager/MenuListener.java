@@ -21,20 +21,20 @@ import java.util.Objects;
 public record MenuListener(HashMap<Player, PlayerMenuUtility> playerMenuUtilityMap) implements Listener {
 
     @EventHandler
-    public void onMenuClick(InventoryClickEvent e) {
-        Player player = (Player) e.getWhoClicked();
-        InventoryHolder holder = InventoryUtils.getTopInventory(e).getHolder();
+    public void onMenuClick(InventoryClickEvent event) {
+        Player player = (Player) event.getWhoClicked();
+        InventoryHolder holder = InventoryUtils.getTopInventory(event).getHolder();
         if (holder instanceof Menu menu) {
             if (menu.setCancelClicks()) {
-                e.setCancelled(true);
+                event.setCancelled(true);
             }
 
             Inventory topInventory = InventoryUtils.getTopInventory(player);
-            boolean isTop = menu.setTopInventory() && Objects.equals(e.getClickedInventory(), topInventory);
+            boolean isTop = menu.setTopInventory() && Objects.equals(event.getClickedInventory(), topInventory);
 
             if (isTop || !menu.setTopInventory()) {
                 try {
-                    menu.handleMenu(e);
+                    menu.handleMenu(event);
                 } catch (MenuManagerNotSetupException ex) {
                     ExLog.sendError("EL ADMINISTRADOR NO SE HA CONFIGURADO. LLAME A 'Menu() {return true}' en ExPlugin");
                 } catch (MenuManagerException ex) {
@@ -70,12 +70,11 @@ public record MenuListener(HashMap<Player, PlayerMenuUtility> playerMenuUtilityM
     }
 
     /**
-     * @since 1.1.0
+     * @since 1.0.1
      */
     @EventHandler
-    public void onPlayerQuit(PlayerQuitEvent e) {
+    public void onPlayerQuit(PlayerQuitEvent event) {
         if (!ExApi.isIsMenu()) return;
-        Player player = e.getPlayer();
-        playerMenuUtilityMap.remove(player);
+        playerMenuUtilityMap.remove(event.getPlayer());
     }
 }

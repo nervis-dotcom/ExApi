@@ -8,9 +8,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 import org.jetbrains.annotations.NotNull;
 
-public class BungeeMessagingManager implements PluginMessageListener {
-
-    private final JavaPlugin plugin;
+public record BungeeMessagingManager(JavaPlugin plugin) implements PluginMessageListener {
 
     public BungeeMessagingManager(JavaPlugin plugin) {
         this.plugin = plugin;

@@ -251,6 +251,7 @@ public class UtilsManagers extends Utils {
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), setPlaceholders(player, cmd));
         }
     }
+
     public void sendConsoleCommand(Player player, List<String> commands) {
       this.sendConsoleCommand(player, commands.toArray(new String[0]));
     }

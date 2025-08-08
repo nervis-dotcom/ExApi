@@ -1,4 +1,4 @@
-package ex.nervisking.ModelManager;
+package ex.nervisking.ModelManager.Pattern;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

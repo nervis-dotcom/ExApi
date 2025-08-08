@@ -11,6 +11,12 @@ public class Task {
     }
 
     public void cancel() {
-        bukkitTask.cancel();
+        if (bukkitTask != null && !bukkitTask.isCancelled()) {
+            bukkitTask.cancel();
+        }
+    }
+
+    public boolean isRunning() {
+        return bukkitTask != null && !bukkitTask.isCancelled();
     }
 }

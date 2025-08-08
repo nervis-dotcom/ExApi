@@ -1,21 +1,13 @@
 package ex.nervisking;
 
-import ex.nervisking.Event.armorequipevent.ArmorListener;
-import ex.nervisking.Event.itemselectevent.ItemSelectListener;
-import ex.nervisking.ModelManager.ExPl;
-import ex.nervisking.ModelManager.Plugins;
-import ex.nervisking.ModelManager.Scheduler;
-import ex.nervisking.ModelManager.Task;
+import ex.nervisking.ModelManager.*;
 import ex.nervisking.command.CommandManager;
 import ex.nervisking.menuManager.*;
 import ex.nervisking.utils.PyfigletMessage;
 import ex.nervisking.utils.Utils;
 import ex.nervisking.utils.UtilsManagers;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.ArrayList;
 
 public abstract class ExPlugin extends JavaPlugin {
 
@@ -51,10 +43,10 @@ public abstract class ExPlugin extends JavaPlugin {
         if (Menu()) {
             this.gui = Scheduler.runTimer(new UpdateMenus(), 0, 20);
         }
+        if (isPlugin("ExMagic")) {
+            return;
+        }
 
-        PluginManager pm = getServer().getPluginManager();
-        pm.registerEvents(new ArmorListener(new ArrayList<>()), this);
-        pm.registerEvents(new ItemSelectListener(this), this);
         this.Enabled();
     }
 
@@ -67,19 +59,18 @@ public abstract class ExPlugin extends JavaPlugin {
         this.Disable();
     }
 
-    public boolean isPlugin(String plugin) {
-        Plugin wgPlugin = getServer().getPluginManager().getPlugin(plugin);
-        return wgPlugin != null && wgPlugin.isEnabled();
+
+    public boolean isPlugin(String pluginName) {
+        Plugin plugin = getServer().getPluginManager().getPlugin(pluginName);
+        return plugin != null && plugin.isEnabled();
     }
 
     public boolean isPlugin(ExPl exPl) {
-        Plugin wgPlugin = getServer().getPluginManager().getPlugin(exPl.getName());
-        return wgPlugin != null && wgPlugin.isEnabled();
+        return this.isPlugin(exPl.getName());
     }
 
     public boolean isPlugin(Plugins plugins) {
-        Plugin wgPlugin = getServer().getPluginManager().getPlugin(plugins.getName());
-        return wgPlugin != null && wgPlugin.isEnabled();
+        return this.isPlugin(plugins.getName());
     }
 
     public void setPutOut() {

@@ -2,7 +2,7 @@ package ex.nervisking;
 
 import ex.nervisking.ModelManager.ExPl;
 import ex.nervisking.ModelManager.Plugins;
-import ex.nervisking.ModelManager.ToUse;
+import ex.nervisking.ModelManager.Pattern.ToUse;
 import ex.nervisking.exceptions.MenuManagerException;
 import ex.nervisking.exceptions.MenuManagerNotSetupException;
 import ex.nervisking.menuManager.*;
@@ -74,13 +74,19 @@ public class ExApi {
         return plugin;
     }
 
+    public static <T extends JavaPlugin> T getPluginOf(Class<T> clazz) {
+        return clazz.cast(plugin);
+    }
+
     public static BungeeMessagingManager getBungeeMessagingManager() {
         return bungeeMessagingManager;
     }
 
+    @ToUse
     public static String getPluginName() {
         return descriptionFile != null ? descriptionFile.getName() : "unknown";
     }
+
     public static String getPluginVersion() {
         return descriptionFile != null ? descriptionFile.getVersion() : "0.0.1-SNAPSHOT";
     }
@@ -91,6 +97,7 @@ public class ExApi {
                 .replace("]", "") : "unknown";
     }
 
+    @ToUse
     public static PluginDescriptionFile getPluginDescriptionFile() {
         return descriptionFile;
     }
@@ -127,6 +134,7 @@ public class ExApi {
         }
     }
 
+    @ToUse(description = "Método para abir menus")
     public static void openMenu(Class<? extends Menu> menuClass, Player player) {
         try {
             ExApi.openMenuOf(menuClass, player);
