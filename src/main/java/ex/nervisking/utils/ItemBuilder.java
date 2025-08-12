@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import ex.nervisking.ExApi;
-import ex.nervisking.ModelManager.Logger;
 import ex.nervisking.itemsManager.ItemUtils;
 import ex.nervisking.itemsManager.RDMaterial;
 import org.bukkit.*;
@@ -635,7 +634,7 @@ public class ItemBuilder {
             Attribute attribute = Attribute.valueOf(attributeName.toUpperCase());
             meta.addAttributeModifier(attribute, modifier);
         } catch (IllegalArgumentException e) {
-            ExApi.getUtilsManagers().sendLogger(Logger.WARNING,"Atributo inválido '" + attributeName + "'");
+            ExLog.sendWarning("Atributo inválido '" + attributeName + "'");
         }
         return this;
     }
@@ -796,7 +795,7 @@ public class ItemBuilder {
 
                     url = new URL(urlText);
                 } catch (Exception error) {
-                    error.printStackTrace();
+                    ExLog.sendException(error);
                     return this;
                 }
                 textures.setSkin(url);
@@ -964,7 +963,7 @@ public class ItemBuilder {
             try {
                 meta.setRarity(ItemRarity.valueOf(rarityName.toUpperCase()));
             } catch (IllegalArgumentException e) {
-                ExApi.getUtilsManagers().sendLogger(Logger.WARNING, "Rarity inválido: " + rarityName);
+                ExLog.sendWarning("Rarity inválido: " + rarityName);
             }
         }
         return this;
@@ -1248,15 +1247,15 @@ public class ItemBuilder {
      */
     public boolean give() {
         if (error.isStatus()) {
-            ExApi.getUtilsManagers().sendLogger(Logger.WARNING, "no se pudo construir el item.");
+            ExLog.sendWarning("no se pudo construir el item.");
             return false;
         }
         if (player == null) {
-            ExApi.getUtilsManagers().sendLogger(Logger.WARNING, "player es null.");
+            ExLog.sendWarning("player es null.");
             return false;
         }
         if (!player.isOnline()) {
-            ExApi.getUtilsManagers().sendLogger(Logger.WARNING, "player no online.");
+            ExLog.sendWarning("player no online.");
             return false;
         }
 

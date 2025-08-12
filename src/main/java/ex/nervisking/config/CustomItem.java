@@ -4,15 +4,16 @@ import ex.nervisking.utils.ItemBuilder;
 import org.bukkit.Color;
 import org.bukkit.entity.Player;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class CustomItem {
 
     private String id;
-    private String name;
+    public String name;
+    public List<String> lore;
     private int amount;
-    private List<String> lore;
     private Map<String, Integer> enchantments;
     private int durability;
     private int maxDurability;
@@ -124,6 +125,18 @@ public class CustomItem {
         this.trimMaterial = trimMaterial;
     }
 
+    public ItemBuilder getItemBuilder() {
+        return toItemBuilder(null, new HashMap<>());
+    }
+
+    public ItemBuilder getItemBuilder(Player player) {
+        return toItemBuilder(player, new HashMap<>());
+    }
+
+    public ItemBuilder getItemBuilder(Map<String, String> variables) {
+        return toItemBuilder(null, variables);
+    }
+
     public ItemBuilder toItemBuilder(Player player, Map<String, String> variables) {
         String parsedName = replaceVariables(this.name, variables);
 
@@ -131,7 +144,7 @@ public class CustomItem {
                 ? this.lore.stream().map(line -> replaceVariables(line, variables)).toList()
                 : List.of();
 
-        ItemBuilder item = (player != null ? ItemBuilder.of(player, this.id != null ? this.id : "barrier") : ItemBuilder.of(this.id != null ? this.id : "barrier"))
+        ItemBuilder item = (player != null ? ItemBuilder.of(player, this.id) : ItemBuilder.of(this.id))
                 .setName(parsedName)
                 .setLore(parsedLore)
                 .setAmount(this.amount)

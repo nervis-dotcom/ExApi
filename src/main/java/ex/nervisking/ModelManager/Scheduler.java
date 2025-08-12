@@ -3,6 +3,7 @@ package ex.nervisking.ModelManager;
 import ex.nervisking.ExApi;
 import ex.nervisking.utils.methods.TimeParser;
 import org.bukkit.Bukkit;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
@@ -41,6 +42,18 @@ public final class Scheduler {
      */
     public static Task runLater(Runnable runnable, long delayTicks) {
         return new Task(Bukkit.getScheduler().runTaskLater(ExApi.getPlugin(), runnable, delayTicks));
+    }
+
+    public static void runTimer(Consumer<Task> action, long delayTicks, long periodTicks) {
+        final Task[] holder = new Task[1];
+
+        BukkitTask bukkitTask = Bukkit.getScheduler().runTaskTimer(ExApi.getPlugin(), () -> {
+            action.accept(holder[0]); // Aquí el código de la tarea recibe su Task
+        }, delayTicks, periodTicks);
+
+        Task task = new Task(bukkitTask);
+        holder[0] = task;
+
     }
 
     /**

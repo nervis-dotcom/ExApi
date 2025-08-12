@@ -3,7 +3,6 @@ package ex.nervisking.utils;
 import ex.nervisking.ExApi;
 import ex.nervisking.ModelManager.ColorUtil;
 import ex.nervisking.ModelManager.CustomColor;
-import ex.nervisking.ModelManager.Logger;
 import ex.nervisking.ModelManager.Scheduler;
 
 import java.awt.*;
@@ -54,7 +53,7 @@ public class DiscordWebhooks {
 
     public DiscordWebhooks setAvatar(String url) {
         if (!url.startsWith("http")) {
-            utilsManagers.sendLogger(Logger.WARNING, "Avatar URL inválido: " + url);
+            ExLog.sendError("Avatar URL inválido: " + url);
             return this;
         }
         if (rootBuilder.length() > 0) rootBuilder.append(",");
@@ -254,24 +253,21 @@ public class DiscordWebhooks {
 
             int code = connection.getResponseCode();
             if (code != HttpURLConnection.HTTP_NO_CONTENT && code != HttpURLConnection.HTTP_OK) {
-                utilsManagers.sendLogger(Logger.ERROR, "Failed to send message. HTTP error code: " + code);
+                ExLog.sendError("Failed to send message. HTTP error code: " + code);
             }
 
         } catch (MalformedURLException e) {
-            utilsManagers.sendLogger(Logger.ERROR, "URL malformada: " + e.getMessage());
-            e.printStackTrace();
+            ExLog.sendException(e, "URL malformada: " + e.getMessage());
         } catch (IOException e) {
-            utilsManagers.sendLogger(Logger.ERROR, "Error de entrada/salida: " + e.getMessage());
-            e.printStackTrace();
+            ExLog.sendException(e, "Error de entrada/salida: " + e.getMessage());
         } catch (Exception e) {
-            utilsManagers.sendLogger(Logger.ERROR, "Error desconocido: " + e.getMessage());
-            e.printStackTrace();
+            ExLog.sendException(e, "Error desconocido: " + e.getMessage());
         } finally {
             if (os != null) {
                 try {
                     os.close();
                 } catch (IOException e) {
-                    utilsManagers.sendLogger(Logger.ERROR, "Error al cerrar OutputStream: " + e.getMessage());
+                    ExLog.sendException(e, "Error al cerrar OutputStream: " + e.getMessage());
                 }
             }
             if (connection != null) {
@@ -300,5 +296,5 @@ public class DiscordWebhooks {
                 .replace("\t", "\\t");
     }
 
-    private record Field(String name, String value, boolean inline) { }
+    private record Field(String name, String value, boolean inline) {}
 }

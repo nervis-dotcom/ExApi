@@ -1,6 +1,9 @@
 package ex.nervisking.utils.methods;
 
 import ex.nervisking.ExApi;
+import ex.nervisking.ModelManager.Pattern.ToUse;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,47 +11,65 @@ import java.util.UUID;
 
 public class Cooldown {
 
-    private final Map<UUID, Long> cooldowns = new HashMap<>();
+    private final Map<UUID, Long> cooldowns;
 
-    /**
-     * Intenta activar una acción con cooldown para un jugador.
-     * @param uuid del Jugador que ejecuta la acción
-     * @param cooldown Tiempo en milisegundos
-     * @return true si el jugador está en cooldown, false si puede usar la acción
-     */
+    public Cooldown() {
+        this.cooldowns = new HashMap<>();
+    }
+
+    @Contract(value = " -> new", pure = true)
+    public static @NotNull Cooldown of() {
+        return new Cooldown();
+    }
+
+    @ToUse(
+            value = "Intenta activar una acción con cooldown para un jugador.",
+            params = {
+                    "uuid: UUID del jugador que ejecuta la acción",
+                    "cooldown: Tiempo en milisegundos"
+            },
+            returns = "si el jugador está en cooldown, false si puede usar la acción"
+    )
     public boolean tryCooldown(UUID uuid, long cooldown) {
         long currentTime = System.currentTimeMillis();
 
-        if (isOnCooldown(uuid)) return true;
+        if (isOnCooldown(uuid)){
+            return true;
+        }
 
         cooldowns.put(uuid, currentTime + cooldown);
         return false;
     }
 
-    /**
-     * Intenta activar una acción con cooldown para un jugador.
-     * @param uuid del Jugador que ejecuta la acción
-     * @param cooldown Tiempo en milisegundos
-     * @return true si el jugador está en cooldown, false si puede usar la acción
-     */
+    @ToUse(
+            value = "Intenta activar una acción con cooldown para un jugador.",
+            params = {
+                    "uuid: UUID del Jugador que ejecuta la acción",
+                    "cooldown: Tiempo en milisegundos"
+            },
+            returns = "true si el jugador está en cooldown, false si puede usar la acción"
+    )
     public boolean tryCooldown(UUID uuid, String cooldown) {
         long currentTime = System.currentTimeMillis();
 
-        if (isOnCooldown(uuid)) return true;
+        if (isOnCooldown(uuid)) {
+            return true;
+        }
 
         long cooldownMillis = ExApi.getUtils().parseTime(cooldown);
-        if (cooldownMillis <= 0) return true; // o lanzar error/logger
+        if (cooldownMillis <= 0) {
+            return true; // o lanzar error/logger
+        }
 
         cooldowns.put(uuid, currentTime + cooldownMillis);
         return false;
     }
 
-
-    /**
-     * Obtiene el tiempo restante del cooldown en milisegundos.
-     * @param uuid del Jugador
-     * @return Tiempo restante en milisegundos (0 si no está en cooldown)
-     */
+    @ToUse(
+            value = "Obtiene el tiempo restante del cooldown en milisegundos.",
+            params = "uuid: UUID del Jugador",
+            returns = "Tiempo restante en milisegundos (0 si no está en cooldown)"
+    )
     public long getCooldownTime(UUID uuid) {
         Long endTime = cooldowns.get(uuid);
         if (endTime == null) return 0L;
@@ -56,24 +77,22 @@ public class Cooldown {
         return Math.max(endTime - System.currentTimeMillis(), 0L);
     }
 
-    /**
-     * Verifica si el jugador está en cooldown.
-     * @param uuid del Jugador
-     * @return true si está en cooldown, false si no
-     */
+    @ToUse(
+            value = "Verifica si el jugador está en cooldown.",
+            params = "uuid: UUID del Jugador",
+            returns = "true si está en cooldown, false si no"
+    )
     public boolean isOnCooldown(UUID uuid) {
         Long endTime = cooldowns.get(uuid);
         return endTime != null && endTime > System.currentTimeMillis();
     }
 
-    /**
-     * Elimina el cooldown del jugador.
-     * @param uuid del Jugador
-     */
+    @ToUse(value = "Elimina el cooldown del jugador.", params = "uuid: UUID del Jugador")
     public void removeCooldown(UUID uuid) {
         cooldowns.remove(uuid);
     }
 
+    @ToUse
     public String getCooldownTimeFormat(UUID uuid) {
         long seconds = getCooldownTime(uuid) / 1000;
         long days = seconds / 86400;
@@ -91,5 +110,4 @@ public class Cooldown {
 
         return sb.toString().trim();
     }
-
 }

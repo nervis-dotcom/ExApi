@@ -1,5 +1,7 @@
 package ex.nervisking.ModelManager;
 
+import ex.nervisking.ModelManager.Pattern.ToUse;
+
 import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
@@ -81,14 +83,17 @@ public enum CustomColor {
         }
     }
 
+    @ToUse
     public Color getColor() {
         return color;
     }
 
+    @ToUse
     public String getHex() {
         return hex;
     }
 
+    @ToUse
     public String getCode() {
         return code;
     }
@@ -114,6 +119,7 @@ public enum CustomColor {
         return color;
     }
 
+    @ToUse
     public static String applyGradientRandom(String text) {
         CustomColor start = getRandom();
         CustomColor end = getRandom();
@@ -145,6 +151,7 @@ public enum CustomColor {
      * Aplica un gradiente entre dos colores completamente aleatorios (RGB puro).
      * @since 1.0.2
      */
+    @ToUse
     public static String applyPureGradientRandom(String text) {
         Color start = PURE_RANDOM.getColor();
         Color end = PURE_RANDOM.getColor();

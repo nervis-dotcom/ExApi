@@ -2,12 +2,15 @@ package ex.nervisking.utils;
 
 import ex.nervisking.ExApi;
 import ex.nervisking.ModelManager.Logger;
+import ex.nervisking.ModelManager.Scheduler;
+import ex.nervisking.ModelManager.Task;
 import org.bukkit.Bukkit;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarFlag;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -20,7 +23,7 @@ public class BossBar {
     private final Set<UUID> players;
     private final Set<BarFlag> barFlags;
     private org.bukkit.boss.BossBar bossBar;
-    private BukkitRunnable task;
+    private Task task;
     private boolean running;
     private Runnable onFinish;
     private BossBarTick onTick;
@@ -60,23 +63,28 @@ public class BossBar {
         this.createBossBar();
     }
 
-    public static BossBar of() {
+    @Contract(" -> new")
+    public static @NotNull BossBar of() {
         return new BossBar();
     }
 
-    public static BossBar of(String title) {
+    @Contract("_ -> new")
+    public static @NotNull BossBar of(String title) {
         return new BossBar(title);
     }
 
-    public static BossBar of(String title, BarColor barColor) {
+    @Contract("_, _ -> new")
+    public static @NotNull BossBar of(String title, BarColor barColor) {
         return new BossBar(title, barColor);
     }
 
-    public static BossBar of(String title, BarStyle barStyle) {
+    @Contract("_, _ -> new")
+    public static @NotNull BossBar of(String title, BarStyle barStyle) {
         return new BossBar(title, barStyle);
     }
 
-    public static BossBar of(String title, BarColor barColor, BarStyle barStyle) {
+    @Contract("_, _, _ -> new")
+    public static @NotNull BossBar of(String title, BarColor barColor, BarStyle barStyle) {
         return new BossBar(title, barColor, barStyle);
     }
 
@@ -155,9 +163,8 @@ public class BossBar {
             barColor = BarColor.valueOf(color.toUpperCase());
         } catch (IllegalArgumentException e) {
             barColor = BarColor.WHITE;
-            this.utilsManagers.sendLogger(Logger.WARNING, "Color de la bossbar no es correcto: " + color);
+            ExLog.sendWarning("Color de la bossbar no es correcto: " + color);
         }
-        this.color = barColor;
         return setColor(barColor);
     }
 
@@ -167,9 +174,8 @@ public class BossBar {
             barStyle = BarStyle.valueOf(style.toUpperCase());
         } catch (IllegalArgumentException e) {
             barStyle = BarStyle.SOLID;
-            this.utilsManagers.sendLogger(Logger.WARNING, "Estilo de la bossbar no es correcto: " + style);
+            ExLog.sendWarning( "Estilo de la bossbar no es correcto: " + style);
         }
-        this.style = barStyle;
         return setStyle(barStyle);
     }
 
@@ -262,7 +268,7 @@ public class BossBar {
     }
 
     public void destroy() {
-        stop();
+        this.stop();
         this.bossBar = null;
     }
 
@@ -278,17 +284,17 @@ public class BossBar {
 
     public void start() {
         if (running) {
-            utilsManagers.sendLogger(Logger.WARNING, "Ya hay una bossbar activa. No se puede iniciar otra.", true);
+            ExLog.sendLogger(Logger.WARNING, "Ya hay una bossbar activa. No se puede iniciar otra.", true);
             return;
         }
 
         if (timeLeft <= 0) {
-            utilsManagers.sendLogger(Logger.WARNING, "No se puede iniciar la bossbar sin haber asignado un tiempo.", true);
+            ExLog.sendLogger(Logger.WARNING, "No se puede iniciar la bossbar sin haber asignado un tiempo.", true);
             return;
         }
 
         if (players.isEmpty()) {
-            utilsManagers.sendLogger(Logger.WARNING, "No se puede iniciar la bossbar sin jugadores asignados.", true);
+            ExLog.sendLogger(Logger.WARNING, "No se puede iniciar la bossbar sin jugadores asignados.", true);
             return;
         }
 
@@ -305,45 +311,45 @@ public class BossBar {
 
     public void pause() {
         if (!running || task == null) {
-            this.utilsManagers.sendLogger(Logger.INFO, "La bossbar no está activa. No se puede pausar.", true);
+            ExLog.sendLogger(Logger.INFO, "La bossbar no está activa. No se puede pausar.", true);
             return;
         }
 
         this.task.cancel();
         this.task = null;
         this.running = false;
-        this.utilsManagers.sendLogger(Logger.INFO, "La bossbar ha sido pausada.", true);
+        ExLog.sendLogger(Logger.INFO, "La bossbar ha sido pausada.", true);
     }
 
     public void resume() {
         if (running) {
-            this.utilsManagers.sendLogger(Logger.WARNING, "La bossbar ya está activa. No se puede reanudar.", true);
+            ExLog.sendLogger(Logger.WARNING, "La bossbar ya está activa. No se puede reanudar.", true);
             return;
         }
 
         if (timeLeft <= 0) {
-            this.utilsManagers.sendLogger(Logger.WARNING, "No se puede reanudar la bossbar: no queda tiempo.", true);
+            ExLog.sendLogger(Logger.WARNING, "No se puede reanudar la bossbar: no queda tiempo.", true);
             return;
         }
 
         if (players.isEmpty()) {
-            this.utilsManagers.sendLogger(Logger.WARNING, "No se puede reanudar la bossbar sin jugadores asignados.", true);
+            ExLog.sendLogger(Logger.WARNING, "No se puede reanudar la bossbar sin jugadores asignados.", true);
             return;
         }
 
         this.running = true;
         this.startTimer();
-        this.utilsManagers.sendLogger(Logger.INFO, "La bossbar ha sido reanudada.", true);
+        ExLog.sendLogger(Logger.INFO, "La bossbar ha sido reanudada.", true);
     }
 
     public void restart() {
         if (players.isEmpty()) {
-            this.utilsManagers.sendLogger(Logger.WARNING, "No se puede reiniciar la bossbar sin jugadores asignados.", true);
+            ExLog.sendLogger(Logger.WARNING, "No se puede reiniciar la bossbar sin jugadores asignados.", true);
             return;
         }
 
         if (initialTime <= 0) {
-            this.utilsManagers.sendLogger(Logger.WARNING, "No se puede reiniciar la bossbar: no se ha definido un tiempo inicial.", true);
+            ExLog.sendLogger(Logger.WARNING, "No se puede reiniciar la bossbar: no se ha definido un tiempo inicial.", true);
             return;
         }
 
@@ -355,13 +361,11 @@ public class BossBar {
         this.totalTime = initialTime;
         this.running = true;
         this.startTimer();
-        this.utilsManagers.sendLogger(Logger.INFO, "La bossbar ha sido reiniciada desde " + initialTime + " segundos.", true);
+        ExLog.sendLogger(Logger.INFO, "La bossbar ha sido reiniciada desde " + initialTime + " segundos.", true);
     }
 
     private void startTimer() {
-        this.task = new BukkitRunnable() {
-            @Override
-            public void run() {
+        this.task = Scheduler.runTimer(() -> {
                 if (timeLeft <= 0 || !hasOnlinePlayers()) {
                     if (onFinish != null) onFinish.run();
                     remove();
@@ -374,7 +378,9 @@ public class BossBar {
                     Player player = Bukkit.getPlayer(uuid);
 
                     if (player == null || !player.isOnline() || (deleteAnDeath && player.isDead())) {
-                        if (player != null) bossBar.removePlayer(player);
+                        if (player != null) {
+                            bossBar.removePlayer(player);
+                        }
                         iterator.remove();
                     }
                 }
@@ -383,7 +389,7 @@ public class BossBar {
                     try {
                         onTick.run(BossBar.this);
                     } catch (Exception e) {
-                        utilsManagers.sendLogger(Logger.WARNING, "Error en onTick de la bossbar: " + e.getMessage());
+                        ExLog.sendWarning("Error en onTick de la bossbar: " + e.getMessage());
                     }
                 }
 
@@ -394,9 +400,7 @@ public class BossBar {
                 }
 
                 timeLeft -= 1000;
-            }
-        };
-        this.task.runTaskTimer(ExApi.getPlugin(), 0L, 20L);
+        }, 0L, 20L);
     }
 
     private boolean hasOnlinePlayers() {
@@ -421,7 +425,7 @@ public class BossBar {
         return this.running;
     }
 
-    public BukkitRunnable getTask() {
+    public Task getTask() {
         return this.task;
     }
 

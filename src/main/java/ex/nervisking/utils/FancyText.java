@@ -1,33 +1,16 @@
 package ex.nervisking.utils;
 
+import ex.nervisking.ModelManager.Pattern.ToUse;
 import ex.nervisking.ModelManager.TextStyle;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class FancyText {
 
     private static final String from = "abcdefghijklmnñopqrstuvwxyzABCDEFGHIJKLMNÑOPQRSTUVWXYZ0123456789";
 
-//    public static String convertText(String text, TextStyle style) {
-//        if (style == null || style == TextStyle.NONE) return text;
-//
-//        Map<Integer, String> map = getMapForStyle(style);
-//        StringBuilder result = new StringBuilder();
-//        text.codePoints().forEach(cp -> {
-//            System.out.printf("U+%04X -> ", cp);
-//            String converted = map.getOrDefault(cp, new String(Character.toChars(cp)));
-//            System.out.printf("%s (U+%s)%n", converted,
-//                    converted.codePoints()
-//                            .mapToObj(cp2 -> String.format("%04X", cp2))
-//                            .collect(Collectors.joining(",")));
-//            result.append(converted);
-//        });
-//
-//        return result.toString();
-//    }
-
+    @ToUse
     public static String convertText(String text, TextStyle style) {
         if (style == null || style == TextStyle.NONE) return text;
 

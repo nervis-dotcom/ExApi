@@ -43,9 +43,6 @@ public abstract class ExPlugin extends JavaPlugin {
         if (Menu()) {
             this.gui = Scheduler.runTimer(new UpdateMenus(), 0, 20);
         }
-        if (isPlugin("ExMagic")) {
-            return;
-        }
 
         this.Enabled();
     }

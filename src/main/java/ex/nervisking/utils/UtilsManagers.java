@@ -1,7 +1,7 @@
 package ex.nervisking.utils;
 
 import ex.nervisking.ExApi;
-import ex.nervisking.ModelManager.Logger;
+import ex.nervisking.ModelManager.Pattern.ToUse;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.*;
 import org.bukkit.*;
@@ -75,7 +75,7 @@ public class UtilsManagers extends Utils {
         if (actionLine == null || actionLine.equals("none")) return;
         String[] sep = actionLine.split(";");
         if (sep.length < 3) {
-            sendLogger(Logger.ERROR,"se necesitan mínimo 3 partes para reproducir un sonido");
+            ExLog.sendWarning("se necesitan mínimo 3 partes para reproducir un sonido");
             return;
         }
 
@@ -87,7 +87,7 @@ public class UtilsManagers extends Utils {
             volume = Float.parseFloat(sep[1]);
             pitch = Float.parseFloat(sep[2]);
         } catch (Exception e) {
-            sendLogger(Logger.WARNING,"Nombre del sonido: &c" + sep[0] + " no es válido.");
+            ExLog.sendWarning("Nombre del sonido: &c" + sep[0] + " no es válido.");
             return;
         }
         Location location = null;
@@ -122,7 +122,7 @@ public class UtilsManagers extends Utils {
         if (actionLine == null || actionLine.equals("none")) return;
         String[] sep = actionLine.split(";");
         if (sep.length < 3) {
-            sendLogger(Logger.ERROR, "se necesitan minimo 3 partes para reproducir un sonido");
+            ExLog.sendWarning("se necesitan minimo 3 partes para reproducir un sonido");
             return;
         }
 
@@ -134,7 +134,7 @@ public class UtilsManagers extends Utils {
             volume = Float.parseFloat(sep[1]);
             pitch = Float.parseFloat(sep[2]);
         } catch (Exception e) {
-            sendLogger(Logger.WARNING, "Nombre del sonido: &c" + sep[0] + " no es válido.");
+            ExLog.sendWarning( "Nombre del sonido: &c" + sep[0] + " no es válido.");
             return;
         }
 
@@ -461,7 +461,7 @@ public class UtilsManagers extends Utils {
                             Particle.valueOf(effectName), location, amount, offsetX, offsetY, offsetZ, speed, null, force);
                 }
             } catch (Exception e) {
-                sendLogger(Logger.WARNING,"Nombre de la partícula: " + effectName + " no es válido.");
+                ExLog.sendWarning("Nombre de la partícula: " + effectName + " no es válido.");
             }
         }
     }
@@ -492,7 +492,7 @@ public class UtilsManagers extends Utils {
                 Location l = new Location(world, x, y, z, yaw, pitch);
                 player.teleport(l);
             } else {
-                sendLogger(Logger.ERROR, "Se necesitan al menos 4 partes para teletransportar al jugador.");
+                ExLog.sendWarning("Se necesitan al menos 4 partes para teletransportar al jugador.");
             }
         }
     }
@@ -671,38 +671,6 @@ public class UtilsManagers extends Utils {
         this.kickPlayer(player, messages.toArray(new String[0]));
     }
 
-    /**
-     * Envía un mensaje al log de la consola con el prefijo del plugin.
-     */
-    public void sendLogger(Logger logger, List<String> messages) {
-       this.sendLogger(logger, messages.toArray(new String[0]));
-    }
-
-    public void sendLogger(Logger logger, String... messages) {
-        if (messages == null || messages.length == 0) return;
-        if (messages.length == 1) {
-            sendConsoleMessage(getPrefix() + logger.getName() + messages[0]);
-            return;
-        }
-
-        sendConsoleMessage(getPrefix());
-        for (String message : messages) {
-            sendConsoleMessage(logger.getName() + message);
-        }
-    }
-
-    public void sendLogger(Logger logger, String message, boolean online) {
-        if (message == null || message.isEmpty()) return;
-        sendConsoleMessage(getPrefix() + logger.getName() + message);
-        if (online) {
-            Bukkit.getOnlinePlayers().forEach(player -> {
-                if (hasOp(player)) {
-                    sendMessage(player, getPrefix() + logger.getName() + message);
-                }
-            });
-        }
-    }
-
     // other
     @Deprecated(since = "1.0.0")
     public HoverEvent createHoverEvent(Player player, @NotNull List<String> hoverText) {
@@ -770,77 +738,63 @@ public class UtilsManagers extends Utils {
         ExApi.getBungeeMessagingManager().sendToServer(player, actionLine);
     }
 
-    @Deprecated(since = "1.0.2", forRemoval = true)
-    public void getKnockback(Player player, String message) {
+    public void sendKnockback(Player player, String message) {
         Vector knockback = player.getLocation().getDirection().multiply(-1).setY(0.5);
         player.setVelocity(knockback);
         sendMessage(player, "%prefix% " + message);
     }
 
-    /**
-     * Ejecuta una lista de acciones sobre un jugador. Esta utilidad puede utilizarse en secciones del plugin que acepten
-     * acciones personalizadas mediante etiquetas.
-     *
-     * <p><strong>ACCIONES DISPONIBLES:</strong></p>
-     *
-     * <ul>
-     *     <li><b>[wait] time</b> – Aplica un retraso antes de ejecutar las siguientes acciones.</li>
-     *     <li><b>[teleport] world;x;y;z;yaw;pitch</b> – Teletransporta al jugador a una ubicación específica.</li>
-     *     <li><b>[title] title;subtitle;fadeIn;stay;fadeOut</b> – Muestra un título y subtítulo al jugador. <i>Ej:</i> "[title] Bienvenido;Jugador;10;20;10"</li>
-     *     <li><b>[message] mensaje</b> – Envía un mensaje al jugador en el chat.</li>
-     *     <li><b>[message_center] mensaje</b> – Envía un mensaje centrado en el chat.</li>
-     *     <li><b>[action_bar] mensaje</b> – Envía un mensaje en la barra de acción.</li>
-     *     <li><b>[sound] sound;volume;pitch</b> – Reproduce un sonido al jugador.</li>
-     *     <li><b>[console] comando</b> – Ejecuta un comando desde la consola.</li>
-     *     <li><b>[player_command] comando</b> – Ejecuta un comando como el jugador.</li>
-     *     <li><b>[effect_add] tipo;duración;potencia</b> – Aplica un efecto de poción al jugador.</li>
-     *     <li><b>[effect_remove] tipo</b> – quita el efecto de poción al jugador.</li>
-     *     <li><b>[effect_clear] tipo</b> – quita todos los efectos de poción al jugador.</li>
-     *     <li><b>[give_item] material;cantidad;(opcional[nombre])</b> – Da un ítem al jugador.</li>
-     *     <li><b>[broadcast] mensaje</b> – Envía un mensaje a todos los jugadores.</li>
-     *     <li><b>[kill]</b> – Mata al jugador.</li>
-     *     <li><b>[damage] cantidad</b> – Daña al jugador.</li>
-     *     <li><b>[heal] (opcional[cantidad])</b> – Cura al jugador.</li>
-     *     <li><b>[feed] (opcional[cantidad])</b> – Alimenta al jugador (y lo cura).</li>
-     *     <li><b>[extinguish]</b> – Apaga el fuego del jugador.</li>
-     *     <li><b>[fly] true|false</b> – Activa o desactiva el modo vuelo.</li>
-     *     <li><b>[gamemode] modo</b> – Cambia el modo de juego del jugador.</li>
-     *     <li><b>[clear_armor]</b> – Elimina la armadura del jugador.</li>
-     *     <li><b>[launch] fuerza</b> – Lanza al jugador hacia arriba.</li>
-     *     <li><b>[velocity] x;y;z</b> – Aplica una velocidad específica al jugador.</li>
-     *     <li><b>[freeze] (opcional[ticks])</b> – Congela al jugador.</li>
-     *     <li><b>[fire] (opcional[ticks])</b> – Prende fuego al jugador.</li>
-     *     <li><b>[clear_inventory]</b> – Borra el inventario del jugador.</li>
-     *     <li><b>[close_inventory]</b> – Cierra el inventario del jugador.</li>
-     *     <!-- Acciones específicas del sistema de menús -->
-     *     <li><b>[refresh_inventory]</b> – Recarga el menú del plugin (solo para este plugin).</li>
-     *     <li><b>[inventory_first-page]</b>, <b>[inventory_last-page]</b>, <b>[inventory_prev-page]</b>, <b>[inventory_next-page]</b> – Control de paginación en menús del plugin.</li>
-     * </ul>
-     *
-     * <p><strong>CONDICIONES DISPONIBLES:</strong></p>
-     *
-     * <ul>
-     *     <li><b>[has_item] material:cantidad -> acción</b> – Ejecuta la acción si el jugador tiene el ítem. Ej: "[has_item] DIAMOND:5 -> [message] Tienes 5 diamantes"</li>
-     *     <li><b>[has_permission] permiso -> acción</b> – Ejecuta la acción si el jugador tiene el permiso.</li>
-     *     <li><b>[has_world] mundo -> acción</b> – Ejecuta la acción si el jugador está en ese mundo.</li>
-     *     <li><b>[has_placeholder] placeholder operador valor -> acción</b> – (Requiere PlaceholderAPI). Compara un placeholder con un valor. Ej:
-     *         <ul>
-     *             <li>"[has_placeholder] %player_health% &lt; 10 -> [message] ¡Te estás muriendo!"</li>
-     *             <li>"[has_placeholder] %vault_eco_balance% &gt;= 10000 -> [message] Eres rico"</li>
-     *             <li>"[has_placeholder] %player_name% == Steve -> [message] Hola Steve"</li>
-     *         </ul>
-     *     </li>
-     *     <li><b>[to_world] mundo -> acción</b> – Ejecuta la acción en todos los jugadores del mundo indicado.</li>
-     *     <li><b>[to_targets] jugador1;jugador2 -> acción</b> – Ejecuta la acción en jugadores específicos.</li>
-     *     <li><b>[to_range] radio;incluirJugador -> acción</b> – Ejecuta la acción en un radio desde el jugador. Ej: "[to_range] 15;false -> [sound] sonido;2;1"</li>
-     * </ul>
-     *
-     * <p><strong>VARIABLES:</strong></p>
-     * Puedes utilizar placeholders de PlaceholderAPI (PAPI). Por defecto, <code>%player%</code> representa al jugador actual.
-     *
-     * @param player Jugador objetivo
-     * @param actions Lista de acciones a ejecutar
-     */
+    @ToUse(
+            value = "Ejecuta una lista de acciones sobre un jugador. Utilizado para acciones personalizadas mediante etiquetas.",
+            params = {
+                    "player: Jugador objetivo",
+                    "actions: Lista de acciones a ejecutar"
+            },
+            usedFor = "Ejecución de acciones personalizadas",
+            notes = {
+                    "ACCIONES DISPONIBLES:",
+                    "- [wait] time – Retraso antes de ejecutar las siguientes acciones.",
+                    "- [teleport] world;x;y;z;yaw;pitch – Teletransporta al jugador.",
+                    "- [title] title;subtitle;fadeIn;stay;fadeOut – Muestra título y subtítulo.",
+                    "- [message] mensaje – Envía mensaje en chat.",
+                    "- [message_center] mensaje – Envía mensaje centrado en chat.",
+                    "- [action_bar] mensaje – Envía mensaje en barra de acción.",
+                    "- [sound] sound;volume;pitch – Reproduce un sonido.",
+                    "- [console] comando – Ejecuta comando desde consola.",
+                    "- [player_command] comando – Ejecuta comando como jugador.",
+                    "- [effect_add] tipo;duración;potencia – Aplica efecto de poción.",
+                    "- [effect_remove] tipo – Quita efecto de poción.",
+                    "- [effect_clear] – Quita todos los efectos.",
+                    "- [give_item] material;cantidad;(opcional[nombre]) – Da un ítem.",
+                    "- [broadcast] mensaje – Envía mensaje a todos.",
+                    "- [kill] – Mata al jugador.",
+                    "- [damage] cantidad – Daña al jugador.",
+                    "- [heal] (opcional[cantidad]) – Cura al jugador.",
+                    "- [feed] (opcional[cantidad]) – Alimenta y cura al jugador.",
+                    "- [extinguish] – Apaga fuego.",
+                    "- [fly] true|false – Activa/desactiva vuelo.",
+                    "- [gamemode] modo – Cambia modo de juego.",
+                    "- [clear_armor] – Elimina armadura.",
+                    "- [launch] fuerza – Lanza al jugador.",
+                    "- [velocity] x;y;z – Aplica velocidad.",
+                    "- [freeze] (opcional[ticks]) – Congela jugador.",
+                    "- [fire] (opcional[ticks]) – Prende fuego.",
+                    "- [clear_inventory] – Borra inventario.",
+                    "- [close_inventory] – Cierra inventario.",
+                    "- [refresh_inventory] – Recarga menú (plugin).",
+                    "- [inventory_first-page], [inventory_last-page], [inventory_prev-page], [inventory_next-page] – Control de paginación.",
+                    "CONDICIONES DISPONIBLES:",
+                    "- [has_item] material:cantidad -> acción – Ejecuta acción si tiene ítem.",
+                    "- [has_permission] permiso -> acción – Ejecuta si tiene permiso.",
+                    "- [has_world] mundo -> acción – Ejecuta en mundo específico.",
+                    "- [has_placeholder] placeholder operador valor -> acción – Compara placeholder (requiere PAPI).",
+                    "- [to_world] mundo -> acción – Ejecuta en jugadores de un mundo.",
+                    "- [to_targets] jugador1;jugador2 -> acción – Ejecuta en jugadores específicos.",
+                    "- [to_range] radio;incluirJugador -> acción – Ejecuta en radio desde jugador.",
+                    "VARIABLES:",
+                    "Puedes usar placeholders PAPI; %player% es el jugador actual."
+            }
+    )
     public void executeActions(Player player, List<String> actions) {
         new Action(this).executeActions(player, actions);
     }

@@ -1,8 +1,7 @@
 package ex.nervisking.command;
 
-import ex.nervisking.ExApi;
-import ex.nervisking.ModelManager.Logger;
-import ex.nervisking.utils.UtilsManagers;
+import ex.nervisking.ModelManager.Pattern.ToUse;
+import ex.nervisking.utils.ExLog;
 import org.bukkit.Bukkit;
 import org.bukkit.command.*;
 import org.bukkit.plugin.Plugin;
@@ -11,16 +10,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 
-public class CommandManager {
+public record CommandManager(JavaPlugin plugin) {
 
-    private final JavaPlugin plugin;
-    private final UtilsManagers utilsManagers;
-
-    public CommandManager(JavaPlugin plugin) {
-        this.plugin = plugin;
-        this.utilsManagers = ExApi.getUtilsManagers();
-    }
-
+    @ToUse(value = "Registrar comando")
     public void registerCommand(Command command) {
         String name = command.getName();
         PluginCommand pluginCommand = createPluginCommand(name);
@@ -39,10 +31,11 @@ public class CommandManager {
 
             registerBukkitCommand(pluginCommand);
         } else {
-            utilsManagers.sendLogger(Logger.WARNING,"No se pudo registrar el comando: " + name);
+            ExLog.sendWarning("No se pudo registrar el comando: " + name);
         }
     }
 
+    @ToUse(value = "Registrar comando")
     public void registerCommand(CommandExecutor command) {
         String name = command.getName();
         PluginCommand pluginCommand = createPluginCommand(name);
@@ -61,10 +54,11 @@ public class CommandManager {
 
             registerBukkitCommand(pluginCommand);
         } else {
-            utilsManagers.sendLogger(Logger.WARNING,"No se pudo registrar el comando: " + name);
+            ExLog.sendWarning("No se pudo registrar el comando: " + name);
         }
     }
 
+    @ToUse(value = "Registrar comando")
     public void registerCommand(CustomCommand command) {
         String name = command.getName();
         PluginCommand pluginCommand = createPluginCommand(name);
@@ -83,7 +77,7 @@ public class CommandManager {
 
             registerBukkitCommand(pluginCommand);
         } else {
-            utilsManagers.sendLogger(Logger.WARNING,"No se pudo registrar el comando: " + name);
+            ExLog.sendWarning("No se pudo registrar el comando: " + name);
         }
     }
 
@@ -93,7 +87,7 @@ public class CommandManager {
             constructor.setAccessible(true);
             return constructor.newInstance(name, plugin);
         } catch (Exception e) {
-            e.printStackTrace();
+            ExLog.sendException(e);
             return null;
         }
     }
@@ -105,8 +99,7 @@ public class CommandManager {
             CommandMap commandMap = (CommandMap) commandMapField.get(Bukkit.getServer());
             commandMap.register(plugin.getName().toLowerCase(), command);
         } catch (Exception e) {
-            e.printStackTrace();
+            ExLog.sendException(e);
         }
     }
 }
-

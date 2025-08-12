@@ -18,8 +18,10 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
 import java.util.HashMap;
 
 public class ExApi {
@@ -102,14 +104,19 @@ public class ExApi {
         return descriptionFile;
     }
 
+    @ToUse
+    public static @NotNull Collection<? extends Player> getOnlinePlayers() {
+        return plugin.getServer().getOnlinePlayers();
+    }
+
     // menu ------------------------------------------------------------------------------------------------------
 
     private void registerMenuListener(JavaPlugin plugin) {
         boolean isAlreadyRegistered = false;
-        RegisteredListener[] var3 = InventoryClickEvent.getHandlerList().getRegisteredListeners();
+        RegisteredListener[] listeners = InventoryClickEvent.getHandlerList().getRegisteredListeners();
 
-        for (RegisteredListener rl : var3) {
-            if (rl.getListener() instanceof MenuListener) {
+        for (RegisteredListener listener : listeners) {
+            if (listener.getListener() instanceof MenuListener) {
                 isAlreadyRegistered = true;
                 break;
             }
@@ -134,7 +141,7 @@ public class ExApi {
         }
     }
 
-    @ToUse(description = "Método para abir menus")
+    @ToUse(value = "Método para abir menus")
     public static void openMenu(Class<? extends Menu> menuClass, Player player) {
         try {
             ExApi.openMenuOf(menuClass, player);
@@ -204,18 +211,18 @@ public class ExApi {
         }
     }
 
-    @ToUse(description = "verificar si el plugin esta activo")
+    @ToUse(value = "verificar si el plugin esta activo")
     public static boolean isPlugin(String pluginName) {
         Plugin plugin = ExApi.plugin.getServer().getPluginManager().getPlugin(pluginName);
         return plugin != null && plugin.isEnabled();
     }
 
-    @ToUse(description = "verificar si el plugin esta activo")
+    @ToUse(value = "verificar si el plugin esta activo")
     public static boolean isPlugin(ExPl exPl) {
         return ExApi.isPlugin(exPl.getName());
     }
 
-    @ToUse(description = "verificar si el plugin esta activo")
+    @ToUse(value = "verificar si el plugin esta activo")
     public static boolean isPlugin(Plugins plugins) {
         return ExApi.isPlugin(plugins.getName());
     }

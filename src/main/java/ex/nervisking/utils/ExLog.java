@@ -1,6 +1,8 @@
 package ex.nervisking.utils;
 
 import ex.nervisking.ExApi;
+import ex.nervisking.ModelManager.Logger;
+import org.bukkit.Bukkit;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -48,6 +50,22 @@ public class ExLog {
         send(messages, "&b ");
     }
 
+    public static void sendLogger(Logger logger, List<String> message, boolean online) {
+        if (message == null || message.isEmpty()) return;
+        send(message, logger.getName());
+        if (online) {
+            Bukkit.getOnlinePlayers().forEach(player -> {
+                if (utilsManagers.hasOp(player)) {
+                    utilsManagers.sendMessage(player, PREFIX + logger.getName() + message);
+                }
+            });
+        }
+    }
+
+    public static void sendLogger(Logger logger, String message, boolean online) {
+        sendLogger(logger, List.of(message), online);
+    }
+
     public static void logToFile(String message) {
         if (!logsFolder.exists()) logsFolder.mkdirs();
 
@@ -62,7 +80,11 @@ public class ExLog {
     }
 
     public static void sendException(Throwable throwable) {
-        sendError("Se produjo un error: " + throwable.getMessage());
+        sendException(throwable,"Se produjo un error: " + throwable.getMessage());
+    }
+
+    public static void sendException(Throwable throwable, String message) {
+        sendError(message);
         for (StackTraceElement element : throwable.getStackTrace()) {
             sendDebug("  at " + element.toString());
         }

@@ -2,6 +2,7 @@ package ex.nervisking.utils;
 
 import ex.nervisking.ExApi;
 import ex.nervisking.ModelManager.DefaultFontInfo;
+import ex.nervisking.ModelManager.Pattern.ToUse;
 import ex.nervisking.ModelManager.Plugins;
 import ex.nervisking.Placeholder.Placeholder;
 import me.clip.placeholderapi.PlaceholderAPI;
@@ -315,43 +316,69 @@ public class Utils {
         return FormatTime.formatTime(timeSeconds, timeFormatType);
     }
 
-    /**
-     * Convierte un string de tiempo personalizado a milisegundos.
-     * Ejemplos: "1d10m", "5m;35s;4t", "1h 30m 20s", "500ms"
-     *
-     * @param timeString String con el tiempo a convertir.
-     * @return Tiempo en milisegundos.
-     * @throws NumberFormatException Si el formato es inválido.
-     */
+    @ToUse(
+            value = "Convierte un string de tiempo personalizado a milisegundos.",
+            params = {
+                    "timeString: String con el tiempo a convertir. Ejemplos: \"1d10m\", \"5m;35s;4t\", \"1h 30m 20s\", \"500ms\""
+            },
+            returns = "Tiempo en milisegundos.",
+            usedFor = "Parseo flexible de tiempos para configuraciones o temporizadores.",
+            notes = {
+                    "Soporta unidades: ms (milisegundos), t (ticks = 50ms), s (segundos), m (minutos), h (horas), d (días).",
+                    "Lanza NumberFormatException si el formato o unidad es inválida.",
+                    "Permite concatenar múltiples unidades sin espacios, ej: \"1d10m\", \"500ms\"."
+            }
+    )
     public long parseTime(String timeString) throws NumberFormatException {
         long totalMillis = 0;
         StringBuilder numberBuffer = new StringBuilder();
+        StringBuilder unitBuffer = new StringBuilder();
 
-        for (char c : timeString.replace(" ", "").toCharArray()) { // quitamos los espacios
+        String input = timeString.replace(" ", "").replace(";", "").replace(",", "").toLowerCase();
+        int length = input.length();
+
+        for (int i = 0; i < length; i++) {
+            char c = input.charAt(i);
+
             if (Character.isDigit(c)) {
+                if (unitBuffer.length() > 0) {
+                    totalMillis += convertToMillis(numberBuffer.toString(), unitBuffer.toString());
+                    numberBuffer.setLength(0);
+                    unitBuffer.setLength(0);
+                }
                 numberBuffer.append(c);
             } else {
-                if (!numberBuffer.isEmpty()) {
-                    long value = Long.parseLong(numberBuffer.toString());
-                    switch (c) {
-                        case 's' -> totalMillis += value * 1000L;
-                        case 'm' -> totalMillis += value * 60_000L;
-                        case 'h' -> totalMillis += value * 3_600_000L;
-                        case 'd' -> totalMillis += value * 86_400_000L;
-                        default -> throw new NumberFormatException("Unidad de tiempo no válida: '" + c + "'");
+                unitBuffer.append(c);
+                boolean nextIsLetter = (i + 1 < length) && Character.isLetter(input.charAt(i + 1));
+                if (!nextIsLetter || unitBuffer.length() == 2) {
+                    if (numberBuffer.length() == 0) {
+                        throw new NumberFormatException("Formato inválido: número faltante antes de unidad '" + unitBuffer + "'");
                     }
+                    totalMillis += convertToMillis(numberBuffer.toString(), unitBuffer.toString());
                     numberBuffer.setLength(0);
-                } else {
-                    throw new NumberFormatException("Formato de tiempo inválido: valor faltante antes de '" + c + "'");
+                    unitBuffer.setLength(0);
                 }
             }
         }
 
-        if (!numberBuffer.isEmpty()) {
-            throw new NumberFormatException("Formato de tiempo inválido: falta unidad para " + numberBuffer);
+        if (numberBuffer.length() > 0) {
+            throw new NumberFormatException("Formato inválido: falta unidad para " + numberBuffer);
         }
 
         return totalMillis;
+    }
+
+    private long convertToMillis(String numberStr, String unit) throws NumberFormatException {
+        long value = Long.parseLong(numberStr);
+        return switch (unit) {
+            case "ms" -> value;
+            case "t" -> value * 50;
+            case "s" -> value * 1000L;
+            case "m" -> value * 60_000L;
+            case "h" -> value * 3_600_000L;
+            case "d" -> value * 86_400_000L;
+            default -> throw new NumberFormatException("Unidad de tiempo no válida: '" + unit + "'");
+        };
     }
 
     /**

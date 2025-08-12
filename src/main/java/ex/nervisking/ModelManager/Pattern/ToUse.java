@@ -1,15 +1,40 @@
 package ex.nervisking.ModelManager.Pattern;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
-@Target({ElementType.METHOD})
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
+@Documented
 public @interface ToUse {
 
+    /**
+     * Descripción general de lo que hace el método.
+     */
+    String value() default "unknown";
+
+    @Deprecated(forRemoval = true)
     String description() default "unknown";
 
-    String usedFor() default "unknown";
+    /**
+     * Lista de parámetros en formato "nombre: descripción".
+     */
+    String[] params() default {};
+
+    /**
+     * Descripción del valor de retorno.
+     */
+    String returns() default "void";
+
+
+    String Throws() default "void";
+
+    /**
+     * Uso previsto o propósito general.
+     */
+    String usedFor() default "general";
+
+    /**
+     * Notas adicionales o advertencias.
+     */
+    String[] notes() default {};
 }

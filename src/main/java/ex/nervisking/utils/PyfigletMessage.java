@@ -11,6 +11,7 @@ import org.bukkit.command.ConsoleCommandSender;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class PyfigletMessage {
 
@@ -47,8 +48,17 @@ public class PyfigletMessage {
         this.infos = new ArrayList<>();
     }
 
+    public PyfigletMessage(Consumer<PyfigletMessage> action) {
+        this();
+        action.accept(this);
+    }
+
     public static PyfigletMessage of() {
         return new PyfigletMessage();
+    }
+
+    public static PyfigletMessage of(Consumer<PyfigletMessage> action) {
+        return new PyfigletMessage(action);
     }
 
     public PyfigletMessage setStatus(boolean value) {

@@ -1,7 +1,6 @@
 package ex.nervisking.utils;
 
 import ex.nervisking.ExApi;
-import ex.nervisking.ModelManager.Logger;
 import net.md_5.bungee.api.chat.*;
 import org.bukkit.entity.Player;
 
@@ -108,11 +107,13 @@ public class JSONMessage {
 
             hover = new BaseComponent[lines.length];
             for (int i = 0; i < lines.length; i++) {
-                String line = player == null ? utilsManagers.setColoredMessage(text) : utilsManagers.setPlaceholders(player, text);
+                String text = player == null ? utilsManagers.setColoredMessage(lines[i]) : utilsManagers.setPlaceholders(player, lines[i]);
+
                 if (i != lines.length - 1) {
-                    line += "\n";
+                    text += "\n";
                 }
-                hover[i] = new TextComponent(TextComponent.fromLegacyText(line));
+
+                hover[i] = new TextComponent(TextComponent.fromLegacyText(text));
             }
             return this;
         }
@@ -123,7 +124,7 @@ public class JSONMessage {
 
         public Part action(Player player, Action action, String value) {
             if (action == null || value == null || value.isEmpty()) {
-                utilsManagers.sendLogger(Logger.ERROR, "Action or value cannot be null or empty.");
+                ExLog.sendError( "Action or value cannot be null or empty.");
                 return this;
             }
             String parsedValue = player != null ? utilsManagers.setPlaceholders(player, value) : utilsManagers.setColoredMessage(value);
@@ -134,7 +135,7 @@ public class JSONMessage {
                 case COPY -> copy(parsedValue);
                 case NONE -> {
                     clickEvent = null;
-                    utilsManagers.sendLogger(Logger.ERROR, "Invalid action specified: " + action);
+                    ExLog.sendError("Invalid action specified: " + action);
                     yield this;
                 }
             };
@@ -142,7 +143,7 @@ public class JSONMessage {
 
         private Part suggest(String command) {
             if (command == null || command.isEmpty()) {
-                utilsManagers.sendLogger(Logger.ERROR, "Command cannot be null or empty for suggest action.");
+                ExLog.sendError("Command cannot be null or empty for suggest action.");
                 return this;
             }
             this.clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command);
@@ -151,7 +152,7 @@ public class JSONMessage {
 
         private Part run(String command) {
             if (command == null || command.isEmpty()) {
-                utilsManagers.sendLogger(Logger.ERROR, "Command cannot be null or empty for suggest action.");
+                ExLog.sendError("Command cannot be null or empty for suggest action.");
                 return this;
             }
             this.clickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND, command);
@@ -160,7 +161,7 @@ public class JSONMessage {
 
         private Part openUrl(String url) {
             if (url == null || url.isEmpty()) {
-                utilsManagers.sendLogger(Logger.ERROR, "Command cannot be null or empty for suggest action.");
+                ExLog.sendError("Command cannot be null or empty for suggest action.");
                 return this;
             }
             this.clickEvent = new ClickEvent(ClickEvent.Action.OPEN_URL, url);
@@ -169,7 +170,7 @@ public class JSONMessage {
 
         private Part copy(String text) {
             if (text == null || text.isEmpty()) {
-                utilsManagers.sendLogger(Logger.ERROR, "Command cannot be null or empty for suggest action.");
+                ExLog.sendError( "Command cannot be null or empty for suggest action.");
                 return this;
             }
             this.clickEvent = new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, text);
@@ -229,7 +230,7 @@ public class JSONMessage {
         if (player != null) {
             player.spigot().sendMessage(root);
         } else {
-            utilsManagers.sendLogger(Logger.ERROR, "Cannot send message: Player is null.");
+            ExLog.sendError("Cannot send message: Player is null.");
         }
     }
 

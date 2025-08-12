@@ -1,6 +1,5 @@
 package ex.nervisking.utils;
 
-import ex.nervisking.ModelManager.Logger;
 import ex.nervisking.ModelManager.Scheduler;
 import ex.nervisking.menuManager.*;
 import org.bukkit.*;
@@ -18,13 +17,7 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Action {
-
-    private final UtilsManagers utilsManagers;
-
-    public Action(UtilsManagers utilsManagers) {
-        this.utilsManagers = utilsManagers;
-    }
+public record Action(UtilsManagers utilsManagers) {
 
     public void executeActions(Player player, List<String> actions) {
         if (actions == null || actions.isEmpty()) return;
@@ -38,7 +31,9 @@ public class Action {
                 try {
                     int seconds = Integer.parseInt(action.substring("[wait]".length()).trim());
                     delay += (seconds * 20L); // segundos a ticks
-                } catch (NumberFormatException ignored) {}
+                } catch (NumberFormatException e) {
+                    ExLog.sendException(e);
+                }
                 continue;
             }
 
@@ -47,7 +42,9 @@ public class Action {
                 try {
                     int ticks = Integer.parseInt(action.substring("[wait_tick]".length()).trim());
                     delay += ticks;
-                } catch (NumberFormatException ignored) {}
+                } catch (NumberFormatException e) {
+                    ExLog.sendException(e);
+                }
                 continue;
             }
 
@@ -112,7 +109,9 @@ public class Action {
                 // Intentar comparar como número
                 try {
                     boolean conditionMet = isConditionMet(value, expected, operator);
-                    if (conditionMet) executeAction(player, resultAction);
+                    if (conditionMet) {
+                        executeAction(player, resultAction);
+                    }
                 } catch (NumberFormatException e) {
                     // Si no son números, comparar como texto
                     boolean conditionMet = switch (operator) {
@@ -121,7 +120,9 @@ public class Action {
                         default -> false; // Operadores de comparación no aplican a texto
                     };
 
-                    if (conditionMet) executeAction(player, resultAction);
+                    if (conditionMet) {
+                        executeAction(player, resultAction);
+                    }
                 }
 
             }
@@ -133,17 +134,11 @@ public class Action {
             String actions = parts[1].trim();
 
             String[] usernames = targetPart.split(";");
-            List<Player> targets = new ArrayList<>();
-
             for (String username : usernames) {
                 Player target = Bukkit.getPlayerExact(username.trim());
                 if (target != null && target.isOnline()) {
-                    targets.add(target);
+                    executeAction(target, actions);
                 }
-            }
-
-            for (Player target : targets) {
-                executeAction(target, actions);
             }
         } else if (action.startsWith("[to_range]")) {
             String[] parts = action.substring("[to_range]".length()).trim().split("->");
@@ -222,11 +217,12 @@ public class Action {
         } else if (action.toLowerCase().startsWith("[damage]")) {
             String[] parts = action.substring("[damage]".length()).trim().split(";");
             if (parts.length >= 2) {
-                double damage = Double.parseDouble(parts[0]);
-                String message = parts[1];
                 try {
+                    double damage = Double.parseDouble(parts[0]);
+                    String message = parts[1];
                     Fake.setDamage(player, damage, message);
-                } catch (NumberFormatException ignored) {
+                } catch (NumberFormatException e) {
+                    ExLog.sendException(e);
                 }
             }
         } else if (action.equalsIgnoreCase("[kill]")) {
@@ -252,7 +248,8 @@ public class Action {
                     amount = Integer.parseInt(value);
                     player.setFoodLevel(Math.min(amount, 20));
                     player.setSaturation(Math.min(amount, 20));
-                } catch (NumberFormatException ignored) {
+                } catch (NumberFormatException e) {
+                    ExLog.sendException(e);
                 }
             } else {
                 player.setFoodLevel(amount);
@@ -264,7 +261,8 @@ public class Action {
                 try {
                     int amount = Integer.parseInt(value);
                     player.setFireTicks(amount);
-                } catch (NumberFormatException ignored) {
+                } catch (NumberFormatException e) {
+                    ExLog.sendException(e);
                 }
             } else {
                 player.setFireTicks(20);
@@ -289,8 +287,8 @@ public class Action {
                         }
                     }
 
-                } catch (NumberFormatException ignored) {
-                    utilsManagers.sendLogger(Logger.WARNING,"Acción [lightning] con formato inválido: " + action);
+                } catch (NumberFormatException e) {
+                    ExLog.sendException(e);
                 }
             }
         } else if (action.toLowerCase().startsWith("[freeze]")) {
@@ -299,7 +297,8 @@ public class Action {
                 try {
                     int amount = Integer.parseInt(value);
                     player.setFreezeTicks(amount);
-                } catch (NumberFormatException ignored) {
+                } catch (NumberFormatException e) {
+                    ExLog.sendException(e);
                 }
             } else {
                 player.setFreezeTicks(20);
@@ -315,7 +314,8 @@ public class Action {
             try {
                 String mode = action.substring("[gamemode]".length()).trim().toUpperCase();
                 player.setGameMode(GameMode.valueOf(mode));
-            } catch (IllegalArgumentException ignored) {}
+            } catch (IllegalArgumentException ignored) {
+            }
         } else if (action.equalsIgnoreCase("[clear_armor]")) {
             player.getInventory().setArmorContents(new ItemStack[]{new ItemStack(Material.AIR)});
         } else if (action.toLowerCase().startsWith("[remove_item]")) {
@@ -332,7 +332,9 @@ public class Action {
             try {
                 double power = Double.parseDouble(action.substring("[launch]".length()).trim());
                 player.setVelocity(new Vector(0, power, 0));
-            } catch (NumberFormatException ignored) {}
+            } catch (NumberFormatException e) {
+                ExLog.sendException(e);
+            }
         } else if (action.toLowerCase().startsWith("[velocity]")) {
             String[] parts = action.substring("[velocity]".length()).trim().split(";");
             if (parts.length >= 3) {
@@ -341,7 +343,9 @@ public class Action {
                     double y = Double.parseDouble(parts[1]);
                     double z = Double.parseDouble(parts[2]);
                     player.setVelocity(new Vector(x, y, z));
-                } catch (NumberFormatException ignored) {}
+                } catch (NumberFormatException e) {
+                    ExLog.sendException(e);
+                }
             }
         } else if (action.toLowerCase().startsWith("[broadcast]")) {
             utilsManagers.sendBroadcastMessage(action.substring("[broadcast]".length()).trim());
@@ -448,8 +452,8 @@ public class Action {
             case "!=" -> actual != expectedNum;
             case ">=" -> actual >= expectedNum;
             case "<=" -> actual <= expectedNum;
-            case ">"  -> actual > expectedNum;
-            case "<"  -> actual < expectedNum;
+            case ">" -> actual > expectedNum;
+            case "<" -> actual < expectedNum;
             default -> false;
         };
     }
