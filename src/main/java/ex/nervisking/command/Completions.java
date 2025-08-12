@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -73,6 +74,15 @@ public class Completions {
     }
 
     public void add(Set<String> values) {
+        if (values == null) return;
+        for (String val : values) {
+            if (val != null && !val.isBlank()) {
+                completions.add(val.toLowerCase());
+            }
+        }
+    }
+
+    public void add(Collection<String> values) {
         if (values == null) return;
         for (String val : values) {
             if (val != null && !val.isBlank()) {

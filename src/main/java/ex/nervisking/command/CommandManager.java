@@ -9,6 +9,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.util.Map;
 
 public record CommandManager(JavaPlugin plugin) {
 
@@ -79,6 +80,39 @@ public record CommandManager(JavaPlugin plugin) {
         } else {
             ExLog.sendWarning("No se pudo registrar el comando: " + name);
         }
+    }
+
+    @ToUse(value = "Eliminar comando registrado")
+    public void unregisterCommand(String name) {
+        try {
+            Map<String, Command> knownCommands = getStringCommandMap();
+
+            // Eliminar la entrada principal
+            Command removed = knownCommands.remove(name.toLowerCase());
+
+            if (removed != null) {
+                // También eliminar aliases que apuntan a este comando
+                knownCommands.entrySet().removeIf(entry -> entry.getValue() == removed);
+                ExLog.sendInfo("Comando '" + name + "' eliminado correctamente.");
+            } else {
+                ExLog.sendWarning("No se encontró el comando '" + name + "' para eliminar.");
+            }
+        } catch (Exception e) {
+            ExLog.sendException(e);
+        }
+    }
+
+    private Map<String, Command> getStringCommandMap() throws NoSuchFieldException, IllegalAccessException {
+        Field commandMapField = Bukkit.getServer().getClass().getDeclaredField("commandMap");
+        commandMapField.setAccessible(true);
+        CommandMap commandMap = (CommandMap) commandMapField.get(Bukkit.getServer());
+
+        // knownCommands es un mapa privado en SimpleCommandMap
+        Field knownCommandsField = commandMap.getClass().getDeclaredField("knownCommands");
+        knownCommandsField.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        Map<String, Command> knownCommands = (Map<String, Command>) knownCommandsField.get(commandMap);
+        return knownCommands;
     }
 
     private PluginCommand createPluginCommand(String name) {

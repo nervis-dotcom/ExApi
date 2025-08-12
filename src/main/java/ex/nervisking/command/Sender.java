@@ -54,7 +54,7 @@ public class Sender {
         }
     }
 
-    @Deprecated(since = "1.0.2")
+    @Deprecated(since = "1.0.2", forRemoval = true)
     public boolean equals(Player player) {
         return commandSender instanceof Player p && p.equals(player);
     }
@@ -87,11 +87,7 @@ public class Sender {
         return isPlayer() ? asPlayer().getUniqueId() : null;
     }
 
-    public void sendMessage(String message) {
-        utilsManagers.sendMessage(commandSender, message);
-    }
-
-    public void sendMessages(String... messages) {
+    public void sendMessage(String... messages) {
         utilsManagers.sendMessage(commandSender, messages);
     }
 

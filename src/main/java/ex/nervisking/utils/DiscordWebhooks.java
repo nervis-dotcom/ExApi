@@ -3,7 +3,10 @@ package ex.nervisking.utils;
 import ex.nervisking.ExApi;
 import ex.nervisking.ModelManager.ColorUtil;
 import ex.nervisking.ModelManager.CustomColor;
+import ex.nervisking.ModelManager.Pattern.ToUse;
 import ex.nervisking.ModelManager.Scheduler;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.io.IOException;
@@ -15,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class DiscordWebhooks {
 
@@ -35,8 +39,24 @@ public class DiscordWebhooks {
         this.fields = new ArrayList<>();
     }
 
-    public static DiscordWebhooks of(String discordHook) {
+    public DiscordWebhooks(String discordHook, @NotNull Consumer<DiscordWebhooks> action) {
+        this(discordHook);
+        action.accept(this);
+    }
+
+    @Contract("_ -> new")
+    public static @NotNull DiscordWebhooks of(String discordHook) {
         return new DiscordWebhooks(discordHook);
+    }
+
+    @Contract("_, _ -> new")
+    public static @NotNull DiscordWebhooks of(String discordHook, @NotNull Consumer<DiscordWebhooks> action) {
+        return new DiscordWebhooks(discordHook, action);
+    }
+
+    @ToUse
+    public static void andRun(String discordHook, @NotNull Consumer<DiscordWebhooks> action) {
+        new DiscordWebhooks(discordHook, action);
     }
 
     public DiscordWebhooks setBotName(String name) {
@@ -276,6 +296,7 @@ public class DiscordWebhooks {
         }
     }
 
+    @ToUse
     public void buildAsync() {
         Scheduler.runAsync(this::build);
     }
@@ -284,7 +305,6 @@ public class DiscordWebhooks {
         if (input == null) return "";
         return input.length() > maxLength ? input.substring(0, maxLength) : input;
     }
-
 
     private String escapeJson(String message) {
         return message.replace("\\", "\\\\")

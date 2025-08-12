@@ -38,6 +38,15 @@ public interface CommandExecutor extends BaseCommand {
 
     @Override
     default List<String> onTabComplete(@NotNull CommandSender sender, org.bukkit.command.@NotNull Command command, @NotNull String alias, String @NotNull [] args) {
-        return this.onTab(Sender.of(sender), Arguments.of(args), Completions.of()).asList();
+        Arguments arg = Arguments.of(args);
+        Completions completions = this.onTab(Sender.of(sender), arg, Completions.of());
+
+        if (!arg.isEmpty()) {
+            completions.filter(s -> s.startsWith(arg.get(arg.size() - 1).toLowerCase()));
+        } else {
+            completions.addPlayerOnline();
+        }
+
+        return completions.asList();
     }
 }

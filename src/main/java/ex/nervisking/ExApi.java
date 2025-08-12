@@ -1,8 +1,10 @@
 package ex.nervisking;
 
 import ex.nervisking.ModelManager.ExPl;
+import ex.nervisking.ModelManager.Pattern.KeyDef;
 import ex.nervisking.ModelManager.Plugins;
 import ex.nervisking.ModelManager.Pattern.ToUse;
+import ex.nervisking.command.CommandManager;
 import ex.nervisking.exceptions.MenuManagerException;
 import ex.nervisking.exceptions.MenuManagerNotSetupException;
 import ex.nervisking.menuManager.*;
@@ -11,6 +13,7 @@ import ex.nervisking.utils.ServerVersion;
 import ex.nervisking.utils.Utils;
 import ex.nervisking.utils.UtilsManagers;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
@@ -18,6 +21,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
@@ -27,6 +31,7 @@ import java.util.HashMap;
 public class ExApi {
 
     private static JavaPlugin plugin;
+    private static CommandManager commandManager;
     private static BungeeMessagingManager bungeeMessagingManager;
     private static UtilsManagers utilsManagers;
     private static Utils utils;
@@ -56,6 +61,7 @@ public class ExApi {
         this.setVersion();
         ExApi.plugin = plugin;
         bungeeMessagingManager = new BungeeMessagingManager(plugin);
+        commandManager = new CommandManager(plugin);
         utilsManagers = new UtilsManagers();
         utils = new Utils();
         sVar = plugin.getServer().getBukkitVersion().split("-")[0];
@@ -76,7 +82,8 @@ public class ExApi {
         return plugin;
     }
 
-    public static <T extends JavaPlugin> T getPluginOf(Class<T> clazz) {
+    @Contract(pure = true)
+    public static <T extends JavaPlugin> T getPluginOf(@NotNull Class<T> clazz) {
         return clazz.cast(plugin);
     }
 
@@ -84,16 +91,18 @@ public class ExApi {
         return bungeeMessagingManager;
     }
 
+    @Contract(pure = true)
     @ToUse
-    public static String getPluginName() {
+    public static @NotNull String getPluginName() {
         return descriptionFile != null ? descriptionFile.getName() : "unknown";
     }
 
-    public static String getPluginVersion() {
+    @Contract(pure = true)
+    public static @NotNull String getPluginVersion() {
         return descriptionFile != null ? descriptionFile.getVersion() : "0.0.1-SNAPSHOT";
     }
 
-    public static String getPluginAuthor() {
+    public static @NotNull String getPluginAuthor() {
         return descriptionFile != null ? descriptionFile.getAuthors().toString()
                 .replace("[", "")
                 .replace("]", "") : "unknown";
@@ -109,7 +118,18 @@ public class ExApi {
         return plugin.getServer().getOnlinePlayers();
     }
 
-    // menu ------------------------------------------------------------------------------------------------------
+    @ToUse
+    public static CommandManager getCommandManager() {
+        return commandManager;
+    }
+
+    @Contract("_ -> new")
+    @ToUse
+    public static @NotNull NamespacedKey getNamespacedKey(@KeyDef String name) {
+        return new NamespacedKey(plugin, name);
+    }
+
+// menu ------------------------------------------------------------------------------------------------------
 
     private void registerMenuListener(JavaPlugin plugin) {
         boolean isAlreadyRegistered = false;
@@ -127,7 +147,8 @@ public class ExApi {
         }
     }
 
-    public static void openMenuOf(Class<? extends Menu> menuClass, Player player) throws MenuManagerException, MenuManagerNotSetupException {
+    @ToUse(value = "Método para abir menu")
+    public static void openMenuOf(@NotNull Class<? extends Menu> menuClass, Player player) throws MenuManagerException, MenuManagerNotSetupException {
         try {
             menuClass.getConstructor(PlayerMenuUtility.class).newInstance(getPlayerMenuUtility(player)).open();
         } catch (InstantiationException var3) {
@@ -141,7 +162,7 @@ public class ExApi {
         }
     }
 
-    @ToUse(value = "Método para abir menus")
+    @ToUse(value = "Método para abir menu")
     public static void openMenu(Class<? extends Menu> menuClass, Player player) {
         try {
             ExApi.openMenuOf(menuClass, player);
@@ -218,12 +239,12 @@ public class ExApi {
     }
 
     @ToUse(value = "verificar si el plugin esta activo")
-    public static boolean isPlugin(ExPl exPl) {
+    public static boolean isPlugin(@NotNull ExPl exPl) {
         return ExApi.isPlugin(exPl.getName());
     }
 
     @ToUse(value = "verificar si el plugin esta activo")
-    public static boolean isPlugin(Plugins plugins) {
+    public static boolean isPlugin(@NotNull Plugins plugins) {
         return ExApi.isPlugin(plugins.getName());
     }
 

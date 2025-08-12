@@ -1,10 +1,9 @@
 package ex.nervisking.command;
 
 import ex.nervisking.ExApi;
+import ex.nervisking.ModelManager.Pattern.ToUse;
 import ex.nervisking.utils.UtilsManagers;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -52,82 +51,89 @@ public abstract class CustomCommand extends UtilsManagers implements BaseCommand
         return aliases;
     }
 
+    @ToUse(value = "Verificar si el sender tiene permiso para usar el comando")
     public boolean hasPermission(Sender sender) {
         return hasPermission(sender.getCommandSender(), "command." + getName());
     }
 
+    @ToUse(value = "Verificar si el sender tiene ese permiso")
     public boolean hasPermission(Sender sender, String permission) {
         return hasPermission(sender.getCommandSender(), permission);
     }
 
-    public boolean hasSubPermission(Sender sender, String subPermission) {
-        return hasPermission(sender.getCommandSender(), "command." + getName() + "." + subPermission);
+    @ToUse(value = "Verificar si el sender tiene es permiso para usar el comando")
+    public boolean hasSubPermission(Sender sender, String permission) {
+        return hasPermission(sender.getCommandSender(), "command." + getName() + "." + permission);
     }
 
-    public void sendMessage(Sender sender, String message) {
-        this.sendMessage(sender.getCommandSender(), message);
-    }
-
+    @ToUse(value = "Permite enviarle mensaje al sender")
     public void sendMessage(Sender sender, String... message) {
-        this.sendMessage(sender.getCommandSender(), message);
+        sender.sendMessage(message);
     }
 
+    @ToUse(value = "Permite enviarle mensaje al sender")
     public void sendMessage(Sender sender, List<String> messages) {
-        this.sendMessage(sender.getCommandSender(), messages);
+        sender.sendMessage(messages);
     }
 
-    // Ayudas y mensajes
+    @ToUse(value = "Enviá un mensaje al sender")
     public void noPermission(Sender sender) {
-        sendMessage(sender, ExApi.getPermissionMessage());
+        sender.sendMessage(ExApi.getPermissionMessage());
     }
 
+    @ToUse(value = "Enviá un mensaje al sender")
     public void neverConnected(Sender sender, String target) {
-        sendMessage(sender, ExApi.getNeverConnected().replace("%player%", target));
+        sender.sendMessage(ExApi.getNeverConnected().replace("%player%", target));
     }
 
+    @ToUse(value = "Enviá un mensaje al sender")
     public void noConsole(Sender sender) {
-        sendMessage(sender, ExApi.getConsoleMessage());
+        sender.sendMessage(ExApi.getConsoleMessage());
     }
 
+    @ToUse(value = "Enviá un mensaje al sender")
     public void invalidityAmount(Sender sender) {
-        sendMessage(sender, ExApi.getInvalidityAmountMessage());
+        sender.sendMessage(ExApi.getInvalidityAmountMessage());
     }
 
+    @ToUse(value = "Enviá un mensaje al sender")
     public void noOnline(Sender sender, String target) {
-        sendMessage(sender, ExApi.getNoOnlineMessage().replace("%player%", target));
+        sender.sendMessage(ExApi.getNoOnlineMessage().replace("%player%", target));
     }
 
+    @ToUse(value = "Enviá un mensaje al sender")
     public void sendHelp(Sender sender, String... usages) {
-        sendMessage(sender, "%prefix% &eUso del comando:");
+        sender.sendMessage("%prefix% &eUso del comando:");
         for (String usage : usages) {
-            sendMessage(sender, "&7 - /" + getName() + " " + usage);
+            sender.sendMessage("&7 - /" + getName() + " " + usage);
         }
     }
 
+    @ToUse(value = "Enviá un mensaje al sender")
     public void help(Sender sender, String... args) {
         help(sender, args == null ? List.of() : Arrays.asList(args));
     }
 
+    @ToUse(value = "Enviá un mensaje al sender")
     public void help(Sender sender, List<String> args) {
-        sendMessage(sender, ExApi.getUsage().replace("%command%", getName()));
-
+        sender.sendMessage(ExApi.getUsage().replace("%command%", getName()));
         if (args != null && !args.isEmpty()) {
-            sendMessage(sender, " ");
+            sender.sendMessage(" ");
             for (String arg : args) {
-                sendMessage(sender, arg);
+                sender.sendMessage(arg);
             }
-            sendMessage(sender, " ");
+            sender.sendMessage(" ");
         }
 
         if (sender.isOp() || hasOp(sender.getCommandSender())) {
             if (!getDescription().isEmpty()) {
-                sendMessage(sender, ExApi.getDescription().replace("%description%", getDescription()));
+                sender.sendMessage(ExApi.getDescription().replace("%description%", getDescription()));
             }
             if (!getAliases().isEmpty()) {
-                sendMessage(sender, ExApi.getAliases().replace("%aliases%", String.join(", ", getAliases())));
+                sender.sendMessage(ExApi.getAliases().replace("%aliases%", String.join(", ", getAliases())));
             }
             if (getPermission()) {
-                sendMessage(sender, ExApi.getPermissions().replace("%permission%",
+                sender.sendMessage(ExApi.getPermissions().replace("%permission%",
                         ExApi.getPlugin().getName().toLowerCase() + ".command." + getName()));
             }
         }
@@ -141,14 +147,13 @@ public abstract class CustomCommand extends UtilsManagers implements BaseCommand
 
     @Override
     public final List<String> onTabComplete(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command cmd, @NotNull String alias, @NotNull String @NotNull [] args) {
-        Arguments arguments = Arguments.of(args);
-        Completions completions = this.onTab(Sender.of(sender), arguments, Completions.of());
+        Arguments arg = Arguments.of(args);
+        Completions completions = this.onTab(Sender.of(sender), arg, Completions.of());
 
-        if (!arguments.isEmpty()) {
-            String lastArg = arguments.get(arguments.size() - 1);
-            completions.filter(s -> s.startsWith(lastArg.toLowerCase()));
+        if (!arg.isEmpty()) {
+            completions.filter(s -> s.startsWith(arg.get(arg.size() - 1).toLowerCase()));
         } else {
-            completions.add(Bukkit.getOnlinePlayers().stream().map(Player::getName).toList());
+            completions.addPlayerOnline();
         }
 
         return completions.asList();
