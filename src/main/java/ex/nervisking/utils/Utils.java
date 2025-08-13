@@ -82,7 +82,8 @@ public class Utils {
      */
     public String setPlaceholders(final Player player, String text) {
         text = replacePlaceholders(player, text);
-        text = Placeholder.parsePlaceholders(player, text);
+        text = Placeholder.parsePlaceholdersSplit(player, text);
+        text = Placeholder.parsePlaceholdersFull(player, text);
         if (!ExApi.isPlugin(Plugins.PLACEHOLDERAPI)) {
             return setColoredMessage(text);
         }

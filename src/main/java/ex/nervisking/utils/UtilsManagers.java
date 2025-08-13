@@ -741,7 +741,9 @@ public class UtilsManagers extends Utils {
     public void sendKnockback(Player player, String message) {
         Vector knockback = player.getLocation().getDirection().multiply(-1).setY(0.5);
         player.setVelocity(knockback);
-        sendMessage(player, "%prefix% " + message);
+        if (message != null) {
+            sendMessage(player, "%prefix% " + message);
+        }
     }
 
     @ToUse(

@@ -61,18 +61,8 @@ public record Arguments(String[] args) {
             params = "index -> Índice del argumento.",
             returns = "El argumento en forma de String, o null si no existe."
     )
-    @Contract(pure = true)
-    public @Nullable String get(int index) {
+    public String get(int index) {
         return index >= 0 && index < args.length ? args[index] : null;
-    }
-
-    @ToUse(
-            value = "Obtiene el argumento en el índice indicado como String, o un valor por defecto si no existe.",
-            params = {"index -> Índice del argumento.", "def -> Valor por defecto si no existe el argumento."},
-            returns = "El argumento en forma de String, o el valor por defecto."
-    )
-    public String getOrDefault(int index, String def) {
-        return index >= 0 && index < args.length ? args[index] : def;
     }
 
     @ToUse(
@@ -80,7 +70,7 @@ public record Arguments(String[] args) {
             params = "index -> Índice del argumento.",
             returns = "El argumento en minúsculas, o null si no existe."
     )
-    public @Nullable String toLowerCase(int index) {
+    public String toLowerCase(int index) {
         String value = get(index);
         return value != null ? value.toLowerCase() : null;
     }
@@ -90,9 +80,18 @@ public record Arguments(String[] args) {
             params = "index -> Índice del argumento.",
             returns = "El argumento en mayúsculas, o null si no existe."
     )
-    public @Nullable String toUpperCase(int index) {
+    public String toUpperCase(int index) {
         String value = get(index);
         return value != null ? value.toUpperCase() : null;
+    }
+
+    @ToUse(
+            value = "Obtiene el argumento en el índice indicado como String, o un valor por defecto si no existe.",
+            params = {"index -> Índice del argumento.", "def -> Valor por defecto si no existe el argumento."},
+            returns = "El argumento en forma de String, o el valor por defecto."
+    )
+    public String getOrDefault(int index, String def) {
+        return index >= 0 && index < args.length ? args[index] : def;
     }
 
     @ToUse(value = "Intenta convertir el argumento en el índice dado a entero.")

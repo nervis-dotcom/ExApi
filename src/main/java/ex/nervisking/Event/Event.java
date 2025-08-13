@@ -12,6 +12,5 @@ public abstract class Event<T extends JavaPlugin> extends UtilsManagers implemen
     @SuppressWarnings("unchecked")
     public Event() {
         this.plugin = ExApi.getPluginOf((Class<T>) JavaPlugin.class);
-        plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 }

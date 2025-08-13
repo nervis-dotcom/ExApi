@@ -1,5 +1,6 @@
 package ex.nervisking;
 
+import ex.nervisking.Event.EventsManager;
 import ex.nervisking.ModelManager.ExPl;
 import ex.nervisking.ModelManager.Pattern.KeyDef;
 import ex.nervisking.ModelManager.Plugins;
@@ -32,6 +33,7 @@ public class ExApi {
 
     private static JavaPlugin plugin;
     private static CommandManager commandManager;
+    private static EventsManager eventsManager;
     private static BungeeMessagingManager bungeeMessagingManager;
     private static UtilsManagers utilsManagers;
     private static Utils utils;
@@ -62,6 +64,7 @@ public class ExApi {
         ExApi.plugin = plugin;
         bungeeMessagingManager = new BungeeMessagingManager(plugin);
         commandManager = new CommandManager(plugin);
+        eventsManager = new EventsManager(plugin);
         utilsManagers = new UtilsManagers();
         utils = new Utils();
         sVar = plugin.getServer().getBukkitVersion().split("-")[0];
@@ -109,7 +112,7 @@ public class ExApi {
     }
 
     @ToUse
-    public static PluginDescriptionFile getPluginDescriptionFile() {
+    public static PluginDescriptionFile getDescriptionFile() {
         return descriptionFile;
     }
 
@@ -121,6 +124,11 @@ public class ExApi {
     @ToUse
     public static CommandManager getCommandManager() {
         return commandManager;
+    }
+
+    @ToUse
+    public static EventsManager getEventsManager() {
+        return eventsManager;
     }
 
     @Contract("_ -> new")
@@ -167,6 +175,7 @@ public class ExApi {
         try {
             ExApi.openMenuOf(menuClass, player);
         } catch (MenuManagerNotSetupException | MenuManagerException e) {
+            utilsManagers.sendMessage(player, e.getMessage());
             ExLog.sendException(e);
         }
     }

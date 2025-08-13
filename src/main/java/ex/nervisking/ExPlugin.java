@@ -1,6 +1,8 @@
 package ex.nervisking;
 
+import ex.nervisking.Event.EventsManager;
 import ex.nervisking.ModelManager.*;
+import ex.nervisking.ModelManager.Pattern.ToUse;
 import ex.nervisking.command.CommandManager;
 import ex.nervisking.menuManager.*;
 import ex.nervisking.utils.PyfigletMessage;
@@ -15,12 +17,14 @@ public abstract class ExPlugin extends JavaPlugin {
     private UtilsManagers utilsManagers;
     private Utils utils;
     public CommandManager commandManager;
+    public EventsManager eventsManager;
     public PyfigletMessage pyfigletMessage;
 
     protected void Load() {}
     protected boolean Menu() {
         return false;
     }
+    @ToUse
     public void Reload() {
         ExApi.closeInventorys();
     }
@@ -37,7 +41,8 @@ public abstract class ExPlugin extends JavaPlugin {
         new ExApi(this, Menu());
         this.utilsManagers = ExApi.getUtilsManagers();
         this.utils = ExApi.getUtils();
-        this.commandManager = new CommandManager(this);
+        this.commandManager = ExApi.getCommandManager();
+        this.eventsManager = ExApi.getEventsManager();
         this.pyfigletMessage = new PyfigletMessage();
 
         if (Menu()) {
@@ -56,20 +61,23 @@ public abstract class ExPlugin extends JavaPlugin {
         this.Disable();
     }
 
-
+    @ToUse(value = "Verificar si el plugin esta activo")
     public boolean isPlugin(String pluginName) {
         Plugin plugin = getServer().getPluginManager().getPlugin(pluginName);
         return plugin != null && plugin.isEnabled();
     }
 
+    @ToUse(value = "Verificar si el plugin esta activo")
     public boolean isPlugin(ExPl exPl) {
         return this.isPlugin(exPl.getName());
     }
 
+    @ToUse(value = "Verificar si el plugin esta activo")
     public boolean isPlugin(Plugins plugins) {
         return this.isPlugin(plugins.getName());
     }
 
+    @ToUse(value = "Desactiva el plugin")
     public void setPutOut() {
         getServer().getPluginManager().disablePlugin(this);
     }
