@@ -1,8 +1,12 @@
 package ex.nervisking.command;
 
+import ex.nervisking.ModelManager.Pattern.ToUse;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.UUID;
@@ -12,178 +16,170 @@ import java.util.UUID;
  * Clase que encapsula los argumentos de un comando y provee métodos
  * convenientes para acceder y convertir dichos argumentos.
  */
-public class Arguments {
-
-    private final String[] args;
+public record Arguments(String[] args) {
 
     /**
      * Constructor que recibe el arreglo original de argumentos.
      *
-     * @param args Array de argumentos recibido del comando.
+     * @param args Array de argumentos recibidos del comando.
      */
-    public Arguments(String[] args) {
-        this.args = args;
+    public Arguments {
     }
 
     /**
      * @since 1.1.0
      */
-    public static Arguments of(String[] args) {
-       return new Arguments(args);
+    @Contract(value = "_ -> new", pure = true)
+    public static @NotNull Arguments of(String[] args) {
+        return new Arguments(args);
     }
 
     /**
      * @since 1.1.0
      */
-    public static Arguments of() {
-       return new Arguments(new String[0]);
+    @Contract(value = " -> new", pure = true)
+    public static @NotNull Arguments of() {
+        return new Arguments(new String[0]);
     }
 
-    /**
-     * Obtiene la cantidad total de argumentos.
-     *
-     * @return Número total de argumentos.
-     */
+    @ToUse(value = "Obtiene la cantidad total de argumentos.", returns = "Número total de argumentos.")
     public int size() {
         return args.length;
     }
 
-    /**
-     * Verifica si existe un argumento en el índice dado.
-     *
-     * @param index Índice a verificar.
-     * @return true si existe argumento en ese índice, false en caso contrario.
-     */
+    @ToUse(
+            value = "Verifica si existe un argumento en el índice dado.",
+            params = "index -> Índice a verificar.",
+            returns = "true si existe argumento en ese índice, false en caso contrario."
+    )
     public boolean has(int index) {
         return !isEmpty() && args.length == index;
     }
 
-    private boolean h(int index) {
-        return index >= 0 && index < args.length;
+    @ToUse(
+            value = "Obtiene el argumento en el índice indicado como String.",
+            params = "index -> Índice del argumento.",
+            returns = "El argumento en forma de String, o null si no existe."
+    )
+    @Contract(pure = true)
+    public @Nullable String get(int index) {
+        return index >= 0 && index < args.length ? args[index] : null;
     }
 
-    /**
-     * Obtiene el argumento en el índice indicado como String.
-     *
-     * @param index Índice del argumento.
-     * @return El argumento en forma de String, o null si no existe.
-     */
-    public String get(int index) {
-        return h(index) ? args[index] : null;
-    }
-
-    /**
-     * Obtiene el argumento en el índice indicado como String, o un valor por defecto si no existe.
-     *
-     * @param index Índice del argumento.
-     * @param def Valor por defecto si no existe el argumento.
-     * @return El argumento en forma de String, o el valor por defecto.
-     */
+    @ToUse(
+            value = "Obtiene el argumento en el índice indicado como String, o un valor por defecto si no existe.",
+            params = {"index -> Índice del argumento.", "def -> Valor por defecto si no existe el argumento."},
+            returns = "El argumento en forma de String, o el valor por defecto."
+    )
     public String getOrDefault(int index, String def) {
-        return h(index) ? args[index] : def;
+        return index >= 0 && index < args.length ? args[index] : def;
     }
 
-    /**
-     * Convierte el argumento en el índice dado a minúsculas.
-     *
-     * @param index Índice del argumento.
-     * @return El argumento en minúsculas, o null si no existe.
-     */
-    public String toLowerCase(int index) {
+    @ToUse(
+            value = "Convierte el argumento en el índice dado a minúsculas.",
+            params = "index -> Índice del argumento.",
+            returns = "El argumento en minúsculas, o null si no existe."
+    )
+    public @Nullable String toLowerCase(int index) {
         String value = get(index);
         return value != null ? value.toLowerCase() : null;
     }
 
-    /**
-     * Convierte el argumento en el índice dado a mayúsculas.
-     *
-     * @param index Índice del argumento.
-     * @return El argumento en mayúsculas, o null si no existe.
-     */
-    public String toUpperCase(int index) {
+    @ToUse(
+            value = "Convierte el argumento en el índice dado a mayúsculas.",
+            params = "index -> Índice del argumento.",
+            returns = "El argumento en mayúsculas, o null si no existe."
+    )
+    public @Nullable String toUpperCase(int index) {
         String value = get(index);
         return value != null ? value.toUpperCase() : null;
     }
 
-    /**
-     * Intenta convertir el argumento en el índice dado a entero.
-     *
-     * @param index Índice del argumento.
-     * @param def Valor por defecto si no se puede convertir.
-     * @return El valor entero del argumento o el valor por defecto.
-     */
+    @ToUse(value = "Intenta convertir el argumento en el índice dado a entero.")
     public int getInt(int index, int def) {
+        String get = get(index);
+        if (get == null) return def;
         try {
-            return Integer.parseInt(get(index));
-        } catch (Exception e) {
+            return Integer.parseInt(get);
+        } catch (NumberFormatException | NullPointerException e) {
             return def;
         }
     }
 
-    public int getInt(int index) throws NumberFormatException{
-        return Integer.parseInt(get(index));
+    @ToUse
+    public int getInt(int index) throws NumberFormatException {
+        String value = get(index);
+        if (value == null) {
+            throw new NumberFormatException("Valor en el índice " + index + " es null");
+        }
+        return Integer.parseInt(value);
     }
 
-    /**
-     * Intenta convertir el argumento en el índice dado a double.
-     *
-     * @param index Índice del argumento.
-     * @param def Valor por defecto si no se puede convertir.
-     * @return El valor double del argumento o el valor por defecto.
-     */
+    @ToUse(value = "Intenta convertir el argumento en el índice dado a double.")
     public double getDouble(int index, double def) {
+        String get = get(index);
+        if (get == null) return def;
         try {
-            return Double.parseDouble(get(index));
-        } catch (Exception e) {
+            return Double.parseDouble(get);
+        } catch (NumberFormatException | NullPointerException e) {
             return def;
         }
     }
 
-    public double getDouble(int index) throws NumberFormatException{
-        return Double.parseDouble(get(index));
+    @ToUse
+    public double getDouble(int index) throws NumberFormatException {
+        String value = get(index);
+        if (value == null) {
+            throw new NumberFormatException("Valor en el índice " + index + " es null");
+        }
+        return Double.parseDouble(value);
     }
 
-    /**
-     * Intenta convertir el argumento en el índice dado a double.
-     *
-     * @param index Índice del argumento.
-     * @param def Valor por defecto si no se puede convertir.
-     * @return El valor long del argumento o el valor por defecto.
-     */
+    @ToUse(value = "Intenta convertir el argumento en el índice dado a long.")
     public long getLong(int index, long def) {
+        String get = get(index);
+        if (get == null) return def;
         try {
-            return Long.parseLong(get(index));
-        } catch (Exception e) {
+            return Long.parseLong(get);
+        } catch (NumberFormatException | NullPointerException e) {
             return def;
         }
     }
 
-    /**
-     * Intenta convertir el argumento en el índice dado a double.
-     *
-     * @param index Índice del argumento.
-     * @param def Valor por defecto si no se puede convertir.
-     * @return El valor float del argumento o el valor por defecto.
-     */
+    @ToUse
+    public long getLong(int index) throws NumberFormatException {
+        String value = get(index);
+        if (value == null) {
+            throw new NumberFormatException("Valor en el índice " + index + " es null");
+        }
+        return Long.parseLong(value);
+    }
+
+    @ToUse(value = "Intenta convertir el argumento en el índice dado a float.")
     public float getFloat(int index, float def) {
+        String get = get(index);
+        if (get == null) return def;
         try {
-            return Float.parseFloat(get(index)); // ← corrección aquí
-        } catch (Exception e) {
+            return Float.parseFloat(get);
+        } catch (NumberFormatException | NullPointerException e) {
             return def;
         }
     }
 
-    /**
-     * Intenta convertir el argumento en el índice dado a booleano.
-     *
-     * @param index Índice del argumento.
-     * @param def Valor por defecto si no se puede convertir.
-     * @return El valor booleano del argumento o el valor por defecto.
-     */
+    @ToUse
+    public float getFloat(int index) throws NumberFormatException {
+        String value = get(index);
+        if (value == null) {
+            throw new NumberFormatException("Valor en el índice " + index + " es null");
+        }
+        return Float.parseFloat(value);
+    }
+
+    @ToUse(value = "Intenta convertir el argumento en el índice dado a boolean.")
     public boolean getBoolean(int index, boolean def) {
         try {
             return Boolean.parseBoolean(get(index));
-        } catch (Exception e) {
+        } catch (NullPointerException e) {
             return def;
         }
     }
@@ -195,12 +191,12 @@ public class Arguments {
      * @param startIndex Índice desde donde comenzar a unir argumentos.
      * @return Cadena con los argumentos unidos por espacios.
      */
-    public String join(int startIndex) {
+    public @NotNull String join(int startIndex) {
         if (startIndex >= args.length) return ""; // prevenir IllegalArgumentException
         return String.join(" ", Arrays.copyOfRange(args, startIndex, args.length));
     }
 
-    public String join(int start, int end) {
+    public @NotNull String join(int start, int end) {
         if (start >= end || start >= args.length) return "";
         return String.join(" ", Arrays.copyOfRange(args, start, Math.min(end, args.length)));
     }
@@ -221,8 +217,11 @@ public class Arguments {
      * @return true si es un entero válido, false en caso contrario.
      */
     public boolean isInt(int index) {
+        String get = get(index);
+        if (get == null)
+            return false;
         try {
-            Integer.parseInt(get(index));
+            Integer.parseInt(get);
             return true;
         } catch (Exception e) {
             return false;
@@ -236,8 +235,11 @@ public class Arguments {
      * @return true si es un entero válido, false en caso contrario.
      */
     public boolean isLong(int index) {
+        String get = get(index);
+        if (get == null)
+            return false;
         try {
-            Long.parseLong(get(index));
+            Long.parseLong(get);
             return true;
         } catch (Exception e) {
             return false;
@@ -251,8 +253,11 @@ public class Arguments {
      * @return true si es un número decimal válido, false en caso contrario.
      */
     public boolean isDouble(int index) {
+        String get = get(index);
+        if (get == null)
+            return false;
         try {
-            Double.parseDouble(get(index));
+            Double.parseDouble(get);
             return true;
         } catch (Exception e) {
             return false;
@@ -276,7 +281,7 @@ public class Arguments {
      * @param index Índice del argumento con el nombre del jugador.
      * @return Jugador online si existe, o null si no está online o no existe.
      */
-    public Player getOnlinePlayer(int index) {
+    public @Nullable Player getOnlinePlayer(int index) {
         String name = get(index);
         return name != null ? Bukkit.getPlayerExact(name) : null;
     }
@@ -287,7 +292,7 @@ public class Arguments {
      * @param index Índice del argumento con el nombre del jugador.
      * @return Jugador offline correspondiente o null si no existe.
      */
-    public OfflinePlayer getOfflinePlayer(int index) {
+    public @Nullable OfflinePlayer getOfflinePlayer(int index) {
         String name = get(index);
         return name != null ? Bukkit.getOfflinePlayer(name) : null;
     }
@@ -298,9 +303,12 @@ public class Arguments {
      * @param index Índice del argumento.
      * @return UUID si la conversión es exitosa, o null en caso contrario.
      */
-    public UUID getUUID(int index) {
+    public @Nullable UUID getUUID(int index) {
+        String get = get(index);
+        if (get == null)
+            return null;
         try {
-            return UUID.fromString(get(index));
+            return UUID.fromString(get);
         } catch (Exception e) {
             return null;
         }
@@ -360,7 +368,7 @@ public class Arguments {
      *
      * @return el último argumento como String, o null si no hay argumentos
      */
-    public String getLast() {
+    public @Nullable String getLast() {
         if (isEmpty()) {
             return null;  // No hay argumentos
         }
@@ -370,7 +378,7 @@ public class Arguments {
     /**
      * Verifica si el argumento en el índice dado coincide con alguno de los valores esperados (ignora mayúsculas/minúsculas).
      *
-     * @param index Índice del argumento.
+     * @param index  Índice del argumento.
      * @param values Valores permitidos a comparar.
      * @return true si coincide con alguno, false en caso contrario.
      */
@@ -389,7 +397,7 @@ public class Arguments {
     /**
      * Verifica si el argumento en el índice dado coincide con alguno de los valores esperados.
      *
-     * @param index Índice del argumento.
+     * @param index  Índice del argumento.
      * @param values Valores permitidos a comparar.
      * @return true si coincide con alguno, false en caso contrario.
      */

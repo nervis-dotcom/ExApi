@@ -16,7 +16,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 /**
- * @since 1.1.0
+ * @since 1.0.0
  */
 public class Sender {
 
