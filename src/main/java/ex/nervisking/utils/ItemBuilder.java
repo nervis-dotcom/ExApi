@@ -32,7 +32,6 @@ import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Utility class for easily creating custom items.
@@ -48,7 +47,7 @@ public class ItemBuilder {
     private final PersistentDataContainer container;
 
     private Player player = null;
-    private static final Error error = new Error();
+    private final Error error;
     private static final ServerVersion serverVersion = ExApi.serverVersion;
 
     public final static String CLOSE = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDM0NWU1ZmNlMmZjZmZmNzhjZGFjNjVlZDg4MTkxOGM3OWMzOGU4NTVlYmJjMTkyYzk3YzU3ODRjMzJkMzc4In19fQ==";
@@ -69,15 +68,6 @@ public class ItemBuilder {
 
     // ======= Constructors =======
 
-    public ItemBuilder(ItemStack item) {
-        if (item.getItemMeta() == null)
-            throw new IllegalArgumentException("ItemMeta cannot be null.");
-
-        this.item = item;
-        this.meta = item.getItemMeta();
-        this.container = meta.getPersistentDataContainer();
-    }
-
     public ItemBuilder(Player player, ItemStack item) {
         if (item.getItemMeta() == null)
             throw new IllegalArgumentException("ItemMeta cannot be null.");
@@ -86,6 +76,49 @@ public class ItemBuilder {
         this.item = item;
         this.meta = item.getItemMeta();
         this.container = meta.getPersistentDataContainer();
+        this.error = new Error();
+    }
+
+    public ItemBuilder(Player player, String value, int count) {
+        this.error = new Error();
+        if (value == null || value.isEmpty()) {
+            error.setCause("Material incorrecto: " + value);
+            this.item = createErrorItem();
+            this.meta = item.getItemMeta();
+            this.container = meta.getPersistentDataContainer();
+            return;
+        }
+
+        Material material = getMaterial(value);
+        if (material != Material.AIR) {
+            this.item = new ItemStack(material, count);
+        } else if (value.startsWith("ey") || value.startsWith("[texture]")) {
+            this.item = texture(value.startsWith("[texture]") ? value.substring("[texture]".length()).trim() : value, count);
+        } else if (value.startsWith("[user]")) {
+            this.item = createSkullFromUsername(value.substring("[user]".length()).trim());
+        } else if (value.toLowerCase().startsWith("[random]")) {
+            String trim = value.substring("[random]".length()).trim();
+            RDMaterial type = RDMaterial.fromString(trim);
+            if (type != null) {
+                Material mat = type.getRandom();
+                this.item = new ItemStack(mat, count);
+            } else {
+                error.setCause("RDMaterial incorrecto: " + trim);
+                this.item = createErrorItem();
+            }
+        } else {
+            this.item = createSkullFromUsername(value);
+        }
+        if (item.getItemMeta() == null)
+            throw new IllegalArgumentException("ItemMeta cannot be null.");
+
+        this.player = player;
+        this.meta = item.getItemMeta();
+        this.container = meta.getPersistentDataContainer();
+    }
+
+    public ItemBuilder(ItemStack item) {
+        this(null, item);
     }
 
     public ItemBuilder(Material material, int count) {
@@ -113,38 +146,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder(String value, int count) {
-        if (value == null) {
-            error.setCause("Material incorrecto");
-            this.item = createErrorItem();
-            this.meta = item.getItemMeta();
-            this.container = meta.getPersistentDataContainer();
-            return;
-        }
-
-        Material material = getMaterial(value);
-        if (material != Material.AIR) {
-            this.item = new ItemStack(material, count);
-        } else if (value.startsWith("ey") || value.startsWith("[texture]")) {
-            this.item = texture(value.startsWith("[texture]") ? value.substring("[texture]".length()).trim() : value, count);
-        } else if (value.startsWith("[user]")) {
-            this.item = createSkullFromUsername(value.substring("[user]".length()).trim());
-        } else if (value.toLowerCase().startsWith("[random]")) {
-            RDMaterial type = RDMaterial.fromString(value.substring("[random]".length()).trim());
-            if (type != null) {
-                Material mat = type.getRandom();
-                this.item = new ItemStack(mat, count);
-            } else {
-                this.item = createErrorItem();
-            }
-        } else {
-            this.item = createSkullFromUsername(value);
-        }
-
-        if (item.getItemMeta() == null)
-            throw new IllegalArgumentException("ItemMeta cannot be null.");
-
-        this.meta = item.getItemMeta();
-        this.container = meta.getPersistentDataContainer();
+        this(null, value, count);
     }
 
     public ItemBuilder(String value) {
@@ -152,48 +154,38 @@ public class ItemBuilder {
     }
 
     public ItemBuilder(Player player, String value) {
-        if (value == null || value.isEmpty()) {
-            error.setCause("Material incorrecto: " + value);
-            this.item = createErrorItem();
-            this.meta = item.getItemMeta();
-            this.container = meta.getPersistentDataContainer();
-            return;
-        }
-
-        Material material = getMaterial(value);
-        if (material != Material.AIR) {
-            this.item = new ItemStack(material, 1);
-        } else if (value.startsWith("ey") || value.startsWith("[texture]")) {
-            this.item = texture(value.startsWith("[texture]") ? value.substring("[texture]".length()).trim() : value, 1);
-        } else if (value.startsWith("[user]")) {
-            this.item = createSkullFromUsername(value.substring("[user]".length()).trim());
-        } else if (value.toLowerCase().startsWith("[random]")) {
-            String trim = value.substring("[random]".length()).trim();
-            RDMaterial type = RDMaterial.fromString(trim);
-            if (type != null) {
-                Material mat = type.getRandom();
-                this.item = new ItemStack(mat, 1);
-            } else {
-                error.setCause("RDMaterial incorrecto: " + trim);
-                this.item = createErrorItem();
-            }
-        } else {
-            this.item = createSkullFromUsername(value);
-        }
-        if (item.getItemMeta() == null)
-            throw new IllegalArgumentException("ItemMeta cannot be null.");
-
-        this.player = player;
-        this.meta = item.getItemMeta();
-        this.container = meta.getPersistentDataContainer();
+        this(player, value, 1);
     }
 
     public ItemBuilder(UUID uuid) {
-        this(createSkullFromUUID(uuid));
+       this(null, uuid);
     }
 
     public ItemBuilder(Player player, UUID uuid) {
-        this(player, createSkullFromUUID(uuid));
+        ItemStack stack = new ItemStack(Material.PLAYER_HEAD);
+        if (stack.getItemMeta() instanceof SkullMeta skullMeta) {
+
+            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+            if (offlinePlayer.hasPlayedBefore()) {
+                if (offlinePlayer.isOnline()) {
+                    skullMeta.setPlayerProfile(offlinePlayer.getPlayerProfile());
+                } else {
+                    stack = texture(OFFLINE, 1);
+                }
+            } else {
+                stack = createErrorItem();
+            }
+            stack.setItemMeta(skullMeta);
+        }
+
+        item = stack;
+        if (item.getItemMeta() == null) {
+            throw new IllegalArgumentException("ItemMeta cannot be null.");
+        }
+        this.player = player;
+        this.meta = item.getItemMeta();
+        this.container = meta.getPersistentDataContainer();
+        this.error = new Error();
     }
 
     // ======= Static Helpers =======
@@ -246,7 +238,7 @@ public class ItemBuilder {
         return new ItemBuilder(player, uuid);
     }
 
-    private static ItemStack createErrorItem() {
+    private ItemStack createErrorItem() {
         ItemStack errorItem = new ItemStack(Material.BARRIER);
         ItemMeta meta = errorItem.getItemMeta();
         if (meta != null) {
@@ -256,7 +248,7 @@ public class ItemBuilder {
         return errorItem;
     }
 
-    private static @NotNull Material getMaterial(String name) {
+    private @NotNull Material getMaterial(String name) {
         if (name == null || name.isEmpty()) return Material.AIR;
         try {
             return Material.valueOf(name.toUpperCase());
@@ -265,7 +257,7 @@ public class ItemBuilder {
         }
     }
 
-    private static ItemStack createSkullFromUsername(String user) {
+    private ItemStack createSkullFromUsername(String user) {
         ItemStack head = new ItemStack(Material.PLAYER_HEAD);
         if (head.getItemMeta() instanceof SkullMeta skullMeta) {
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(user);
@@ -285,30 +277,11 @@ public class ItemBuilder {
         return head;
     }
 
-    private static ItemStack createSkullFromUUID(UUID uuid) {
-        ItemStack head = new ItemStack(Material.PLAYER_HEAD);
-        if (head.getItemMeta() instanceof SkullMeta skullMeta) {
-
-            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-            if (offlinePlayer.hasPlayedBefore()) {
-                if (offlinePlayer.isOnline()) {
-                    skullMeta.setPlayerProfile(offlinePlayer.getPlayerProfile());
-                } else {
-                    return texture(OFFLINE, 1);
-                }
-            } else {
-                return createErrorItem();
-            }
-            head.setItemMeta(skullMeta);
-        }
-        return head;
-    }
-
-    private static ItemStack texture(String texture, int amount) {
+    private ItemStack texture(String texture, int amount) {
         ItemStack head = new ItemStack(Material.PLAYER_HEAD);
         head.setAmount(amount);
         if (head.getItemMeta() instanceof SkullMeta skullMeta && texture != null) {
-            if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_20_R2)) {
+            if (ExApi.serverVersion.serverVersionGreaterEqualThan(ExApi.serverVersion, ServerVersion.v1_20_R2)) {
                 PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID());
                 PlayerTextures textures = profile.getTextures();
                 URL url;
@@ -320,7 +293,7 @@ public class ItemBuilder {
 
                     url = new URL(urlText);
                 } catch (Exception exception) {
-                    exception.printStackTrace();
+                    ExLog.sendException(exception);
                     error.setCause(exception.getMessage());
                     return createErrorItem();
                 }
@@ -411,6 +384,7 @@ public class ItemBuilder {
         Material mat = getMaterial(material);
         if (mat != Material.AIR) {
             item.setType(mat);
+            item.setItemMeta(meta);
         } else {
             throw new IllegalArgumentException("Invalid material: " + material);
         }
@@ -431,16 +405,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setLore(String... lore) {
-        if (error.isStatus() || lore == null || lore.length == 0) {
-            return this;
-        }
-        List<String> currentLore = new ArrayList<>();
-        for (String line : lore) {
-            currentLore.add(parse(line));
-        }
-        meta.setLore(currentLore);
-
-        return this;
+        return this.setLore(List.of(lore));
     }
 
     public ItemBuilder setLore(List<String> lore) {
@@ -456,15 +421,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder addLore(String... lore) {
-        if (error.isStatus() || lore == null || lore.length == 0) {
-            return this;
-        }
-        List<String> currentLore = meta.hasLore() ? new ArrayList<>(Objects.requireNonNull(meta.getLore())) : new ArrayList<>();
-        for (String line : lore) {
-            currentLore.add(parse(line));
-        }
-        meta.setLore(currentLore);
-        return this;
+        return this.addLore(List.of(lore));
     }
 
     public ItemBuilder addLore(List<String> lore) {
@@ -498,17 +455,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder addItemFlagsByName(String... flags) {
-        if (error.isStatus() || flags == null) {
-            return this;
-        }
-        for (String name : flags) {
-            try {
-                meta.addItemFlags(ItemFlag.valueOf(name.toUpperCase()));
-            } catch (IllegalArgumentException e) {
-                System.out.println("Advertencia: Flag inválido '" + name + "'");
-            }
-        }
-        return this;
+        return this.addItemFlagsByName(List.of(flags));
     }
 
     public ItemBuilder setCustomModelData(int data) {
@@ -528,7 +475,7 @@ public class ItemBuilder {
     }
 
     /**
-     * @since 1.1.0
+     * @since 1.0.1
      */
     public ItemBuilder addEnchant(Map<String, Integer> enchantments) {
         if (error.isStatus() || enchantments == null || enchantments.isEmpty()) {
@@ -555,7 +502,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setDamage(int damage) {
-        if (error.isStatus()) {
+        if (error.isStatus() || damage < 0) {
             return this;
         }
         if (meta instanceof Damageable d) {
@@ -565,7 +512,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setMaxDamage(int damage) {
-        if (error.isStatus()) {
+        if (error.isStatus() || damage < 0) {
             return this;
         }
         if (meta instanceof Damageable damageable) {
@@ -614,7 +561,7 @@ public class ItemBuilder {
         if (error.isStatus()) {
             return this;
         }
-        container.set(new NamespacedKey(ExApi.getPlugin(), key), type, data);
+        container.set(ExApi.getNamespacedKey(key), type, data);
         return this;
     }
 
@@ -639,25 +586,22 @@ public class ItemBuilder {
         return this;
     }
 
-    public ItemBuilder setHide() {
+    public ItemBuilder setHide(boolean value) {
         if (error.isStatus()) {
             return this;
         }
-        meta.addItemFlags(ItemFlag.values());
+        if (value) {
+            meta.addItemFlags(ItemFlag.values());
+        }
         return this;
     }
 
+    public ItemBuilder setHide() {
+        return this.setHide(true);
+    }
+
     public ItemBuilder setHideAll() {
-        if (error.isStatus()) {
-            return this;
-        }
-        meta.addItemFlags(ItemFlag.values());
-        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
-            for (Attribute attribute : Attribute.values()) {
-                meta.removeAttributeModifier(attribute);
-            }
-        }
-        return this;
+        return this.setHideAll(true);
     }
 
     public ItemBuilder setHideAll(boolean value) {
@@ -676,11 +620,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setUnbreakable() {
-        if (error.isStatus()) {
-            return this;
-        }
-        meta.setUnbreakable(true);
-        return this;
+        return this.setUnbreakable(true);
     }
 
     public ItemBuilder setUnbreakable(boolean value) {
@@ -700,12 +640,11 @@ public class ItemBuilder {
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(user);
             if (offlinePlayer.hasPlayedBefore()) {
                 if (offlinePlayer.isOnline()) {
-                    skullMeta.setPlayerProfile(offlinePlayer.getPlayerProfile());
+                    skullMeta.setOwnerProfile(offlinePlayer.getPlayerProfile());
                 } else {
                     return setSkullTexture(OFFLINE);
                 }
             }
-            item.setItemMeta(skullMeta);
         }
         return this;
     }
@@ -719,55 +658,18 @@ public class ItemBuilder {
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
             if (offlinePlayer.hasPlayedBefore()) {
                 if (offlinePlayer.isOnline()) {
-                    skullMeta.setPlayerProfile(offlinePlayer.getPlayerProfile());
+                    skullMeta.setOwnerProfile(offlinePlayer.getPlayerProfile());
                 } else {
                     return setSkullTexture(OFFLINE);
                 }
             }
-            item.setItemMeta(skullMeta);
         }
         return this;
     }
 
     @Deprecated(since = "1.0.0", forRemoval = true)
     public ItemBuilder SkullTexture(String texture) {
-        if (error.isStatus()) {
-            return this;
-        }
-        if (meta instanceof SkullMeta skullMeta) {
-            if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_20_R2)) {
-                PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID());
-                PlayerTextures textures = profile.getTextures();
-                URL url;
-                try {
-                    String decoded = new String(Base64.getDecoder().decode(texture));
-                    String decodedFormatted = decoded.replaceAll("\\s", "");
-                    JsonObject jsonObject = new Gson().fromJson(decodedFormatted, JsonObject.class);
-                    String urlText = jsonObject.get("textures").getAsJsonObject().get("SKIN").getAsJsonObject().get("url").getAsString();
-
-                    url = new URL(urlText);
-                } catch (Exception error) {
-                    error.printStackTrace();
-                    return this;
-                }
-                textures.setSkin(url);
-                profile.setTextures(textures);
-
-                skullMeta.setOwnerProfile(profile);
-            } else {
-                GameProfile profile = new GameProfile(UUID.randomUUID(), "");
-                profile.getProperties().put("textures", new Property("textures", texture));
-
-                try {
-                    Field profileField = skullMeta.getClass().getDeclaredField("profile");
-                    profileField.setAccessible(true);
-                    profileField.set(skullMeta, profile);
-                } catch (IllegalArgumentException | NoSuchFieldException | SecurityException | IllegalAccessException ignored) {
-                }
-            }
-
-        }
-        return this;
+        return this.texture(texture, UUID.randomUUID());
     }
 
     public ItemBuilder setSkullTexture(String texture) {
@@ -794,8 +696,8 @@ public class ItemBuilder {
                     String urlText = jsonObject.get("textures").getAsJsonObject().get("SKIN").getAsJsonObject().get("url").getAsString();
 
                     url = new URL(urlText);
-                } catch (Exception error) {
-                    ExLog.sendException(error);
+                } catch (Exception exception) {
+                    ExLog.sendException(exception);
                     return this;
                 }
                 textures.setSkin(url);
@@ -810,8 +712,7 @@ public class ItemBuilder {
                     Field profileField = skullMeta.getClass().getDeclaredField("profile");
                     profileField.setAccessible(true);
                     profileField.set(skullMeta, profile);
-                } catch (IllegalArgumentException | NoSuchFieldException | SecurityException |
-                         IllegalAccessException ignored) {
+                } catch (IllegalArgumentException | NoSuchFieldException | SecurityException | IllegalAccessException ignored) {
                 }
             }
 
@@ -820,7 +721,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setMaxStackSize(int amount) {
-        if (error.isStatus()) {
+        if (error.isStatus() || amount < 0) {
             return this;
         }
         if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
@@ -860,46 +761,30 @@ public class ItemBuilder {
     /**
      * @since 1.0.1
      */
-    public ItemBuilder setGlintOverride(boolean value) {
-        if (error.isStatus()) {
-            return this;
-        }
-        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
-            meta.setEnchantmentGlintOverride(value);
-        } else if (value) {
-            addEnchant(Enchantment.LURE, 1, true);
-            addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        }
-        return this;
+    public ItemBuilder setGlintOverride() {
+        return setGlintOverride(true);
     }
 
     /**
      * @since 1.0.1
      */
-    public ItemBuilder setGlintOverride() {
+    public ItemBuilder setGlintOverride(boolean value) {
         if (error.isStatus()) {
             return this;
         }
-        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
-            meta.setEnchantmentGlintOverride(true);
-        } else {
-            addEnchant(Enchantment.LURE, 1, true);
-            addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        if (value) {
+            if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
+                meta.setEnchantmentGlintOverride(true);
+            } else {
+                addEnchant(Enchantment.LURE, 1, true);
+                addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            }
         }
         return this;
     }
 
     public ItemBuilder setGlider() {
-        if (error.isStatus()) {
-            return this;
-        }
-        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
-            meta.setGlider(true);
-        } else {
-            addEnchant(Enchantment.LURE, 1, true);
-            addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        }
-        return this;
+        return setGlider(true);
     }
 
     public ItemBuilder setGlider(boolean value) {
@@ -916,15 +801,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setHideTooltip() {
-        if (error.isStatus()) {
-            return this;
-        }
-        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
-            meta.setHideTooltip(true);
-        } else {
-            setName(" ");
-        }
-        return this;
+        return setHideTooltip(true);
     }
 
     public ItemBuilder setHideTooltip(boolean value) {
@@ -956,7 +833,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setRarity(String rarityName) {
-        if (error.isStatus()) {
+        if (error.isStatus() || rarityName == null) {
             return this;
         }
         if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
@@ -992,7 +869,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setColor(Color color) {
-        if (error.isStatus()) {
+        if (error.isStatus() || color == null) {
             return this;
         }
         if (meta instanceof PotionMeta potionMeta) {
@@ -1085,14 +962,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setComponentFlags(Boolean... booleans) {
-        if (error.isStatus()) {
-            return this;
-        }
-        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
-            CustomModelDataComponent component = meta.getCustomModelDataComponent();
-            component.setFlags(List.of(booleans));
-        }
-        return this;
+        return this.setComponentFlags(List.of(booleans));
     }
 
     public ItemBuilder setComponentFloats(List<Float> floats) {
@@ -1107,15 +977,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setComponentFloats(Float... floats) {
-        if (error.isStatus()) {
-            return this;
-        }
-
-        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
-            CustomModelDataComponent component = meta.getCustomModelDataComponent();
-            component.setFloats(List.of(floats));
-        }
-        return this;
+        return this.setComponentFloats(List.of(floats));
     }
 
     public ItemBuilder setComponentColors(List<Color> colors) {
@@ -1131,15 +993,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setComponentColors(Color... colors) {
-        if (error.isStatus()) {
-            return this;
-        }
-
-        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
-            CustomModelDataComponent component = meta.getCustomModelDataComponent();
-            component.setColors(List.of(colors));
-        }
-        return this;
+        return this.setComponentColors(List.of(colors));
     }
 
     public ItemBuilder setComponentColorsByName(List<String> colors) {
@@ -1157,17 +1011,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setComponentColorsByName(String... colors) {
-        if (error.isStatus()) {
-            return this;
-        }
-
-        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
-            CustomModelDataComponent component = meta.getCustomModelDataComponent();
-            component.setColors(Stream.of(colors)
-                    .map(rgb -> Color.fromRGB(Integer.parseInt(rgb)))
-                    .collect(Collectors.toList()));
-        }
-        return this;
+        return this.setComponentColorsByName(List.of(colors));
     }
 
     public ItemBuilder setComponentStrings(List<String> strings) {
@@ -1183,15 +1027,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setComponentStrings(String... strings) {
-        if (error.isStatus()) {
-            return this;
-        }
-
-        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
-            CustomModelDataComponent component = meta.getCustomModelDataComponent();
-            component.setStrings(List.of(strings));
-        }
-        return this;
+        return this.setComponentStrings(List.of(strings));
     }
 
     public ItemBuilder setItemModel(String namespace, String key) {
@@ -1259,14 +1095,7 @@ public class ItemBuilder {
             return false;
         }
 
-        Map<Integer, ItemStack> stackHashMap = player.getInventory().addItem(this.build());
-
-        if (!stackHashMap.isEmpty()) {
-            for (ItemStack leftover : stackHashMap.values()) {
-                player.getWorld().dropItem(player.getLocation(), leftover);
-            }
-        }
-
+        ExApi.getUtilsManagers().giveItem(player, this.build());
         return true;
     }
 
@@ -1290,9 +1119,19 @@ public class ItemBuilder {
      * @since 1.0.1
      */
     public void drop() {
-        if (player != null) {
-            drop(player.getLocation());
+        if (error.isStatus()) {
+            ExLog.sendWarning("no se pudo construir el item.");
+            return;
         }
+        if (player == null) {
+            ExLog.sendWarning("player es null.");
+            return;
+        }
+        if (!player.isOnline()) {
+            ExLog.sendWarning("player no online.");
+            return;
+        }
+        drop(player.getLocation());
     }
 
     /**

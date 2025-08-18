@@ -432,4 +432,14 @@ public class BossBar {
     public Set<UUID> getPlayers() {
         return this.players;
     }
+
+    public List<Player> getPlayersOline() {
+        List<Player> player = new ArrayList<>();
+        for (var p : this.players) {
+            if (Bukkit.getPlayer(p) != null) {
+                player.add(Bukkit.getPlayer(p));
+            }
+        }
+        return player;
+    }
 }

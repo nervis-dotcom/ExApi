@@ -3,6 +3,7 @@ package ex.nervisking.config;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import ex.nervisking.ExApi;
+import ex.nervisking.ModelManager.Pattern.KeyLet;
 import ex.nervisking.utils.ExLog;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -25,7 +26,7 @@ public class JsonConfig {
     private final Gson gson;
     private JsonObject root;
 
-    public JsonConfig(String fileName, String folderName) {
+    public JsonConfig(@KeyLet String fileName, @KeyLet String folderName) {
         JavaPlugin plugin = ExApi.getPlugin();
         this.gson = new GsonBuilder().setPrettyPrinting().create();
 
@@ -44,7 +45,6 @@ public class JsonConfig {
         if (!file.exists()) {
             if (plugin.getResource(resourcePath) != null) {
                 plugin.saveResource(resourcePath, false);
-                ExLog.sendInfo("Archivo por defecto '" + resourcePath + "' copiado al directorio de datos.");
             } else {
                 try {
                     file.createNewFile();
@@ -59,17 +59,17 @@ public class JsonConfig {
         this.load();
     }
 
-    public JsonConfig(String fileName) {
+    public JsonConfig(@KeyLet String fileName) {
         this(fileName, null);
     }
 
     @Contract("_, _ -> new")
-    public static @NotNull JsonConfig of(String fileName, String folderName) {
+    public static @NotNull JsonConfig of(@KeyLet String fileName, @KeyLet String folderName) {
         return new JsonConfig(fileName, folderName);
     }
 
     @Contract("_ -> new")
-    public static @NotNull JsonConfig of(String fileName) {
+    public static @NotNull JsonConfig of(@KeyLet String fileName) {
         return new JsonConfig(fileName);
     }
 
@@ -94,7 +94,6 @@ public class JsonConfig {
     public void reload() {
         this.load();
     }
-
 
     // ─────────────────────────────────────
     // Métodos de escritura

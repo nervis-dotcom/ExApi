@@ -12,6 +12,7 @@ public class CommandBuilder {
     private boolean permission;
     private String[] aliases;
     private String description;
+    private String per;
     private BiConsumer<Sender, Arguments> commandExecutor;
     private TriFunction<Sender, Arguments, Completions, Completions> tabCompleter;
     private boolean commandSet;
@@ -22,6 +23,7 @@ public class CommandBuilder {
         this.permission = permission;
         this.aliases = new String[0];
         this.description = "";
+        this.per = "";
         this.commandExecutor = null;
         this.tabCompleter = null;
         this.commandSet = false;
@@ -43,6 +45,12 @@ public class CommandBuilder {
     @ToUse(value = "Define la descripción del comando")
     public CommandBuilder description(String description) {
         this.description = description;
+        return this;
+    }
+
+    @ToUse(value = "Define el permiso del comando")
+    public CommandBuilder per(String per) {
+        this.per = per;
         return this;
     }
 
@@ -100,6 +108,11 @@ public class CommandBuilder {
             @Override
             public List<String> getAliases() {
                 return List.of(aliases);
+            }
+
+            @Override
+            public String per() {
+                return per;
             }
 
             @Override

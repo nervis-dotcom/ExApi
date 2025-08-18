@@ -1,6 +1,7 @@
 package ex.nervisking.config;
 
 import ex.nervisking.ExApi;
+import ex.nervisking.ModelManager.Pattern.KeyLet;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -102,8 +103,8 @@ public abstract class CustomConfigSave {
 
     public abstract void loadConfigs();
     public abstract void saveData();
-    public abstract String fileName();
-    public abstract String folderName();
+    public abstract @KeyLet String fileName();
+    public abstract @KeyLet String folderName();
     public abstract boolean newFile();
     public String getPath() {
         return this.fileName;

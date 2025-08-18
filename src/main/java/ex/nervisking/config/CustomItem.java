@@ -2,6 +2,7 @@ package ex.nervisking.config;
 
 import ex.nervisking.utils.ItemBuilder;
 import org.bukkit.Color;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
@@ -126,25 +127,52 @@ public class CustomItem {
     }
 
     public ItemBuilder getItemBuilder() {
-        return toItemBuilder(null, new HashMap<>());
+        return toItemBuilder(null, new HashMap<>(), null);
+    }
+
+    public ItemBuilder getItemBuilder(Material material) {
+        return toItemBuilder(null, new HashMap<>(), material);
     }
 
     public ItemBuilder getItemBuilder(Player player) {
-        return toItemBuilder(player, new HashMap<>());
+        return toItemBuilder(player, new HashMap<>(), null);
+    }
+
+    public ItemBuilder getItemBuilder(Player player, Material material) {
+        return toItemBuilder(player, new HashMap<>(), material);
+    }
+
+    public ItemBuilder getItemBuilder(Map<String, String> variables, Material material) {
+        return toItemBuilder(null, variables, material);
+    }
+
+    public ItemBuilder getItemBuilder(Player player, Map<String, String> variables, Material material) {
+        return toItemBuilder(player, variables, material);
+    }
+
+    public ItemBuilder getItemBuilder(Player player, Map<String, String> variables) {
+        return toItemBuilder(player, variables, null);
     }
 
     public ItemBuilder getItemBuilder(Map<String, String> variables) {
-        return toItemBuilder(null, variables);
+        return toItemBuilder(null, variables, null);
     }
 
+    @Deprecated(since = "1.0.3", forRemoval = true)
     public ItemBuilder toItemBuilder(Player player, Map<String, String> variables) {
+        return toItemBuilder(player, variables, null);
+    }
+
+    private ItemBuilder toItemBuilder(Player player, Map<String, String> variables, Material material) {
         String parsedName = replaceVariables(this.name, variables);
+
+        String type = material == null ? this.id : material.name();
 
         List<String> parsedLore = this.lore != null
                 ? this.lore.stream().map(line -> replaceVariables(line, variables)).toList()
                 : List.of();
 
-        ItemBuilder item = (player != null ? ItemBuilder.of(player, this.id) : ItemBuilder.of(this.id))
+        ItemBuilder item = (player != null ? ItemBuilder.of(player, type) : ItemBuilder.of(type))
                 .setName(parsedName)
                 .setLore(parsedLore)
                 .setAmount(this.amount)

@@ -24,10 +24,6 @@ public class DataUtils {
         return segment.toString();
     }
 
-    public static NamespacedKey generateRandomKey(String namespace) {
-        return new NamespacedKey(ExApi.getPlugin(), namespace);
-    }
-
     public static String getDataFromString(ItemStack itemStack, NamespacedKey key) {
         ItemMeta itemMeta = itemStack.getItemMeta();
         if (itemMeta == null) return null;
@@ -40,7 +36,7 @@ public class DataUtils {
         if (meta == null) {
             return false;
         }
-        return meta.getPersistentDataContainer().has(new NamespacedKey(ExApi.getPlugin(), NAMESPACE), PersistentDataType.STRING);
+        return meta.getPersistentDataContainer().has(ExApi.getNamespacedKey(NAMESPACE), PersistentDataType.STRING);
     }
 
     public static boolean getDataFromBoolean(ItemStack itemStack, NamespacedKey key){
@@ -67,7 +63,7 @@ public class DataUtils {
     public static long getDataFromLong(ItemStack itemStack, NamespacedKey key){
         ItemMeta itemMeta = itemStack.getItemMeta();
         if (itemMeta == null) {
-            return 0;
+            return -1L;
         }
         PersistentDataContainer container = itemMeta.getPersistentDataContainer();
         Long value = container.get(key, PersistentDataType.LONG);

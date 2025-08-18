@@ -21,6 +21,11 @@ public abstract class Command extends UtilsManagers implements BaseCommand {
     public abstract String getDescription();
 
     @Override
+    public String per() {
+        return "";
+    }
+
+    @Override
     public abstract boolean getPermission();
 
     @Override
@@ -129,8 +134,9 @@ public abstract class Command extends UtilsManagers implements BaseCommand {
         Arguments arg = Arguments.of(args);
         Completions completions = this.onTab(Sender.of(sender), arg, Completions.of());
 
-        if (!arg.isEmpty()) {
-            completions.filter(s -> s.startsWith(arg.get(arg.size() - 1).toLowerCase()));
+        String spm = arg.get(arg.size() - 1);
+        if (!arg.isEmpty() && spm != null) {
+            completions.filter(s -> s.startsWith(spm.toLowerCase()));
         } else {
             completions.addPlayerOnline();
         }

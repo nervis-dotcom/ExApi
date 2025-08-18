@@ -29,7 +29,7 @@ public class Sender {
     }
 
     @Contract(value = "_ -> new", pure = true)
-    public static @NotNull Sender of(CommandSender sender) {
+    public static Sender of(CommandSender sender) {
         return new Sender(sender);
     }
 

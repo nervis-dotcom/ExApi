@@ -4,6 +4,7 @@ import ex.nervisking.ExApi;
 import ex.nervisking.ModelManager.DefaultFontInfo;
 import ex.nervisking.ModelManager.Pattern.ToUse;
 import ex.nervisking.ModelManager.Plugins;
+import ex.nervisking.ModelManager.Scheduler;
 import ex.nervisking.Placeholder.Placeholder;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.TextComponent;
@@ -22,6 +23,8 @@ import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 @SuppressWarnings("deprecation")
@@ -89,6 +92,30 @@ public class Utils {
         }
         return setColoredMessage(PlaceholderAPI.setPlaceholders(player, text));
     }
+
+    public String getPlaceholders(final Player player, String text){
+        if (ExApi.isPlugin(Plugins.PLACEHOLDERAPI)) {
+            return PlaceholderAPI.setPlaceholders(player, text);
+        }
+        return text;
+    }
+
+    public void getPlaceholdersAsync(Player player, String text, Consumer<String> callback) {
+        if (!ExApi.isPlugin(Plugins.PLACEHOLDERAPI)) {
+            callback.accept(text);
+            return;
+        }
+
+        Scheduler.runAsync(() -> {
+
+            // Volver al hilo principal para PAPI
+            Scheduler.run(() -> {
+                String finalText = PlaceholderAPI.setPlaceholders(player, text);
+                callback.accept(finalText);
+            });
+        });
+    }
+
 
     /**
      * Convierte un texto con códigos de color a un componente de texto de BungeeCord.
@@ -221,39 +248,59 @@ public class Utils {
         return builder.toString();
     }
 
-    private String replacePlaceholders(Player player, String message) {
-        if (message == null || message.isEmpty()) {
-            return ""; // o un mensaje predeterminado
-        }
-        for (Map.Entry<String, String> entry : getStringStringMap(player).entrySet()) {
-            message = message.replace(entry.getKey(), entry.getValue());
-        }
-        return message;
+    // 🔹 Placeholders globales (no dependen de jugador)
+    private static final Map<String, Supplier<String>> GLOBAL_PLACEHOLDERS = new HashMap<>();
+
+    static {
+        GLOBAL_PLACEHOLDERS.put("%prefix%", ExApi::getPrefix);
+        GLOBAL_PLACEHOLDERS.put("%online_player%", () -> String.valueOf(Bukkit.getOnlinePlayers().size()));
+        GLOBAL_PLACEHOLDERS.put("%max_player%", () -> String.valueOf(Bukkit.getMaxPlayers()));
     }
 
-    private Map<String, String> getStringStringMap(Player player) {
-        Map<String, String> placeholders = new HashMap<>();
-        placeholders.put("%prefix%", getPrefix());
-        placeholders.put("%oline_player%", String.valueOf(Bukkit.getOnlinePlayers().size()));
-        placeholders.put("%max_player%", String.valueOf(Bukkit.getMaxPlayers()));
+    /**
+     * Genera un mapa de placeholders para un jugador específico
+     */
+    private Map<String, Supplier<String>> getPlayerPlaceholders(Player player) {
+        Map<String, Supplier<String>> map = new HashMap<>();
+        map.put("%player%", player::getName);
+        map.put("%display_name%", player::getDisplayName);
+        map.put("%world%", () -> player.getWorld().getName());
+        map.put("%heal%", () -> String.valueOf(player.getHealth()));
+        map.put("%food%", () -> String.valueOf(player.getFoodLevel()));
+        map.put("%heal_bar%", () -> createBar((int) Math.ceil(player.getHealth()), "❤", "&#b90000", "&#ff4d4d"));
+        map.put("%food_bar%", () -> createBar(player.getFoodLevel(), "🍗", "&#995c00", "&#ff9933"));
+        map.put("%kills%", () -> String.valueOf(player.getStatistic(Statistic.PLAYER_KILLS)));
+        map.put("%deaths%", () -> String.valueOf(player.getStatistic(Statistic.DEATHS)));
+        map.put("%ping%", () -> getPing(player));
+        map.put("%x%", () -> String.format("%.0f", player.getLocation().getX()));
+        map.put("%y%", () -> String.format("%.0f", player.getLocation().getY()));
+        map.put("%z%", () -> String.format("%.0f", player.getLocation().getZ()));
+        return map;
+    }
 
-        if (player != null) {
-            placeholders.put("%player%", safeString(player.getName()));
-            placeholders.put("%display_name%", safeString(player.getDisplayName()));
-            placeholders.put("%world%", safeString(player.getWorld().getName()));
-            placeholders.put("%heal%", safeString(String.valueOf(player.getHealth())));
-            placeholders.put("%food%", safeString(String.valueOf(player.getFoodLevel())));
-            placeholders.put("%heal_bar%", safeString(createBar((int) Math.ceil(player.getHealth()), "❤", "&#b90000", "&#ff4d4d")));
-            placeholders.put("%food_bar%", safeString(createBar(player.getFoodLevel(), "🍗", "&#995c00", "&#ff9933")));
-            placeholders.put("%kills%", safeString(String.valueOf(player.getStatistic(Statistic.PLAYER_KILLS))));
-            placeholders.put("%deaths%", safeString(String.valueOf(player.getStatistic(Statistic.DEATHS))));
-            placeholders.put("%ping%", safeString(getPing(player)));
-            placeholders.put("%x%", safeString(String.format("%.0f", player.getLocation().getX())));
-            placeholders.put("%y%", safeString(String.format("%.0f", player.getLocation().getY())));
-            placeholders.put("%z%", safeString(String.format("%.0f", player.getLocation().getZ())));
-            return placeholders;
+    /**
+     * Reemplaza los placeholders definidos (globales + jugador)
+     */
+    public String replacePlaceholders(Player player, String message) {
+        if (message == null || message.isEmpty()) return "";
+
+        // 🌍 Placeholders globales
+        for (Map.Entry<String, Supplier<String>> entry : GLOBAL_PLACEHOLDERS.entrySet()) {
+            if (message.contains(entry.getKey())) {
+                message = message.replace(entry.getKey(), safeString(entry.getValue().get()));
+            }
         }
-        return placeholders;
+
+        // 👤 Placeholders de jugador
+        if (player != null) {
+            for (Map.Entry<String, Supplier<String>> entry : getPlayerPlaceholders(player).entrySet()) {
+                if (message.contains(entry.getKey())) {
+                    message = message.replace(entry.getKey(), safeString(entry.getValue().get()));
+                }
+            }
+        }
+
+        return message;
     }
 
     private String getPing(Player player) {

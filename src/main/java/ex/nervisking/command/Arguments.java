@@ -5,7 +5,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -30,7 +29,7 @@ public record Arguments(String[] args) {
      * @since 1.1.0
      */
     @Contract(value = "_ -> new", pure = true)
-    public static @NotNull Arguments of(String[] args) {
+    public static Arguments of(String[] args) {
         return new Arguments(args);
     }
 
@@ -38,7 +37,7 @@ public record Arguments(String[] args) {
      * @since 1.1.0
      */
     @Contract(value = " -> new", pure = true)
-    public static @NotNull Arguments of() {
+    public static Arguments of() {
         return new Arguments(new String[0]);
     }
 
@@ -190,12 +189,12 @@ public record Arguments(String[] args) {
      * @param startIndex Índice desde donde comenzar a unir argumentos.
      * @return Cadena con los argumentos unidos por espacios.
      */
-    public @NotNull String join(int startIndex) {
+    public String join(int startIndex) {
         if (startIndex >= args.length) return ""; // prevenir IllegalArgumentException
         return String.join(" ", Arrays.copyOfRange(args, startIndex, args.length));
     }
 
-    public @NotNull String join(int start, int end) {
+    public String join(int start, int end) {
         if (start >= end || start >= args.length) return "";
         return String.join(" ", Arrays.copyOfRange(args, start, Math.min(end, args.length)));
     }
@@ -280,7 +279,7 @@ public record Arguments(String[] args) {
      * @param index Índice del argumento con el nombre del jugador.
      * @return Jugador online si existe, o null si no está online o no existe.
      */
-    public @Nullable Player getOnlinePlayer(int index) {
+    public Player getOnlinePlayer(int index) {
         String name = get(index);
         return name != null ? Bukkit.getPlayerExact(name) : null;
     }
@@ -291,7 +290,7 @@ public record Arguments(String[] args) {
      * @param index Índice del argumento con el nombre del jugador.
      * @return Jugador offline correspondiente o null si no existe.
      */
-    public @Nullable OfflinePlayer getOfflinePlayer(int index) {
+    public OfflinePlayer getOfflinePlayer(int index) {
         String name = get(index);
         return name != null ? Bukkit.getOfflinePlayer(name) : null;
     }
@@ -302,7 +301,7 @@ public record Arguments(String[] args) {
      * @param index Índice del argumento.
      * @return UUID si la conversión es exitosa, o null en caso contrario.
      */
-    public @Nullable UUID getUUID(int index) {
+    public UUID getUUID(int index) {
         String get = get(index);
         if (get == null)
             return null;

@@ -2,6 +2,7 @@ package ex.nervisking.config;
 
 import ex.nervisking.ExApi;
 import ex.nervisking.ModelManager.Configurate;
+import ex.nervisking.ModelManager.Pattern.KeyLet;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -9,13 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public abstract class FolderConfigLoand {
+public abstract class FolderConfigLoan {
 
     protected JavaPlugin plugin;
-    protected String folderName;
+    protected @KeyLet String folderName;
     protected ArrayList<CustomConfig> configFiles;
 
-    public FolderConfigLoand() {
+    public FolderConfigLoan() {
         this.configFiles = new ArrayList<>();
         this.plugin = ExApi.getPlugin();
         this.folderName = folderName();
@@ -97,7 +98,7 @@ public abstract class FolderConfigLoand {
     }
 
     public abstract void loadConfigs();
-    public abstract String folderName();
+    public abstract @KeyLet String folderName();
     public List<Configurate> createConfigFiles() {
         return List.of();
     }

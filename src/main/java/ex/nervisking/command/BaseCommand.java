@@ -17,6 +17,7 @@ public interface BaseCommand extends CommandExecutor, TabCompleter {
     String getName();
     List<String> getAliases();
     String getDescription();
+    String per();
     boolean getPermission();
 
 }

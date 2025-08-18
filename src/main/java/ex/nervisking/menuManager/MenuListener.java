@@ -20,10 +20,36 @@ import java.util.Objects;
 
 public record MenuListener(HashMap<Player, PlayerMenuUtility> playerMenuUtilityMap) implements Listener {
 
+//    @EventHandler
+//    public void onMenuClick(InventoryClickEvent event) {
+//        Player player = (Player) event.getWhoClicked();
+//        InventoryHolder holder = InventoryUtils.getTopInventory(event).getHolder();
+//        if (holder instanceof Menu menu) {
+//            if (menu.setCancelClicks()) {
+//                event.setCancelled(true);
+//            }
+//
+//            Inventory topInventory = InventoryUtils.getTopInventory(player);
+//            boolean isTop = menu.setTopInventory() && Objects.equals(event.getClickedInventory(), topInventory);
+//
+//            if (isTop || !menu.setTopInventory()) {
+//                try {
+//                    menu.handleMenu(event);
+//                } catch (MenuManagerNotSetupException ex) {
+//                    ExLog.sendError("EL ADMINISTRADOR NO SE HA CONFIGURADO. LLAME A 'Menu() {return true}' en ExPlugin");
+//                } catch (MenuManagerException ex) {
+//                    ExLog.sendException(ex);
+//                }
+//            }
+//
+//        }
+//    }
+
     @EventHandler
     public void onMenuClick(InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
         InventoryHolder holder = InventoryUtils.getTopInventory(event).getHolder();
+
         if (holder instanceof Menu menu) {
             if (menu.setCancelClicks()) {
                 event.setCancelled(true);
@@ -34,14 +60,31 @@ public record MenuListener(HashMap<Player, PlayerMenuUtility> playerMenuUtilityM
 
             if (isTop || !menu.setTopInventory()) {
                 try {
-                    menu.handleMenu(event);
+                    // 🔹 En lugar de pasar el InventoryClickEvent directamente
+                    // creamos tu MenuEvent personalizado
+                    MenuEvent menuEvent = new MenuEvent(
+                            event,
+                            event.getView(),
+                            event.getSlotType(),
+                            event.getRawSlot(),
+                            event.getClick(),
+                            event.getAction()
+                    );
+
+                    // Si el Menu usa tu sistema, se le pasa el MenuEvent
+                    menu.handleMenu(menuEvent);
+
+                    // Sincronizar cancelación
+                    if (menuEvent.isCancelled()) {
+                        event.setCancelled(true);
+                    }
+
                 } catch (MenuManagerNotSetupException ex) {
                     ExLog.sendError("EL ADMINISTRADOR NO SE HA CONFIGURADO. LLAME A 'Menu() {return true}' en ExPlugin");
                 } catch (MenuManagerException ex) {
                     ExLog.sendException(ex);
                 }
             }
-
         }
     }
 
@@ -76,5 +119,6 @@ public record MenuListener(HashMap<Player, PlayerMenuUtility> playerMenuUtilityM
     public void onPlayerQuit(PlayerQuitEvent event) {
         if (!ExApi.isIsMenu()) return;
         playerMenuUtilityMap.remove(event.getPlayer());
+
     }
 }

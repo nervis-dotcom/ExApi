@@ -8,6 +8,7 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 public @interface CommandInfo {
     @KeyDef String name();
+    @KeyDef String per() default "";
     String description() default "";
     boolean permission() default false;
     String[] aliases() default {};

@@ -27,7 +27,11 @@ public record CommandManager(JavaPlugin plugin) {
                 pluginCommand.setDescription(command.getDescription());
             }
             if (command.getPermission()) {
-                pluginCommand.setPermission(plugin.getName().toLowerCase() + ".command." + command.getName());
+                String permiso = ".command." + command.getName();
+                if (command.per() != null && !command.per().isEmpty()) {
+                    permiso = command.per();
+                }
+                pluginCommand.setPermission(plugin.getName().toLowerCase() + permiso);
             }
 
             registerBukkitCommand(pluginCommand);
@@ -50,7 +54,11 @@ public record CommandManager(JavaPlugin plugin) {
                 pluginCommand.setDescription(command.getDescription());
             }
             if (command.getPermission()) {
-                pluginCommand.setPermission(plugin.getName().toLowerCase() + ".command." + command.getName());
+                String permiso = ".command." + command.getName();
+                if (command.per() != null && !command.per().isEmpty()) {
+                    permiso = command.per();
+                }
+                pluginCommand.setPermission(plugin.getName().toLowerCase() + permiso);
             }
 
             registerBukkitCommand(pluginCommand);
@@ -73,7 +81,11 @@ public record CommandManager(JavaPlugin plugin) {
                 pluginCommand.setDescription(command.getDescription());
             }
             if (command.getPermission()) {
-                pluginCommand.setPermission(plugin.getName().toLowerCase() + ".command." + command.getName());
+                String permiso = ".command." + command.getName();
+                if (command.per() != null && !command.per().isEmpty()) {
+                    permiso = command.per();
+                }
+                pluginCommand.setPermission(plugin.getName().toLowerCase() + permiso);
             }
 
             registerBukkitCommand(pluginCommand);

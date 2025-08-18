@@ -16,6 +16,7 @@ public abstract class CustomCommand extends UtilsManagers implements BaseCommand
 
     private final String name;
     private final String description;
+    private final String per;
     private final boolean permissionRequired;
     private final List<String> aliases;
 
@@ -25,6 +26,7 @@ public abstract class CustomCommand extends UtilsManagers implements BaseCommand
             this.name = info.name();
             this.description = info.description();
             this.permissionRequired = info.permission();
+            this.per = info.per();
             this.aliases = Arrays.asList(info.aliases());
         } else {
             throw new IllegalStateException("Falta @CommandInfo en: " + getClass().getName());
@@ -49,6 +51,11 @@ public abstract class CustomCommand extends UtilsManagers implements BaseCommand
     @Override
     public List<String> getAliases() {
         return aliases;
+    }
+
+    @Override
+    public String per() {
+        return per;
     }
 
     @ToUse(value = "Verificar si el sender tiene permiso para usar el comando")
@@ -150,8 +157,9 @@ public abstract class CustomCommand extends UtilsManagers implements BaseCommand
         Arguments arg = Arguments.of(args);
         Completions completions = this.onTab(Sender.of(sender), arg, Completions.of());
 
-        if (!arg.isEmpty()) {
-            completions.filter(s -> s.startsWith(arg.get(arg.size() - 1).toLowerCase()));
+        String spm = arg.get(arg.size() - 1);
+        if (!arg.isEmpty() && spm != null) {
+            completions.filter(s -> s.startsWith(spm.toLowerCase()));
         } else {
             completions.addPlayerOnline();
         }

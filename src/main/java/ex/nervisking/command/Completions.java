@@ -14,7 +14,7 @@ import java.util.function.Predicate;
 /**
  * Clase que gestiona una lista de autocompletados (completions) para comandos.
  *
- * @since 1.1.0
+ * @since 1.0.1
  */
 public class Completions {
 

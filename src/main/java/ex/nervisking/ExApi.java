@@ -14,7 +14,10 @@ import ex.nervisking.utils.ServerVersion;
 import ex.nervisking.utils.Utils;
 import ex.nervisking.utils.UtilsManagers;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Particle;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
@@ -24,6 +27,7 @@ import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
@@ -135,6 +139,64 @@ public class ExApi {
     @ToUse
     public static @NotNull NamespacedKey getNamespacedKey(@KeyDef String name) {
         return new NamespacedKey(plugin, name);
+    }
+
+    @ToUse
+    public static @Nullable Material getMaterial(String name) {
+        if (name != null && !name.isEmpty()) {
+            Material material;
+            try {
+                material = Material.valueOf(name.toUpperCase());
+            } catch (Exception e) {
+                material = null;
+            }
+
+            return material;
+        }
+        return null;
+    }
+
+    @ToUse
+    public static Material getMaterial(String name, Material def) {
+        return getMaterial(name) != null ? getMaterial(name) : def;
+    }
+
+    @ToUse
+    public static @Nullable EntityType geEntityType(String name) {
+        if (name != null && !name.isEmpty()) {
+            EntityType entityType;
+            try {
+                entityType = EntityType.valueOf(name);
+            } catch (IllegalArgumentException e) {
+                return null;
+            }
+            return entityType;
+        }
+        return null;
+    }
+
+    @ToUse
+    public static EntityType geEntityType(String name, EntityType def) {
+        return geEntityType(name) != null ? geEntityType(name) : def;
+    }
+
+    @ToUse
+    public static @Nullable Particle geParticle(String name) {
+        if (name != null && !name.isEmpty()) {
+            Particle particle;
+            try {
+                particle = Particle.valueOf(name);
+            } catch (IllegalArgumentException e) {
+                return null;
+            }
+            return particle;
+        }
+        return null;
+    }
+
+    @ToUse
+    public static Particle geParticle(String name, Particle def) {
+        return geParticle(name) != null ? geParticle(name) : def;
     }
 
 // menu ------------------------------------------------------------------------------------------------------

@@ -71,7 +71,7 @@ public class DiscordWebhooks {
         return this;
     }
 
-    public DiscordWebhooks setAvatar(String url) {
+    public DiscordWebhooks setAvatar(@NotNull String url) {
         if (!url.startsWith("http")) {
             ExLog.sendError("Avatar URL inválido: " + url);
             return this;
@@ -301,12 +301,12 @@ public class DiscordWebhooks {
         Scheduler.runAsync(this::build);
     }
 
-    private String limit(String input, int maxLength) {
+    private @NotNull String limit(String input, int maxLength) {
         if (input == null) return "";
         return input.length() > maxLength ? input.substring(0, maxLength) : input;
     }
 
-    private String escapeJson(String message) {
+    private @NotNull String escapeJson(@NotNull String message) {
         return message.replace("\\", "\\\\")
                 .replace("\"", "\\\"")
                 .replace("\b", "\\b")

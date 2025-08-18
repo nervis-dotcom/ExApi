@@ -8,7 +8,6 @@ import ex.nervisking.utils.UtilsManagers;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -42,7 +41,7 @@ public abstract class Menu extends UtilsManagers implements InventoryHolder {
 
     public abstract void addItems();
 
-    public abstract void handleMenu(InventoryClickEvent event) throws MenuManagerNotSetupException, MenuManagerException;
+    public abstract void handleMenu(MenuEvent event) throws MenuManagerNotSetupException, MenuManagerException;
 
     public boolean setCancelClicks() {
         return true;

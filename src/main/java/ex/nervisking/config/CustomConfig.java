@@ -2,6 +2,7 @@ package ex.nervisking.config;
 
 import ex.nervisking.ExApi;
 import ex.nervisking.ModelManager.Coordinate;
+import ex.nervisking.ModelManager.Pattern.KeyLet;
 import ex.nervisking.utils.ItemBuilder;
 import org.bukkit.Color;
 import org.bukkit.configuration.ConfigurationSection;
@@ -30,7 +31,7 @@ public class CustomConfig {
     private FileConfiguration fileConfiguration;
     private File file;
 
-    public CustomConfig(String fileName, String folderName, boolean newFile) {
+    public CustomConfig(@KeyLet String fileName, @KeyLet String folderName, boolean newFile) {
         this.plugin = ExApi.getPlugin();
         this.fileName = fileName.endsWith(".yml") ? fileName : fileName + ".yml";
         this.folderName = folderName;
@@ -42,21 +43,21 @@ public class CustomConfig {
     /**
      * @since 1.0.2
      */
-    public CustomConfig(String fileName, boolean newFile) {
+    public CustomConfig(@KeyLet String fileName, boolean newFile) {
         this(fileName, null, newFile);
     }
 
     /**
      * @since 1.0.2
      */
-    public CustomConfig(String fileName) {
+    public CustomConfig(@KeyLet String fileName) {
         this(fileName, null, false);
     }
 
     /**
      * @since 1.0.2
      */
-    public CustomConfig(String fileName, String folderName) {
+    public CustomConfig(@KeyLet String fileName, @KeyLet String folderName) {
         this(fileName, folderName, false);
     }
 
@@ -64,7 +65,7 @@ public class CustomConfig {
      * @since 1.0.2
      */
     @Contract(value = "_, _, _ -> new", pure = true)
-    public static @NotNull CustomConfig of(String fileName, String folderName, boolean newFile) {
+    public static @NotNull CustomConfig of(@KeyLet String fileName, @KeyLet String folderName, boolean newFile) {
         return new CustomConfig(fileName, folderName, newFile);
     }
 
@@ -72,7 +73,7 @@ public class CustomConfig {
      * @since 1.0.2
      */
     @Contract(value = "_, _ -> new", pure = true)
-    public static @NotNull CustomConfig of(String fileName, String folderName) {
+    public static @NotNull CustomConfig of(@KeyLet String fileName, @KeyLet String folderName) {
         return new CustomConfig(fileName, folderName);
     }
 
@@ -80,7 +81,7 @@ public class CustomConfig {
      * @since 1.0.2
      */
     @Contract(value = "_, _ -> new", pure = true)
-    public static @NotNull CustomConfig of(String fileName, boolean newFile) {
+    public static @NotNull CustomConfig of(@KeyLet String fileName, boolean newFile) {
         return new CustomConfig(fileName, newFile);
     }
 
@@ -88,7 +89,7 @@ public class CustomConfig {
      * @since 1.0.2
      */
     @Contract(value = "_ -> new", pure = true)
-    public static @NotNull CustomConfig of(String fileName) {
+    public static @NotNull CustomConfig of(@KeyLet String fileName) {
         return new CustomConfig(fileName);
     }
 
@@ -162,7 +163,7 @@ public class CustomConfig {
     }
 
     /**
-     * @since 1.1.0
+     * @since 1.0.1
      */
     public ItemBuilder createItem(String path) {
         FileConfiguration config = getConfig();
