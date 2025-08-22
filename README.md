@@ -37,6 +37,7 @@ Agrega el repositorio y la dependencia en tu proyecto:
 
 🚀 Ejemplo de uso
 
+    ```java
     public class MyPlugin extends ExPlugin {
     
         @Override
@@ -53,3 +54,4 @@ Agrega el repositorio y la dependencia en tu proyecto:
             config.reload(); // recarga dinámica
         }
     }
+```
