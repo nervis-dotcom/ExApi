@@ -23,8 +23,8 @@ Agrega el repositorio y la dependencia en tu proyecto:
 ```xml
 <repositories>
     <repository>
-        <id>exapi-repo</id>
-        <url>https://github.com/NervisKing/ExAPI/packages</url>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
     </repository>
 </repositories>
 ```
@@ -32,11 +32,11 @@ Agrega el repositorio y la dependencia en tu proyecto:
 ```xml
 <dependencies>
     <dependency>
-        <groupId>ex.nervisking</groupId>
-        <artifactId>ExAPI</artifactId>
-        <version>1.0.3</version>
-        <scope>provided</scope>
-    </dependency>
+        <groupId>com.github.nervis-dotcom</groupId>
+        <artifactId>ExApi</artifactId>
+        <version>VERSION</version>
+        <scope>compile</scope>
+     </dependency>
 </dependencies>
 ```
 ---
