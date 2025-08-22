@@ -180,22 +180,58 @@ public class JoinListener extends Event<MyPlugin> {
 - Yml
 
 ```java
-public class MainConfig {
+public class MainConfigYml {
 
     private final CustomConfig configFile;
+    private String prefix;
 
     public MainConfig(){
-        this.configFile = CustomConfig.of("Config");
+        this.configFile = CustomConfig.of("ConfigYml");
         this.configFile.registerConfig();
         this.loadConfig();
     }
 
     private void loadConfig() {
         FileConfiguration config = configFile.getConfig();
+
+        prefix = config.getString("prefix", "ex");
+    }
+
+    public String getPrefix() {
+        return prefix;
     }
 
     public void reloadConfig() {
         configFile.reloadConfig();
+        loadConfig();
+    }
+}
+
+```
+
+- Json
+
+```java
+public class MainConfigJson {
+
+    private final JsonConfig jsonConfig;
+    private String prefix;
+
+    public ConfigLicense() {
+        this.jsonConfig = JsonConfig.of("ConfigJson");
+        this.loadConfig();
+    }
+
+    private void loadConfig() {
+        prefix = jsonConfig.getString("prefix", "ex");
+    }
+
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public void reloadConfig(){
+        jsonConfig.reload();
         loadConfig();
     }
 }
