@@ -54,7 +54,7 @@ public class MyPlugin extends ExPlugin {
     @Override
     public void Enable() {
         // Registrar comando
-        this.commandManager.registerCommand(new WeatherCommand(this));
+        this.commandManager.registerCommand(new WeatherCommand());
     }
 
     @Override
@@ -164,28 +164,6 @@ public class WeatherCommand extends Command {
             completions.add(Bukkit.getWorlds().stream().map(World::getName).toList());
         }
         return completions;
-    }
-}
-```
----
-
-```java
-public class MyPlugin extends ExPlugin {
-
-    @Override
-    public void Enable() {
-        // Registrar comando
-        ExAPI.getCommandManager().register(new FlyCommand());
-        
-        // Abrir menú de ejemplo
-        ExAPI.getMenuManager().openMenu(player, new ExampleMenu());
-        
-        // Enviar mensaje
-        ExAPI.getMessageManager().send(player, "plugin.loaded");
-        
-        // Configuración YAML/JSON
-        MyConfig config = ExAPI.getConfigManager().load(MyConfig.class, "config.yml");
-        config.reload(); // recarga dinámica
     }
 }
 ```
