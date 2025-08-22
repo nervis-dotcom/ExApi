@@ -19,38 +19,37 @@ Incluye un sistema de menús, comandos, eventos, mensajes, configuración en YAM
 
 Agrega el repositorio y la dependencia en tu proyecto:
 
-<repositories>
-    <repository>
-        <id>exapi-repo</id>
-        <url>https://github.com/NervisKing/ExAPI/packages</url>
-    </repository>
-</repositories>
+    <repositories>
+        <repository>
+            <id>exapi-repo</id>
+            <url>https://github.com/NervisKing/ExAPI/packages</url>
+        </repository>
+    </repositories>
 
-<dependencies>
-    <dependency>
-        <groupId>ex.nervisking</groupId>
-        <artifactId>ExAPI</artifactId>
-        <version>1.0.3</version>
-        <scope>provided</scope>
-    </dependency>
-</dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>ex.nervisking</groupId>
+            <artifactId>ExAPI</artifactId>
+            <version>1.0.3</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 
 🚀 Ejemplo de uso
 
-//
-public class MyPlugin extends JavaPlugin {
-    @Override
-    public void onEnable() {
-        ExAPI.getCommandManager().register(new FlyCommand());
-        
-        ExAPI.getMenuManager().openMenu(player, new ExampleMenu());
-        
-        // Mensajes
-        ExAPI.getMessageManager().send(player, "plugin.loaded");
-        
-        // Configuración YAML/JSON
-        MyConfig config = ExAPI.getConfigManager().load(MyConfig.class, "config.yml");
-        config.reload(); // recarga dinámica
+    public class MyPlugin extends ExPlugin {
+    
+        @Override
+        public void Enable() {
+            ExAPI.getCommandManager().register(new FlyCommand());
+            
+            ExAPI.getMenuManager().openMenu(player, new ExampleMenu());
+            
+            // Mensajes
+            ExAPI.getMessageManager().send(player, "plugin.loaded");
+            
+            // Configuración YAML/JSON
+            MyConfig config = ExAPI.getConfigManager().load(MyConfig.class, "config.yml");
+            config.reload(); // recarga dinámica
+        }
     }
-}
-//
