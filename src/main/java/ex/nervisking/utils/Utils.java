@@ -4,55 +4,55 @@ import ex.nervisking.ExApi;
 import ex.nervisking.ModelManager.DefaultFontInfo;
 import ex.nervisking.ModelManager.Pattern.ToUse;
 import ex.nervisking.ModelManager.Plugins;
-import ex.nervisking.ModelManager.Scheduler;
 import ex.nervisking.Placeholder.Placeholder;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Statistic;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 @SuppressWarnings("deprecation")
 public class Utils {
 
-    private final Pattern HEX_PATTERN = Pattern.compile("(#|&#)([A-Fa-f0-9]{6})");
-    private final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
-    private final LegacyComponentSerializer LEGACY_SERIALIZER = LegacyComponentSerializer.legacySection();
-    private final int SERVER_VERSION = Integer.parseInt(Bukkit.getBukkitVersion().split("-")[0].split("\\.")[1]);
+    private final Pattern HEX_PATTERN;
+    private final MiniMessage MINI_MESSAGE;
+    private final LegacyComponentSerializer LEGACY_SERIALIZER;
+    private final int SERVER_VERSION;
 
-    /**
-     * Obtiene el prefijo del plugin ExApi.
-     * @return El prefijo del plugin.
-     */
+    public Utils() {
+        this.HEX_PATTERN = Pattern.compile("(#|&#)([A-Fa-f0-9]{6})");
+        this.MINI_MESSAGE = MiniMessage.miniMessage();
+        this.LEGACY_SERIALIZER = LegacyComponentSerializer.legacySection();
+        this.SERVER_VERSION = Integer.parseInt(Bukkit.getBukkitVersion().split("-")[0].split("\\.")[1]);
+    }
+
     public String getPrefix() {
         return ExApi.getPrefix();
     }
 
-    /**
-     * Convierte un texto con códigos de color a un formato compatible con MiniMessage y los aplica.
-     * Si el texto contiene códigos de color antiguos (&a, &f, etc.) o hexadecimales (&#ffffff, #ffffff),
-     * los convierte a un formato compatible con MiniMessage.
-     *
-     * @param text Texto a procesar.
-     * @return Texto procesado y coloreado.
-     */
-    public String setColoredMessage(String text) {
-        if (text == null || text.isEmpty()) return "";
+    @ToUse(
+            description = {"Convierte un texto con códigos de color a un formato compatible con MiniMessage y los aplica.",
+            "Si el texto contiene códigos de color antiguos (&a, &f, etc.) o hexadecimales (&#ffffff, #ffffff),",
+            "los convierte a un formato compatible con MiniMessage."},
+            params = "text -> Texto a procesar.",
+            returns = "Texto procesado y coloreado."
+    )
+    public String setColoredMessage(@NotNull String text) {
+        if (text.isEmpty()) return "";
 
         text = replacePlaceholders(null, text);
         text = processText(text);
@@ -77,12 +77,12 @@ public class Utils {
         return HEX_PATTERN.matcher(text).replaceAll(matcher -> "<color:#" + matcher.group(2) + ">");
     }
 
-    /**
-     * Reemplaza los placeholders del texto y los placeholders de PlaceholderAPI.
-     * @param player Jugador al que se le aplican los placeholders.
-     * @param text Texto a procesar.
-     * @return Texto con los placeholders reemplazados.
-     */
+    @ToUse(
+            value = "Reemplaza los placeholders del texto y los placeholders de PlaceholderAPI.",
+            params = {"player -> Jugador al que se le aplican los placeholders.",
+            "text -> Texto a procesar."},
+            returns = "Texto con los placeholders reemplazados."
+    )
     public String setPlaceholders(final Player player, String text) {
         text = replacePlaceholders(player, text);
         text = Placeholder.parsePlaceholdersSplit(player, text);
@@ -93,6 +93,7 @@ public class Utils {
         return setColoredMessage(PlaceholderAPI.setPlaceholders(player, text));
     }
 
+    @ToUse
     public String getPlaceholders(final Player player, String text){
         if (ExApi.isPlugin(Plugins.PLACEHOLDERAPI)) {
             return PlaceholderAPI.setPlaceholders(player, text);
@@ -100,49 +101,13 @@ public class Utils {
         return text;
     }
 
-    public void getPlaceholdersAsync(Player player, String text, Consumer<String> callback) {
-        if (!ExApi.isPlugin(Plugins.PLACEHOLDERAPI)) {
-            callback.accept(text);
-            return;
-        }
-
-        Scheduler.runAsync(() -> {
-
-            // Volver al hilo principal para PAPI
-            Scheduler.run(() -> {
-                String finalText = PlaceholderAPI.setPlaceholders(player, text);
-                callback.accept(finalText);
-            });
-        });
-    }
-
-
-    /**
-     * Convierte un texto con códigos de color a un componente de texto de BungeeCord.
-     * Si el texto contiene códigos de color antiguos (&a, &f, etc.) o hexadecimales (&#ffffff, #ffffff),
-     * los convierte a un formato compatible con MiniMessage y los aplica.
-     * @param text Texto a procesar.
-     * @return Componente de texto de BungeeCord con los colores aplicados.
-     */
-    @Deprecated(since = "1.0.0")
-    public net.md_5.bungee.api.chat.TextComponent setColoredComponent(@NotNull String text) {
-        String colored = setColoredMessage(text);
-        net.md_5.bungee.api.chat.TextComponent base = new net.md_5.bungee.api.chat.TextComponent();
-        BaseComponent[] converted = net.md_5.bungee.api.chat.TextComponent.fromLegacyText(colored);
-
-        for (BaseComponent comp : converted) {
-            base.addExtra(comp);
-        }
-
-        return base;
-    }
-
-    /**
-     * Centra un mensaje en el chat.
-     * @param message Mensaje a centrar.
-     * @return Mensaje centrado.
-     */
-    public String getCenteredMessage(String message){
+    @ToUse(
+            value = "Centra un mensaje en el chat.",
+            params = "message -> Mensaje a centrar.",
+            returns = "Mensaje centrado."
+    )
+    public String getCenteredMessage(@NotNull String message){
+        if (message.isEmpty()) return "";
         int CENTER_PX = 154;
         int messagePxSize = 0;
         boolean previousCode = false;
@@ -173,13 +138,12 @@ public class Utils {
         return (sb + message);
     }
 
-    /**
-     * Formatea un número grande a un formato legible con sufijos.
-     * Ejemplos: 1500 -> "1.5K", 2500000 -> "2.5M", 1000000000 -> "1B"
-     *
-     * @param amount Número a formatear.
-     * @return String formateado.
-     */
+    @ToUse(
+            value = "Formatea un número grande a un formato legible con sufijos.",
+            description = "Ejemplos: 1500 -> 1.5K, 2500000 -> 2.5M, 1000000000 -> 1B",
+            params = "amount -> Número a formatear.",
+            returns = "String formateado."
+    )
     public String format(double amount) {
         String[] suffixes = new String[]{"", "K", "M", "B", "T", "P"};
         int index = 0;
@@ -193,7 +157,8 @@ public class Utils {
         return df.format(amount) + suffixes[index];
     }
 
-    private String processText(String text) {
+    private @NotNull String processText(@NotNull String text) {
+        if (text.isEmpty()) return "";
         StringBuilder result = new StringBuilder();
         int i = 0;
 
@@ -217,7 +182,7 @@ public class Utils {
         return result.toString();
     }
 
-    private String getString(String text, int i, int endBracket) {
+    private String getString(@NotNull String text, int i, int endBracket) {
         // Extraemos el texto entre corchetes, eliminando la parte "[/" y "]"
         String insideBrackets = text.substring(i + 2, endBracket);
         char lastChar = text.charAt(endBracket - 1);  // Verificamos el último carácter antes de ']'
@@ -233,7 +198,8 @@ public class Utils {
         return insideBrackets;
     }
 
-    public String applyGradient(String text, Color start, Color end) {
+    @ToUse
+    public String applyGradient(@NotNull String text, Color start, Color end) {
         StringBuilder builder = new StringBuilder();
 
         for (int i = 0; i < text.length(); i++) {
@@ -260,7 +226,7 @@ public class Utils {
     /**
      * Genera un mapa de placeholders para un jugador específico
      */
-    private Map<String, Supplier<String>> getPlayerPlaceholders(Player player) {
+    private @NotNull Map<String, Supplier<String>> getPlayerPlaceholders(@NotNull Player player) {
         Map<String, Supplier<String>> map = new HashMap<>();
         map.put("%player%", player::getName);
         map.put("%display_name%", player::getDisplayName);
@@ -281,7 +247,7 @@ public class Utils {
     /**
      * Reemplaza los placeholders definidos (globales + jugador)
      */
-    public String replacePlaceholders(Player player, String message) {
+    private String replacePlaceholders(Player player, String message) {
         if (message == null || message.isEmpty()) return "";
 
         // 🌍 Placeholders globales
@@ -303,7 +269,7 @@ public class Utils {
         return message;
     }
 
-    private String getPing(Player player) {
+    private @NotNull String getPing(Player player) {
         int ping;
         try {
             ping = player.getPing();
@@ -314,7 +280,8 @@ public class Utils {
         return String.valueOf(ping);
     }
 
-    private String safeString(String value) {
+    @Contract(value = "!null -> param1", pure = true)
+    private @NotNull String safeString(String value) {
         return value != null ? value : "N/A";
     }
 
@@ -340,14 +307,17 @@ public class Utils {
         return FormatTime.formatTime(time, fromMillis, FormatTime.TimeFormatType.DIGITAL);
     }
 
+    @ToUse
     public String formatTime(long seconds) {
         return FormatTime.formatTime(seconds, FormatTime.TimeFormatType.DIGITAL);
     }
 
+    @ToUse
     public String formatTime(long time, boolean fromMillis, FormatTime.TimeFormatType timeFormatType) {
         return FormatTime.formatTime(time, fromMillis, timeFormatType);
     }
 
+    @ToUse
     public String formatTime(long timeSeconds, FormatTime.TimeFormatType timeFormatType) {
         return FormatTime.formatTime(timeSeconds, timeFormatType);
     }
@@ -365,7 +335,8 @@ public class Utils {
                     "Permite concatenar múltiples unidades sin espacios, ej: \"1d10m\", \"500ms\"."
             }
     )
-    public long parseTime(String timeString) throws NumberFormatException {
+    public long parseTime(@NotNull String timeString) throws NumberFormatException {
+        if (timeString.isEmpty()) return 0L;
         long totalMillis = 0;
         StringBuilder numberBuffer = new StringBuilder();
         StringBuilder unitBuffer = new StringBuilder();
@@ -417,13 +388,11 @@ public class Utils {
         };
     }
 
-    /**
-     * Verifica si un jugador cumple con las condiciones de visualización.
-     *
-     * @param player El jugador a verificar.
-     * @param condition La condición a evaluar.
-     * @return true si el jugador cumple con la condición, false si no.
-     */
+    @ToUse(
+            value = "Verifica si un jugador cumple con las condiciones de visualización.",
+            params = {"player -> El jugador a verificar.", "condition -> La condición a evaluar."},
+            returns = "true si el jugador cumple con la condición, false si no."
+    )
     public boolean conditions(Player player, String condition) {
         if (condition == null || condition.isEmpty()) {
             return true;  // No hay condición, siempre se muestra
@@ -443,16 +412,11 @@ public class Utils {
                 String[] parts = condition.split("\\%s".formatted(operator)); // Escapamos el operador correctamente
 
                 if (parts.length == 2) {
-                    String leftSide = parts[0].trim(); // La parte izquierda de la condición
-                    String rightSide = parts[1].trim(); // La parte derecha de la condición
 
-                    // Obtener los valores que estamos comparando
-                    String leftValue = setPlaceholders(player, leftSide); // Esto obtiene el valor que corresponde a la parte izquierda
-                    String rightValue = setPlaceholders(player, rightSide); // Esto obtiene el valor que corresponde a la parte izquierda
+                    String leftValue = setPlaceholders(player, parts[0].trim());
+                    String rightValue = setPlaceholders(player, parts[1].trim());
 
-                    // Evaluar dependiendo del operador
                     try {
-                        // Para números, convertir a enteros
                         int leftInt = Integer.parseInt(leftValue);
                         int rightInt = Integer.parseInt(rightValue);
 
@@ -471,7 +435,6 @@ public class Utils {
                                 return leftInt <= rightInt;
                         }
                     } catch (NumberFormatException e) {
-                        // Si no es un número, compararlo como cadenas
                         return switch (operator) {
                             case "==" -> leftValue.equals(rightValue);
                             case "!=" -> !leftValue.equals(rightValue);
@@ -484,33 +447,45 @@ public class Utils {
         return false;
     }
 
-    /**
-     * Verifica si un texto contiene códigos de color tradicionales (&a, &f, etc.) o hexadecimales (&#ffffff, #ffffff).
-     * @param text Texto a analizar.
-     * @return true si hay códigos de color, false si no.
-     */
+    @ToUse(
+            value = "Verifica si un texto contiene códigos de color",
+            description = {"- Legacy (&a, &f, etc.)",
+                    "- Hexadecimales (#ffffff o &#ffffff)",
+                    "- MiniMessage (<red>, <gradient:...>, etc.)"},
+            params = "text -> Texto a analizar.",
+            returns = "true si hay códigos de color/estilo, false si no."
+    )
     public boolean hasColorCodes(String text) {
         if (text == null) return false;
 
         String hexPattern = "(?i)(&#|#)[0-9a-f]{6}";
         String legacyPattern = "(?i)&[0-9a-fk-or]";
+        String miniMessagePattern = "<[^>]+>"; // Cualquier etiqueta <...>
 
-        return text.matches(".*" + hexPattern + ".*") || text.matches(".*" + legacyPattern + ".*");
+        return text.matches(".*" + hexPattern + ".*")
+                || text.matches(".*" + legacyPattern + ".*")
+                || text.matches(".*" + miniMessagePattern + ".*");
     }
 
+    @ToUse(value = "Elimina todos los códigos de color (legacy, hex, MiniMessage).")
     public String removeColorCodes(String input) {
         if (input == null) return "";
-        String cleaned = input.replaceAll("(?i)(&#|#)[0-9a-f]{6}", "");
-        cleaned = cleaned.replaceAll("(?i)&[0-9a-fk-or]", "");
-        return cleaned;
+
+        return input
+                // Quitar hex (#ffffff o &#ffffff)
+                .replaceAll("(?i)(&#|#)[0-9a-f]{6}", "")
+                // Quitar legacy (&a, &f, etc.)
+                .replaceAll("(?i)&[0-9a-fk-or]", "")
+                // Quitar etiquetas MiniMessage (<red>, <bold>, etc.)
+                .replaceAll("<[^>]+>", "");
     }
 
     public boolean isValidText(String input, String regex, Integer minLength, Integer maxLength) {
         if (input == null || input.isEmpty()) return false;
         // Valores por defecto
-        String pattern = (regex != null) ? regex : "^[a-zA-Z0-9_\\- ]+$";
-        int min = (minLength != null) ? minLength : 3;
-        int max = (maxLength != null) ? maxLength : 16;
+        String pattern = regex != null ? regex : "^[a-zA-Z0-9_\\- ]+$";
+        int min = minLength != null ? minLength : 3;
+        int max = maxLength != null ? maxLength : 16;
 
         // Validar longitud
         if (input.length() < min || input.length() > max) {
@@ -521,18 +496,22 @@ public class Utils {
         return !input.matches(pattern);
     }
 
+    @ToUse
     public boolean isValidText(String input) {
         return this.isValidText(input, null, null, null);
     }
 
+    @ToUse
     public boolean isValidText(String input, String regex) {
         return this.isValidText(input, regex, null, null);
     }
 
+    @ToUse
     public boolean isValidText(String input, String regex, Integer minLength) {
         return this.isValidText(input, regex, minLength, null);
     }
 
+    @ToUse
     public boolean isValidText(String input, String regex, int maxLength) {
         return this.isValidText(input, regex, null, maxLength);
     }
@@ -540,32 +519,36 @@ public class Utils {
     public String getValidatedText(String input, String regex, Integer minLength, Integer maxLength) {
         if (input == null || input.isEmpty()) return "";
 
-        String pattern = (regex != null) ? regex : "^[a-zA-Z0-9_\\- ]+$";
-        int min = (minLength != null) ? minLength : 3;
-        int max = (maxLength != null) ? maxLength : 16;
+        String pattern = regex != null ? regex : "^[a-zA-Z0-9_\\- ]+$";
+        int min = minLength != null ? minLength : 3;
+        int max = maxLength != null ? maxLength : 16;
 
         return (input.length() >= min && input.length() <= max && input.matches(pattern)) ? input : "";
     }
 
+    @ToUse
     public String getValidatedText(String input, String regex, Integer maxLength) {
         return this.getValidatedText(input, regex, null, maxLength);
     }
 
+    @ToUse
     public String getValidatedText(String input, String regex, int minLength) {
         return this.getValidatedText(input, regex, minLength, null);
     }
 
+    @ToUse
     public String getValidatedText(String input, String regex) {
         return this.getValidatedText(input, regex, null, null);
     }
 
+    @ToUse
     public String getValidatedText(String input) {
         return this.getValidatedText(input, null, null, null);
     }
 
+    @ToUse
     public String getLocationString(Location location) {
         if (location == null) return "no data";
         return String.format("X: %.2f, Y: %.2f, Z: %.2f, World: %s", location.getX(), location.getY(), location.getZ(), location.getWorld().getName());
     }
 }
-

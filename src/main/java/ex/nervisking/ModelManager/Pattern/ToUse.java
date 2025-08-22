@@ -12,8 +12,7 @@ public @interface ToUse {
      */
     String value() default "unknown";
 
-    @Deprecated(forRemoval = true)
-    String description() default "unknown";
+    String[] description() default {};
 
     /**
      * Lista de parámetros en formato "nombre: descripción".

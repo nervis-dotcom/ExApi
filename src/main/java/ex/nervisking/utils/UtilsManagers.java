@@ -563,8 +563,8 @@ public class UtilsManagers extends Utils {
     }
 
     // messages
-    public void sendCenteredMessage(Player player, String message) {
-        if (message == null || message.isEmpty()) return;
+    public void sendCenteredMessage(Player player, @NotNull String message) {
+        if (message.isEmpty()) return;
         String coloredMessage = setPlaceholders(player, message);
         String centeredMessage = getCenteredMessage(coloredMessage);
         player.sendMessage(centeredMessage);
@@ -574,8 +574,8 @@ public class UtilsManagers extends Utils {
         this.sendCenteredMessage(player, List.of(messages));
     }
 
-    public void sendCenteredMessage(Player player, List<String> messages) {
-        if (messages == null || messages.isEmpty()) return;
+    public void sendCenteredMessage(Player player, @NotNull List<String> messages) {
+        if (messages.isEmpty()) return;
         for (String message : messages) {
             sendCenteredMessage(player, message);
         }
