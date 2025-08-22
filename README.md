@@ -78,16 +78,6 @@ public class MyPlugin extends ExPlugin {
 ## ⌨️ Comando
 
 ```java
-package ex.nervisking.commands;
-
-import ex.nervisking.ModelManager.Pattern.KeyDef;
-import ex.nervisking.command.Arguments;
-import ex.nervisking.command.Command;
-import ex.nervisking.command.Completions;
-import ex.nervisking.command.Sender;
-import org.bukkit.Bukkit;
-import org.bukkit.World;
-
 public class WeatherCommand extends Command {
 
     @Override
