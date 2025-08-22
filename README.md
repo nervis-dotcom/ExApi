@@ -1,4 +1,5 @@
-# 📌 ExAPI – Librería para desarrollo de plugins en Minecraft
+# 📌 ExAPI – Librería para desarrollo de plugins en Minecraft  
+[![License](https://img.shields.io/badge/License-Usage--Only-blue.svg)](./LICENSE)
 
 **ExAPI** es una librería ligera y modular que facilita la creación de plugins en Minecraft.  
 Incluye un sistema de menús, comandos, eventos, mensajes, configuración en **YAML/JSON** y múltiples utilidades que reducen código repetitivo y mejoran la organización.
@@ -36,8 +37,8 @@ Agrega el repositorio y la dependencia en tu proyecto:
     </dependency>
 </dependencies>
 ```
-
-🚀 Ejemplo de uso
+---
+## 🚀 Ejemplo de uso
 
 ```java
 public class MyPlugin extends ExPlugin {
@@ -58,6 +59,5 @@ public class MyPlugin extends ExPlugin {
         config.reload(); // recarga dinámica
     }
 }
-
-
-
+```
+---
