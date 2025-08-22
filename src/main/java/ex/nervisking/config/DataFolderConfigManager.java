@@ -2,7 +2,7 @@ package ex.nervisking.config;
 
 import ex.nervisking.ExApi;
 import ex.nervisking.ModelManager.Configurate;
-import ex.nervisking.ModelManager.Pattern.KeyLet;
+import ex.nervisking.ModelManager.Pattern.KeyAlphaNum;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -13,7 +13,7 @@ import java.util.Objects;
 public abstract class DataFolderConfigManager {
 
     protected JavaPlugin plugin;
-    protected @KeyLet String folderName;
+    protected @KeyAlphaNum String folderName;
     protected ArrayList<CustomConfig> configFiles;
 
     public DataFolderConfigManager() {
@@ -105,7 +105,7 @@ public abstract class DataFolderConfigManager {
 
     public abstract void loadConfigs();
     public abstract void saveConfigs();
-    public abstract @KeyLet String folderName();
+    public abstract @KeyAlphaNum String folderName();
     public List<Configurate> createConfigFiles() {
         return List.of();
     }

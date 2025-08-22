@@ -34,7 +34,7 @@ public abstract class MenuPages extends Menu {
 
     public void addItems() {
         this.pages = getCurrentPage();
-        this.total_pages = getTotalPages();
+        this.totalPages = getTotalPages();
         this.slots = setSlots();
         this.setItems();
 

@@ -14,21 +14,28 @@ import org.bukkit.plugin.java.JavaPlugin;
 public abstract class ExPlugin extends JavaPlugin {
 
     private Task gui;
+    private Task cache;
+
     private UtilsManagers utilsManagers;
     private Utils utils;
+
     public CommandManager commandManager;
     public EventsManager eventsManager;
     public PyfigletMessage pyfigletMessage;
+    public PermissionCache permissionCache;
 
     protected void Load() {}
     protected boolean Menu() {
+        return false;
+    }
+    protected boolean CacheClear() {
         return false;
     }
     @ToUse
     public void Reload() {
         ExApi.closeInventorys();
     }
-    protected abstract void Enabled();
+    protected abstract void Enable();
     protected abstract void Disable();
 
     @Override
@@ -44,18 +51,26 @@ public abstract class ExPlugin extends JavaPlugin {
         this.commandManager = ExApi.getCommandManager();
         this.eventsManager = ExApi.getEventsManager();
         this.pyfigletMessage = new PyfigletMessage();
+        this.permissionCache = ExApi.getPermissionCache();
 
         if (Menu()) {
             this.gui = Scheduler.runTimer(new UpdateMenus(), 0, 20);
         }
 
-        this.Enabled();
+        if (CacheClear()) {
+            this.cache = Scheduler.runTimerAsync(()-> permissionCache.cleanupOldEntries(), 20L * 60, 20L * 60);
+        }
+
+        this.Enable();
     }
 
     @Override
     public void onDisable() {
         if (gui != null) {
             this.gui.cancel();
+        }
+        if (cache != null) {
+            this.cache.cancel();
         }
         ExApi.closeInventorys();
         this.Disable();
@@ -88,5 +103,10 @@ public abstract class ExPlugin extends JavaPlugin {
 
     public Utils getUtils() {
         return utils;
+    }
+
+    @ToUse
+    public PermissionCache getPermissionCache() {
+        return permissionCache;
     }
 }

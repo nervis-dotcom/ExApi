@@ -2,6 +2,7 @@ package ex.nervisking.utils;
 
 import ex.nervisking.ExApi;
 import ex.nervisking.ModelManager.Pattern.ToUse;
+import ex.nervisking.PermissionCache;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.*;
 import org.bukkit.*;
@@ -32,10 +33,13 @@ import java.util.Objects;
 public class UtilsManagers extends Utils {
 
     private final JavaPlugin plugin;
-    private final HashMap<String, Long> cooldowns = new HashMap<>();
+    private final HashMap<String, Long> cooldowns;
+    private final PermissionCache permissionCache;
 
     public UtilsManagers() {
         this.plugin = ExApi.getPlugin();
+        this.cooldowns = new HashMap<>();
+        this.permissionCache = ExApi.getPermissionCache();
     }
 
     public boolean sendCooldown(String string, int time){
@@ -55,6 +59,9 @@ public class UtilsManagers extends Utils {
     }
 
     public boolean hasPermission(CommandSender sender, String permission){
+        if (sender instanceof Player player) {
+            return permissionCache.hasPermission(player, plugin.getName().toLowerCase() + "." + permission);
+        }
         return sender.hasPermission(plugin.getName().toLowerCase() + "." + permission);
     }
 
@@ -80,8 +87,7 @@ public class UtilsManagers extends Utils {
         }
 
         Sound sound;
-        float volume;
-        float pitch;
+        float volume, pitch;
         try {
             sound = getSoundByName(sep[0]);
             volume = Float.parseFloat(sep[1]);

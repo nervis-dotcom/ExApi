@@ -3,7 +3,7 @@ package ex.nervisking.config;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import ex.nervisking.ExApi;
-import ex.nervisking.ModelManager.Pattern.KeyLet;
+import ex.nervisking.ModelManager.Pattern.KeyAlphaNum;
 import ex.nervisking.utils.ExLog;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -26,7 +26,7 @@ public class JsonConfig {
     private final Gson gson;
     private JsonObject root;
 
-    public JsonConfig(@KeyLet String fileName, @KeyLet String folderName) {
+    public JsonConfig(@KeyAlphaNum String fileName, @KeyAlphaNum String folderName) {
         JavaPlugin plugin = ExApi.getPlugin();
         this.gson = new GsonBuilder().setPrettyPrinting().create();
 
@@ -59,17 +59,17 @@ public class JsonConfig {
         this.load();
     }
 
-    public JsonConfig(@KeyLet String fileName) {
+    public JsonConfig(@KeyAlphaNum String fileName) {
         this(fileName, null);
     }
 
     @Contract("_, _ -> new")
-    public static @NotNull JsonConfig of(@KeyLet String fileName, @KeyLet String folderName) {
+    public static @NotNull JsonConfig of(@KeyAlphaNum String fileName, @KeyAlphaNum String folderName) {
         return new JsonConfig(fileName, folderName);
     }
 
     @Contract("_ -> new")
-    public static @NotNull JsonConfig of(@KeyLet String fileName) {
+    public static @NotNull JsonConfig of(@KeyAlphaNum String fileName) {
         return new JsonConfig(fileName);
     }
 

@@ -1,6 +1,7 @@
 package ex.nervisking.command;
 
 import ex.nervisking.ExApi;
+import ex.nervisking.ModelManager.Pattern.KeyAlphaNum;
 import ex.nervisking.ModelManager.Pattern.ToUse;
 
 import java.util.List;
@@ -8,22 +9,22 @@ import java.util.function.BiConsumer;
 
 public class CommandBuilder {
 
-    private final String name;
+    private final @KeyAlphaNum String name;
     private boolean permission;
     private String[] aliases;
     private String description;
-    private String per;
+    private @KeyAlphaNum String per;
     private BiConsumer<Sender, Arguments> commandExecutor;
     private TriFunction<Sender, Arguments, Completions, Completions> tabCompleter;
     private boolean commandSet;
     private boolean tabSet;
 
-    public CommandBuilder(String name, boolean permission) {
+    public CommandBuilder(@KeyAlphaNum String name, boolean permission) {
         this.name = name;
         this.permission = permission;
         this.aliases = new String[0];
         this.description = "";
-        this.per = "";
+        this.per = null;
         this.commandExecutor = null;
         this.tabCompleter = null;
         this.commandSet = false;
@@ -43,13 +44,13 @@ public class CommandBuilder {
     }
 
     @ToUse(value = "Define la descripción del comando")
-    public CommandBuilder description(String description) {
+    public CommandBuilder description(@KeyAlphaNum String description) {
         this.description = description;
         return this;
     }
 
     @ToUse(value = "Define el permiso del comando")
-    public CommandBuilder per(String per) {
+    public CommandBuilder per(@KeyAlphaNum String per) {
         this.per = per;
         return this;
     }
@@ -90,8 +91,9 @@ public class CommandBuilder {
         TriFunction<Sender, Arguments, Completions, Completions> tabFunc = (tabCompleter != null) ? tabCompleter : (sender, args, completions) -> completions;
 
         return new Command() {
+
             @Override
-            public String getName() {
+            public @KeyAlphaNum String getName() {
                 return name;
             }
 
@@ -111,7 +113,7 @@ public class CommandBuilder {
             }
 
             @Override
-            public String per() {
+            public @KeyAlphaNum String per() {
                 return per;
             }
 

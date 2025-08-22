@@ -433,7 +433,7 @@ public class BossBar {
         return this.players;
     }
 
-    public List<Player> getPlayersOline() {
+    public List<Player> getPlayersOnline() {
         List<Player> player = new ArrayList<>();
         for (var p : this.players) {
             if (Bukkit.getPlayer(p) != null) {

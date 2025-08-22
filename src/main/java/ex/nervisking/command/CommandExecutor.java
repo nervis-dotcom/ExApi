@@ -1,5 +1,6 @@
 package ex.nervisking.command;
 
+import ex.nervisking.ModelManager.Pattern.KeyAlphaNum;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,7 +12,7 @@ import java.util.List;
 public interface CommandExecutor extends BaseCommand {
 
     @Override
-    String getName();
+    @KeyAlphaNum String getName();
 
     @Override
     String getDescription();

@@ -41,6 +41,7 @@ public class ExApi {
     private static BungeeMessagingManager bungeeMessagingManager;
     private static UtilsManagers utilsManagers;
     private static Utils utils;
+    private static PermissionCache permissionCache;
     public static ServerVersion serverVersion;
 
     private static final HashMap<Player, PlayerMenuUtility> playerMenuUtilityMap = new HashMap<>();
@@ -66,6 +67,7 @@ public class ExApi {
     public ExApi(JavaPlugin plugin, boolean menu) {
         this.setVersion();
         ExApi.plugin = plugin;
+        permissionCache = PermissionCache.of(5);
         bungeeMessagingManager = new BungeeMessagingManager(plugin);
         commandManager = new CommandManager(plugin);
         eventsManager = new EventsManager(plugin);
@@ -162,7 +164,7 @@ public class ExApi {
     }
 
     @ToUse
-    public static @Nullable EntityType geEntityType(String name) {
+    public static @Nullable EntityType getEntityType(String name) {
         if (name != null && !name.isEmpty()) {
             EntityType entityType;
             try {
@@ -176,12 +178,12 @@ public class ExApi {
     }
 
     @ToUse
-    public static EntityType geEntityType(String name, EntityType def) {
-        return geEntityType(name) != null ? geEntityType(name) : def;
+    public static EntityType getEntityType(String name, EntityType def) {
+        return getEntityType(name) != null ? getEntityType(name) : def;
     }
 
     @ToUse
-    public static @Nullable Particle geParticle(String name) {
+    public static @Nullable Particle getParticle(String name) {
         if (name != null && !name.isEmpty()) {
             Particle particle;
             try {
@@ -195,8 +197,8 @@ public class ExApi {
     }
 
     @ToUse
-    public static Particle geParticle(String name, Particle def) {
-        return geParticle(name) != null ? geParticle(name) : def;
+    public static Particle getParticle(String name, Particle def) {
+        return getParticle(name) != null ? getParticle(name) : def;
     }
 
 // menu ------------------------------------------------------------------------------------------------------
@@ -329,6 +331,14 @@ public class ExApi {
 
     public static Utils getUtils() {
         return utils;
+    }
+
+    public static PermissionCache getPermissionCache() {
+        return permissionCache;
+    }
+
+    public static ServerVersion getServerVersion() {
+        return serverVersion;
     }
 
     @ToUse()

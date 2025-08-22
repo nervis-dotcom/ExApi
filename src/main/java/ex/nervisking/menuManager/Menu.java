@@ -23,7 +23,7 @@ public abstract class Menu extends UtilsManagers implements InventoryHolder {
     protected Inventory inventory;
     protected ItemStack FILTER;
     protected int pages = 1;
-    protected int total_pages = 1;
+    protected int totalPages = 1;
 
     public Menu(PlayerMenuUtility playerMenuUtility) {
         this.FILTER = new ItemBuilder(ItemBuilder.GRAY).setHideTooltip().build();
@@ -72,7 +72,7 @@ public abstract class Menu extends UtilsManagers implements InventoryHolder {
     public void open() {
         this.inventory = Bukkit.createInventory(this, Math.max(9, Math.min(54, (this.setRows() > 0 ? this.setRows() : 1) * 9)), setPlaceholders(player, this.setName()
                 .replace("%page%", String.valueOf(pages))
-                .replace("%total_page%", String.valueOf(total_pages))));
+                .replace("%total_page%", String.valueOf(totalPages))));
         this.addItems();
         this.playerMenuUtility.getOwner().openInventory(this.inventory);
         this.playerMenuUtility.pushMenu(this);

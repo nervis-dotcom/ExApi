@@ -1,6 +1,7 @@
 package ex.nervisking.command;
 
 import ex.nervisking.ExApi;
+import ex.nervisking.ModelManager.Pattern.KeyAlphaNum;
 import ex.nervisking.ModelManager.Pattern.ToUse;
 import ex.nervisking.utils.UtilsManagers;
 import org.bukkit.command.*;
@@ -15,14 +16,14 @@ import java.util.*;
 public abstract class Command extends UtilsManagers implements BaseCommand {
 
     @Override
-    public abstract String getName();
+    public abstract @KeyAlphaNum String getName();
 
     @Override
     public abstract String getDescription();
 
     @Override
-    public String per() {
-        return "";
+    public @KeyAlphaNum String per() {
+        return null;
     }
 
     @Override
@@ -149,12 +150,12 @@ public abstract class Command extends UtilsManagers implements BaseCommand {
     }
 
     @ToUse(value = "Builder fluido para construir un Command funcional")
-    public static CommandBuilder builder(String name, boolean permission) {
+    public static CommandBuilder builder(@KeyAlphaNum String name, boolean permission) {
         return new CommandBuilder(name, permission);
     }
 
     @ToUse(value = "Builder fluido para construir un Command funcional")
-    public static CommandBuilder builder(String name) {
+    public static CommandBuilder builder(@KeyAlphaNum String name) {
         return new CommandBuilder(name, false);
     }
 }
