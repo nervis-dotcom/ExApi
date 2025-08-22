@@ -9,7 +9,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.UUID;
@@ -67,6 +66,11 @@ public class Sender {
 
     @ToUse(value = "Verificar el target es igual al player")
     public boolean parse(Player target) {
+        return is(target);
+    }
+
+    @ToUse(value = "Verificar el target es igual al player")
+    public boolean is(Player target) {
         return commandSender instanceof Player player && player.equals(target);
     }
 
@@ -133,5 +137,10 @@ public class Sender {
     @ToUse(value = "Enviá un mensaje al sender")
     public void noOnline(String target) {
         utilsManagers.sendMessage(commandSender, ExApi.getNoOnlineMessage().replace("%player%", target));
+    }
+
+    @ToUse(value = "Verificar si el sender tiene permiso para usar el comando")
+    public boolean hasPermission(String permission) {
+        return utilsManagers.hasPermission(commandSender, "command." + permission);
     }
 }

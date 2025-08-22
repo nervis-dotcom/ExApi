@@ -93,6 +93,8 @@ public class MyPlugin extends ExPlugin {
 
 ## ⌨️ Comando
 
+- #1 opción
+
 ```java
 public class WeatherCommand extends Command {
 
@@ -148,6 +150,80 @@ public class WeatherCommand extends Command {
             case "thunder":
                 world.setStorm(true);
                 world.setThundering(true);
+                sender.sendMessage("%prefix% &bEl clima en " + world.getName() + " ha sido cambiado a tormenta.");
+                break;
+            case "clear":
+                world.setStorm(false);
+                world.setThundering(false);
+                sender.sendMessage("%prefix% &bEl clima en " + world.getName() + " ha sido cambiado a despejado.");
+                break;
+            default:
+                help(sender, "&eUso: &7/weather [rain | thunder | clear] [mundo opcional]");
+                break;
+        }
+    }
+
+    @Override
+    public Completions onTab(Sender sender, Arguments args, Completions completions) {
+        if (!hasPermission(sender)) {
+            return completions;
+        }
+
+        if (args.has(1)) {
+            completions.add("rain", "thunder", "clear");
+        }
+        
+        if (args.has(2)) {
+            completions.add(Bukkit.getWorlds().stream().map(World::getName).toList());
+        }
+        return completions;
+    }
+}
+```
+
+- #2 opción
+
+```java
+@CommandInfo(name = "weather", permission = true)
+public class WeatherCommand extends CustomCommand {
+
+    @Override
+    public void onCommand(Sender sender, Arguments args) {
+        if (sender.isConsole()) {
+            noConsole(sender);
+            return;
+        }
+
+        if (!hasPermission(sender)) {
+            noPermission(sender);
+            return;
+        }
+
+        if (args.lacksMinArgs(1)) {
+            help(sender, "&eUso: &7/weather [rain | thunder | clear] [mundo opcional]");
+            return;
+        }
+
+        World world;
+        if (args.has(2)) {
+            world = Bukkit.getWorld(args.get(1));
+            if (world == null) {
+                sender.sendMessage("%prefix% &cEl mundo especificado no existe.");
+                return;
+            }
+        } else {
+            world = sender.getWorld();
+        }
+
+        switch (args.get(0).toLowerCase()) {
+            case "rain":
+                world.setStorm(true);
+                world.setThundering(false);
+                sender.sendMessage("%prefix% &bEl clima en " + world.getName() + " ha sido cambiado a lluvia.");
+                break;
+            case "thunder":
+                world.setStorm(true);
+                world.setThundering(true);
                 sendMessage(sender, "%prefix% &bEl clima en " + world.getName() + " ha sido cambiado a tormenta.");
                 break;
             case "clear":
@@ -169,11 +245,169 @@ public class WeatherCommand extends Command {
 
         if (args.has(1)) {
             completions.add("rain", "thunder", "clear");
-        } else if (args.has(2)) {
+        }
+
+        if (args.has(2)) {
             completions.add(Bukkit.getWorlds().stream().map(World::getName).toList());
         }
         return completions;
     }
+}
+```
+
+- #3 opción
+
+```java
+public class WeatherCommand implements CommandExecutor {
+
+    @Override
+    public @KeyAlphaNum String getName() {
+        return "weather";
+    }
+
+    @Override
+    public String getDescription() {
+        return "";
+    }
+
+    @Override
+    public boolean getPermission() {
+        return true;
+    }
+
+    @Override
+    public void onCommand(Sender sender, Arguments args) {
+        if (sender.isConsole()) {
+            sender.noConsole();
+            return;
+        }
+        
+        if (!sender.hasPermission(getName())) {
+            sender.noPermission();
+            return;
+        }
+        
+        if (args.lacksMinArgs(1)) {
+            sender.sendMessage("&eUso: &7/weather [rain | thunder | clear] [mundo opcional]");
+            return;
+        }
+
+        World world;
+        if (args.has(2)) {
+            world = Bukkit.getWorld(args.get(1));
+            if (world == null) {
+                sender.sendMessage("%prefix% &cEl mundo especificado no existe.");
+                return;
+            }
+        } else {
+            world = sender.getWorld();
+        }
+
+        switch (args.get(0).toLowerCase()) {
+            case "rain":
+                world.setStorm(true);
+                world.setThundering(false);
+                sender.sendMessage("%prefix% &bEl clima en " + world.getName() + " ha sido cambiado a lluvia.");
+                break;
+            case "thunder":
+                world.setStorm(true);
+                world.setThundering(true);
+                sender.sendMessage("%prefix% &bEl clima en " + world.getName() + " ha sido cambiado a tormenta.");
+                break;
+            case "clear":
+                world.setStorm(false);
+                world.setThundering(false);
+                sender.sendMessage("%prefix% &bEl clima en " + world.getName() + " ha sido cambiado a despejado.");
+                break;
+            default:
+                sender.sendMessage("&eUso: &7/weather [rain | thunder | clear] [mundo opcional]");
+                break;
+        }
+    }
+
+    @Override
+    public Completions onTab(Sender sender, Arguments args, Completions completions) {
+        if (!sender.hasPermission(getName())) {
+            return completions;
+        }
+        
+        if (args.has(1)) {
+            completions.add("rain", "thunder", "clear");
+        }
+
+        if (args.has(2)) {
+            completions.add(Bukkit.getWorlds().stream().map(World::getName).toList());
+        }
+        return completions;
+    }
+}
+```
+
+- #4 opción
+
+```java
+public CommandRegister() {
+    Command.builder("weather").command((sender, args) -> {
+        if (sender.isConsole()) {
+            sender.noConsole();
+            return;
+        }
+
+        if (!sender.hasPermission("weather")) {
+            sender.noPermission();
+            return;
+        }
+
+        if (args.lacksMinArgs(1)) {
+            sender.sendMessage("&eUso: &7/weather [rain | thunder | clear] [mundo opcional]");
+            return;
+        }
+
+        World world;
+        if (args.has(2)) {
+            world = Bukkit.getWorld(args.get(1));
+            if (world == null) {
+                sender.sendMessage("%prefix% &cEl mundo especificado no existe.");
+                return;
+            }
+        } else {
+            world = sender.getWorld();
+        }
+
+        switch (args.get(0).toLowerCase()) {
+            case "rain":
+                world.setStorm(true);
+                world.setThundering(false);
+                sender.sendMessage("%prefix% &bEl clima en " + world.getName() + " ha sido cambiado a lluvia.");
+                break;
+            case "thunder":
+                world.setStorm(true);
+                world.setThundering(true);
+                sender.sendMessage("%prefix% &bEl clima en " + world.getName() + " ha sido cambiado a tormenta.");
+                break;
+            case "clear":
+                world.setStorm(false);
+                world.setThundering(false);
+                sender.sendMessage("%prefix% &bEl clima en " + world.getName() + " ha sido cambiado a despejado.");
+                break;
+            default:
+                sender.sendMessage("&eUso: &7/weather [rain | thunder | clear] [mundo opcional]");
+                break;
+        }
+    }).tab((sender, args, completions) -> {
+        if (!sender.hasPermission("weather")) {
+            return completions;
+        }
+
+        if (args.has(1)) {
+            completions.add("rain", "thunder", "clear");
+        }
+
+        if (args.has(2)) {
+            completions.add(Bukkit.getWorlds().stream().map(World::getName).toList());
+        }
+        return completions;
+    }).register();
 }
 ```
 ---
@@ -189,8 +423,9 @@ public class JoinListener extends Event<MyPlugin> {
         sendMessage(player, "<green>¡Bienvenido a ExAPI!</green>");
     }
 }
-
 ```
+
+---
 ## Config
 
 - Yml
@@ -218,11 +453,10 @@ public class MainConfigYml {
     }
 
     public void reloadConfig() {
-        configFile.reloadConfig();
-        loadConfig();
+        this.configFile.reloadConfig();
+        this.loadConfig();
     }
 }
-
 ```
 
 - Json
@@ -247,9 +481,8 @@ public class MainConfigJson {
     }
 
     public void reloadConfig(){
-        jsonConfig.reload();
-        loadConfig();
+        this.jsonConfig.reload();
+        this.loadConfig();
     }
 }
-
 ```

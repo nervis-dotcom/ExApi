@@ -26,8 +26,8 @@ public interface CommandExecutor extends BaseCommand {
     }
 
     @Override
-    default String per() {
-        return "";
+    default @KeyAlphaNum String per() {
+        return null;
     }
 
     void onCommand(Sender sender, Arguments args);
