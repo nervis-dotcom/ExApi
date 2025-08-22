@@ -46,6 +46,9 @@ Agrega el repositorio y la dependencia en tu proyecto:
 ```java
 public class MyPlugin extends ExPlugin {
 
+    private MainConfigYml configYml;
+    private MainConfigJson configJson;
+
     @Override
     public void Load() {
 
@@ -53,6 +56,11 @@ public class MyPlugin extends ExPlugin {
 
     @Override
     public void Enable() {
+
+        //Config
+        this.configYml = new MainConfigYml();
+        this.configJson = new MainConfigJson();
+
         // Registrar comando
         this.commandManager.registerCommand(new WeatherCommand());
 
@@ -68,6 +76,14 @@ public class MyPlugin extends ExPlugin {
     @Override
     protected void Disable() {
 
+    }
+
+    public MainConfigYml getConfigYml() {
+      return configYml;
+    }
+
+    public MainConfigJson getConfigJson() {
+      return configJson;
     }
 }
 ```
@@ -185,7 +201,7 @@ public class MainConfigYml {
     private final CustomConfig configFile;
     private String prefix;
 
-    public MainConfig(){
+    public MainConfigYml(){
         this.configFile = CustomConfig.of("ConfigYml");
         this.configFile.registerConfig();
         this.loadConfig();
@@ -217,7 +233,7 @@ public class MainConfigJson {
     private final JsonConfig jsonConfig;
     private String prefix;
 
-    public ConfigLicense() {
+    public MainConfigJson() {
         this.jsonConfig = JsonConfig.of("ConfigJson");
         this.loadConfig();
     }
