@@ -27,7 +27,9 @@ Agrega el repositorio y la dependencia en tu proyecto:
         <url>https://github.com/NervisKing/ExAPI/packages</url>
     </repository>
 </repositories>
+```
 
+```xml
 <dependencies>
     <dependency>
         <groupId>ex.nervisking</groupId>
