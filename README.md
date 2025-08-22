@@ -13,7 +13,7 @@ Incluye un sistema de menús, comandos, eventos, mensajes, configuración en **Y
 - 🎯 **Eventos**: sistema de eventos optimizado y extensible.  
 - 💬 **Mensajes**: envío de mensajes con soporte para placeholders y formatos configurables.  
 - 🗄️ **Configuraciones**: soporte para archivos YAML y JSON, con carga, guardado y recarga automática.  
- 🎨 **Colores**: soporte para **Legacy (&c)**, **Hex (#ff0000)** y **MiniMessage** (`<red>texto</red>`).  
+ 🎨 **Colores**: soporte para **Legacy (&c)**, **Hex (#ff0000) o (&#ff0000)** y **MiniMessage** (`<red>texto</red>`).  
 
 ---
 
