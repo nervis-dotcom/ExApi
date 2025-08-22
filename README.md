@@ -97,7 +97,7 @@ public class MyPlugin extends ExPlugin {
 public class WeatherCommand extends Command {
 
     @Override
-    public @KeyDef String getName() {
+    public @KeyAlphaNum String getName() {
         return "weather";
     }
 
