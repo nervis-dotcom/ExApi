@@ -16,7 +16,7 @@ Incluye un sistema de menús, comandos, eventos, mensajes, configuración en **Y
 
 ---
 
-## 📦 Instalación [![Version](https://img.shields.io/badge/version-1.0.3-green.svg)](https://github.com/nervis-dotcom/ExApi/tree/main)
+## 📦 Instalación [![Version](https://img.shields.io/badge/version-1.0.4-green.svg)](https://github.com/nervis-dotcom/ExApi/tree/main)
 
 Agrega el repositorio y la dependencia en tu proyecto:
 
