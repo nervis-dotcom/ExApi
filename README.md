@@ -175,3 +175,29 @@ public class JoinListener extends Event<MyPlugin> {
 }
 
 ```
+## Config
+
+- Yml
+
+```java
+public class MainConfig {
+
+    private final CustomConfig configFile;
+
+    public MainConfig(){
+        this.configFile = CustomConfig.of("Config");
+        this.configFile.registerConfig();
+        this.loadConfig();
+    }
+
+    private void loadConfig() {
+        FileConfiguration config = configFile.getConfig();
+    }
+
+    public void reloadConfig() {
+        configFile.reloadConfig();
+        loadConfig();
+    }
+}
+
+```
