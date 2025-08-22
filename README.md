@@ -37,13 +37,12 @@ Agrega el repositorio y la dependencia en tu proyecto:
 
 🚀 Ejemplo de uso
 
+//
 public class MyPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
-        // Registro de comandos
         ExAPI.getCommandManager().register(new FlyCommand());
         
-        // Sistema de menús
         ExAPI.getMenuManager().openMenu(player, new ExampleMenu());
         
         // Mensajes
@@ -54,4 +53,4 @@ public class MyPlugin extends JavaPlugin {
         config.reload(); // recarga dinámica
     }
 }
-
+//
