@@ -55,6 +55,9 @@ public class MyPlugin extends ExPlugin {
     public void Enable() {
         // Registrar comando
         this.commandManager.registerCommand(new WeatherCommand());
+
+        // Registra Evento
+        this.eventsManager.registerEvents(new JoinListener());
     }
 
     @Override
@@ -168,3 +171,17 @@ public class WeatherCommand extends Command {
 }
 ```
 ---
+
+## 🎯 Evento
+
+```java
+public class JoinListener extends Event<MyPlugin> {
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        sendMessage(player, "<green>¡Bienvenido a ExAPI!</green>");
+    }
+}
+
+```
