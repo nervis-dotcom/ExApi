@@ -16,7 +16,7 @@ Incluye un sistema de menús, comandos, eventos, mensajes, configuración en **Y
 
 ---
 
-## 📦 Instalación [![Version](https://img.shields.io/badge/version-1.0.3-green.svg)](https://github.com/NervisKing/ExAPI)
+## 📦 Instalación [![Version](https://img.shields.io/badge/version-1.0.3-green.svg)]
 
 Agrega el repositorio y la dependencia en tu proyecto:
 
