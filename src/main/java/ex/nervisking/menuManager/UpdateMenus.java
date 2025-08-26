@@ -11,11 +11,11 @@ public class UpdateMenus extends BukkitRunnable {
 
     @Override
     public void run() {
-        for (Map.Entry<Player, PlayerMenuUtility> entry : ExApi.getPlayerMenuUtilityMap().entrySet()) {
+        for (Map.Entry<Player, PlayerMenuUtility> entry : ExApi.getPlayerMenuUtility().entrySet()) {
             Player player = entry.getKey();
             Inventory topInventory = InventoryUtils.getTopInventory(player);
 
-            if (!(topInventory.getHolder() instanceof Menu menu)) continue;
+            if (!(topInventory.getHolder() instanceof Menu<?> menu)) continue;
             if (!menu.setUpdate()) continue;
 
             LevelUpdate level = menu.levelUpdate();

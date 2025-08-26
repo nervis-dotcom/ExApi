@@ -26,13 +26,11 @@ public class MenuEvent extends Event implements Cancellable {
     private ItemStack current;
     private final int hotbarKey;
     private boolean cancelled = false;
-
-    // Caché de User
-    private final MenuUser cachedUser;
+    private final MenuUser menuUser;
 
     public MenuEvent(InventoryInteractEvent interactEvent, @NotNull InventoryView view, InventoryType.@NotNull SlotType type, int slot, @NotNull ClickType click, @NotNull InventoryAction action) {
         this.interactEvent = interactEvent;
-        this.cachedUser = new MenuUser((Player) interactEvent.getWhoClicked());
+        this.menuUser = new MenuUser((Player) interactEvent.getWhoClicked());
         this.current = null;
         this.slotType = type;
         this.rawSlot = slot;
@@ -43,7 +41,7 @@ public class MenuEvent extends Event implements Cancellable {
     }
 
     public MenuUser getMenuUser() {
-        return cachedUser;
+        return menuUser;
     }
 
     public InventoryType.@NotNull SlotType getSlotType() {

@@ -10,19 +10,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public abstract class FolderConfigLoan {
+public abstract class FolderConfigLoan<T extends JavaPlugin> {
 
-    protected JavaPlugin plugin;
+    protected final T plugin;
     protected String folderName;
     protected ArrayList<CustomConfig> configFiles;
 
+    @SuppressWarnings("unchecked")
     public FolderConfigLoan() {
         this.configFiles = new ArrayList<>();
-        this.plugin = ExApi.getPlugin();
+        this.plugin = ExApi.getPluginOf((Class<T>) JavaPlugin.class);
         this.folderName = folderName();
         this.create();
         this.createFolder();
         this.registerConfigFiles();
+        this.initialize();
+        this.loadConfigs();
     }
 
     public void reloadConfigs() {
@@ -69,7 +72,6 @@ public abstract class FolderConfigLoan {
 
     public CustomConfig registerConfigFile(String pathName) {
         CustomConfig config = new CustomConfig(pathName, folderName, true);
-        config.registerConfig();
         configFiles.add(config);
 
         return config;
@@ -77,8 +79,7 @@ public abstract class FolderConfigLoan {
 
     private void create() {
         for (Configurate files : createConfigFiles()) {
-            CustomConfig config = new CustomConfig(files.fileName(), files.folderName() == null ? folderName : files.folderName(), false);
-            config.registerConfig();
+            CustomConfig.of(files.fileName(), files.folderName() == null ? folderName : files.folderName(), false);
         }
     }
 
@@ -97,6 +98,7 @@ public abstract class FolderConfigLoan {
         configFiles.removeIf(cfg -> cfg.getPath().equals(path));
     }
 
+    public void initialize() {}
     public abstract void loadConfigs();
     public abstract @KeyAlphaNum String folderName();
     public List<Configurate> createConfigFiles() {

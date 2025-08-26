@@ -10,19 +10,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public abstract class DataFolderConfigManager {
+public abstract class FolderConfig<T extends JavaPlugin> {
 
-    protected JavaPlugin plugin;
+    protected final T plugin;
     protected @KeyAlphaNum String folderName;
     protected ArrayList<CustomConfig> configFiles;
 
-    public DataFolderConfigManager() {
+    @SuppressWarnings("unchecked")
+    public FolderConfig() {
+        this.plugin = ExApi.getPluginOf((Class<T>) JavaPlugin.class);
         this.configFiles = new ArrayList<>();
-        this.plugin = ExApi.getPlugin();
         this.folderName = folderName();
         this.create();
         this.createFolder();
         this.registerConfigFiles();
+        this.initialize();
+        this.loadConfigs();
     }
 
     public void reloadConfigs() {
@@ -75,7 +78,6 @@ public abstract class DataFolderConfigManager {
 
     public CustomConfig registerConfigFile(String pathName) {
         CustomConfig config = CustomConfig.of(pathName, folderName, true);
-        config.registerConfig();
         configFiles.add(config);
 
         return config;
@@ -83,13 +85,12 @@ public abstract class DataFolderConfigManager {
 
     private void create() {
         for (Configurate files : createConfigFiles()) {
-            CustomConfig configFile = CustomConfig.of(files.fileName(), files.folderName(), false);
-            configFile.registerConfig();
+            CustomConfig.of(files.fileName(), files.folderName(), false);
         }
     }
 
     public boolean removeFile(String config) {
-        CustomConfig configFile = getConfigFile(config + ".yml");
+        CustomConfig configFile = getConfigFile(config.endsWith(".yml") ? config : config + ".yml");
         if (configFile == null) {
             return false;
         }
@@ -103,6 +104,7 @@ public abstract class DataFolderConfigManager {
         configFiles.removeIf(cfg -> cfg.getPath().equals(path));
     }
 
+    public void initialize() {}
     public abstract void loadConfigs();
     public abstract void saveConfigs();
     public abstract @KeyAlphaNum String folderName();

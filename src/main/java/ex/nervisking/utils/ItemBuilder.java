@@ -10,6 +10,7 @@ import ex.nervisking.itemsManager.RDMaterial;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.block.Container;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
@@ -48,7 +49,6 @@ public class ItemBuilder {
 
     private Player player = null;
     private final Error error;
-    private static final ServerVersion serverVersion = ExApi.serverVersion;
 
     public final static String CLOSE = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDM0NWU1ZmNlMmZjZmZmNzhjZGFjNjVlZDg4MTkxOGM3OWMzOGU4NTVlYmJjMTkyYzk3YzU3ODRjMzJkMzc4In19fQ==";
     public final static String BACK = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWQ3M2NmNjZkMzFiODNjZDhiODY0NGMxNTk1OGMxYjczYzhkOTczMjNiODAxMTcwYzFkODg2NGJiNmE4NDZkIn19fQ==";
@@ -281,7 +281,7 @@ public class ItemBuilder {
         ItemStack head = new ItemStack(Material.PLAYER_HEAD);
         head.setAmount(amount);
         if (head.getItemMeta() instanceof SkullMeta skullMeta && texture != null) {
-            if (ExApi.serverVersion.serverVersionGreaterEqualThan(ExApi.serverVersion, ServerVersion.v1_20_R2)) {
+            if (ExApi.serverVersionGreaterEqualThan(ServerVersion.v1_20_R2)) {
                 PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID());
                 PlayerTextures textures = profile.getTextures();
                 URL url;
@@ -610,7 +610,7 @@ public class ItemBuilder {
         }
         if (value) {
             meta.addItemFlags(ItemFlag.values());
-            if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
+            if (ExApi.serverVersionGreaterEqualThan(ServerVersion.v1_21_R3)) {
                 for (Attribute attribute : Attribute.values()) {
                     meta.removeAttributeModifier(attribute);
                 }
@@ -685,7 +685,7 @@ public class ItemBuilder {
             return this;
         }
         if (meta instanceof SkullMeta skullMeta) {
-            if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_20_R2)) {
+            if (ExApi.serverVersionGreaterEqualThan(ServerVersion.v1_20_R2)) {
                 PlayerProfile profile = Bukkit.createPlayerProfile(uuid);
                 PlayerTextures textures = profile.getTextures();
                 URL url;
@@ -724,7 +724,7 @@ public class ItemBuilder {
         if (error.isStatus() || amount < 0) {
             return this;
         }
-        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
+        if (ExApi.serverVersionGreaterEqualThan(ServerVersion.v1_21_R3)) {
             meta.setMaxStackSize(amount);
         }
         return this;
@@ -735,7 +735,7 @@ public class ItemBuilder {
         if (error.isStatus()) {
             return this;
         }
-        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
+        if (ExApi.serverVersionGreaterEqualThan(ServerVersion.v1_21_R3)) {
             meta.setEnchantmentGlintOverride(true);
         } else {
             addEnchant(Enchantment.FLAME, 1, true);
@@ -749,7 +749,7 @@ public class ItemBuilder {
         if (error.isStatus()) {
             return this;
         }
-        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
+        if (ExApi.serverVersionGreaterEqualThan(ServerVersion.v1_21_R3)) {
             meta.setEnchantmentGlintOverride(value);
         } else if (value) {
             addEnchant(Enchantment.LURE, 1, true);
@@ -773,7 +773,7 @@ public class ItemBuilder {
             return this;
         }
         if (value) {
-            if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
+            if (ExApi.serverVersionGreaterEqualThan(ServerVersion.v1_21_R3)) {
                 meta.setEnchantmentGlintOverride(true);
             } else {
                 addEnchant(Enchantment.LURE, 1, true);
@@ -791,7 +791,7 @@ public class ItemBuilder {
         if (error.isStatus()) {
             return this;
         }
-        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
+        if (ExApi.serverVersionGreaterEqualThan(ServerVersion.v1_21_R3)) {
             meta.setGlider(value);
         } else if (value) {
             addEnchant(Enchantment.LURE, 1, true);
@@ -808,7 +808,7 @@ public class ItemBuilder {
         if (error.isStatus()) {
             return this;
         }
-        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
+        if (ExApi.serverVersionGreaterEqualThan(ServerVersion.v1_21_R3)) {
             meta.setHideTooltip(value);
         } else if (value) {
             setName(" ");
@@ -821,7 +821,7 @@ public class ItemBuilder {
             return this;
         }
         if (meta instanceof FoodComponent foodMeta) {
-            if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
+            if (ExApi.serverVersionGreaterEqualThan(ServerVersion.v1_21_R3)) {
                 foodMeta.setNutrition(nutrition);
                 foodMeta.setSaturation(saturationModifier);
                 foodMeta.setCanAlwaysEat(canAlwaysEat);
@@ -836,7 +836,7 @@ public class ItemBuilder {
         if (error.isStatus() || rarityName == null) {
             return this;
         }
-        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
+        if (ExApi.serverVersionGreaterEqualThan(ServerVersion.v1_21_R3)) {
             try {
                 meta.setRarity(ItemRarity.valueOf(rarityName.toUpperCase()));
             } catch (IllegalArgumentException e) {
@@ -884,7 +884,7 @@ public class ItemBuilder {
         if (error.isStatus()) {
             return this;
         }
-        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_9_R2)) {
+        if (ExApi.serverVersionGreaterEqualThan(ServerVersion.v1_9_R2)) {
             if (meta instanceof ArmorMeta potionMeta) {
                 if (value) {
                     potionMeta.setTrim(null);
@@ -898,7 +898,7 @@ public class ItemBuilder {
         if (error.isStatus()) {
             return this;
         }
-        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_9_R2)) {
+        if (ExApi.serverVersionGreaterEqualThan(ServerVersion.v1_9_R2)) {
             if (meta instanceof ArmorMeta armorMeta) {
                 armorMeta.setTrim(new ArmorTrim(trimMaterial, trimPattern));
             }
@@ -910,7 +910,7 @@ public class ItemBuilder {
         if (error.isStatus()) {
             return this;
         }
-        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_9_R2)) {
+        if (ExApi.serverVersionGreaterEqualThan(ServerVersion.v1_9_R2)) {
             if (meta instanceof ArmorMeta armorMeta) {
                 TrimMaterial trimMaterial = ItemUtils.getTrimMaterial(Material);
                 if (trimMaterial == null) {
@@ -954,7 +954,7 @@ public class ItemBuilder {
         if (error.isStatus()) {
             return this;
         }
-        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
+        if (ExApi.serverVersionGreaterEqualThan(ServerVersion.v1_21_R3)) {
             CustomModelDataComponent component = meta.getCustomModelDataComponent();
             component.setFlags(booleans);
         }
@@ -969,7 +969,7 @@ public class ItemBuilder {
         if (error.isStatus()) {
             return this;
         }
-        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
+        if (ExApi.serverVersionGreaterEqualThan(ServerVersion.v1_21_R3)) {
             CustomModelDataComponent component = meta.getCustomModelDataComponent();
             component.setFloats(floats);
         }
@@ -985,7 +985,7 @@ public class ItemBuilder {
             return this;
         }
 
-        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
+        if (ExApi.serverVersionGreaterEqualThan(ServerVersion.v1_21_R3)) {
             CustomModelDataComponent component = meta.getCustomModelDataComponent();
             component.setColors(colors);
         }
@@ -1001,7 +1001,7 @@ public class ItemBuilder {
             return this;
         }
 
-        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
+        if (ExApi.serverVersionGreaterEqualThan(ServerVersion.v1_21_R3)) {
             CustomModelDataComponent component = meta.getCustomModelDataComponent();
             component.setColors(colors.stream()
                     .map(rgb -> Color.fromRGB(Integer.parseInt(rgb)))
@@ -1019,7 +1019,7 @@ public class ItemBuilder {
             return this;
         }
 
-        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
+        if (ExApi.serverVersionGreaterEqualThan(ServerVersion.v1_21_R3)) {
             CustomModelDataComponent component = meta.getCustomModelDataComponent();
             component.setStrings(strings);
         }
@@ -1035,11 +1035,28 @@ public class ItemBuilder {
             return this;
         }
 
-        if (serverVersion.serverVersionGreaterEqualThan(serverVersion, ServerVersion.v1_21_R3)) {
+        if (ExApi.serverVersionGreaterEqualThan(ServerVersion.v1_21_R3)) {
             meta.setItemModel(new NamespacedKey(namespace, key));
         }
 
         return this;
+    }
+
+    public void setBlockStateMeta(Container container) {
+        if (error.isStatus()) {
+            return;
+        }
+        if (meta instanceof BlockStateMeta blockStateMeta) {
+            blockStateMeta.setBlockState(container);
+        }
+    }
+
+    public BlockStateMeta getBlockStateMeta() {
+        return (BlockStateMeta) meta;
+    }
+
+    public ItemMeta getMeta() {
+        return meta;
     }
 
     /**

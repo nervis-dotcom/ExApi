@@ -50,7 +50,7 @@ public record MenuListener(HashMap<Player, PlayerMenuUtility> playerMenuUtilityM
         Player player = (Player) event.getWhoClicked();
         InventoryHolder holder = InventoryUtils.getTopInventory(event).getHolder();
 
-        if (holder instanceof Menu menu) {
+        if (holder instanceof Menu<?> menu) {
             if (menu.setCancelClicks()) {
                 event.setCancelled(true);
             }
@@ -92,7 +92,7 @@ public record MenuListener(HashMap<Player, PlayerMenuUtility> playerMenuUtilityM
     public void onMenuClose(InventoryCloseEvent event) {
         Player player = (Player) event.getPlayer();
         InventoryHolder holder = InventoryUtils.getTopInventory(event).getHolder();
-        if (holder instanceof Menu menu) {
+        if (holder instanceof Menu<?> menu) {
             if (menu.setCancelClose()) {
                 Scheduler.runLater(() -> player.openInventory(event.getInventory()), 1L);
                 return;
@@ -105,7 +105,7 @@ public record MenuListener(HashMap<Player, PlayerMenuUtility> playerMenuUtilityM
     public void onPlayerDrop(PlayerDropItemEvent event) {
         Player player = event.getPlayer();
         Inventory topInventory = InventoryUtils.getTopInventory(player);
-        if (topInventory.getHolder() instanceof Menu menu) {
+        if (topInventory.getHolder() instanceof Menu<?> menu) {
             if (menu.setCancelDrop()) {
                 event.setCancelled(true);
             }
@@ -117,7 +117,7 @@ public record MenuListener(HashMap<Player, PlayerMenuUtility> playerMenuUtilityM
      */
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        if (!ExApi.isIsMenu()) return;
+        if (!ExApi.isMenu()) return;
         playerMenuUtilityMap.remove(event.getPlayer());
 
     }

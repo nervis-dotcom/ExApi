@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 public class PlayerMenuUtility {
 
     private final Player owner;
-    private final Stack<Menu> history;
+    private final Stack<Menu<?>> history;
     private final Map<String, Object> dataGui;
 
     public PlayerMenuUtility(Player player) {
@@ -21,7 +21,7 @@ public class PlayerMenuUtility {
         return this.owner;
     }
 
-    public Menu lastMenu() {
+    public Menu<?> lastMenu() {
         if (!history.isEmpty()) {
             history.pop(); // El actual
             return history.isEmpty() ? null : history.peek(); // El anterior
@@ -29,7 +29,7 @@ public class PlayerMenuUtility {
         return null;
     }
 
-    public void pushMenu(Menu menu) {
+    public void pushMenu(Menu<?> menu) {
         this.history.push(menu);
     }
 
@@ -38,7 +38,7 @@ public class PlayerMenuUtility {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T getData(String key, Class<T> clazz) {
+    public <T> T getData(String key, Class<T> clazz) throws ClassCastException {
         Object value = this.dataGui.get(key);
         if (value == null) return null;
         if (clazz.isInstance(value)) {

@@ -1,17 +1,22 @@
 package ex.nervisking.menuManager;
 
+import ex.nervisking.ExApi;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
 
-public abstract class MenuPages extends Menu {
+public abstract class MenuPages<T extends JavaPlugin> extends Menu<T> {
 
+    protected final T plugin;
     protected int page = 0;
     private List<ItemStack> cachedItems;
     private List<Integer> slots;
 
+    @SuppressWarnings("unchecked")
     public MenuPages(PlayerMenuUtility playerMenuUtility) {
         super(playerMenuUtility);
+        this.plugin = ExApi.getPluginOf((Class<T>) JavaPlugin.class);
     }
 
     public abstract List<ItemStack> addDataItems();

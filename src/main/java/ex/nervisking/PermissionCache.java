@@ -24,7 +24,6 @@ public class PermissionCache {
         this.cooldownMillis = cooldownMillis;
         this.opCache = new HashMap<>();
         this.permCache = new HashMap<>();
-
     }
 
     @Contract("_ -> new")

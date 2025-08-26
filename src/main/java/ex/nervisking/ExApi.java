@@ -42,9 +42,9 @@ public class ExApi {
     private static UtilsManagers utilsManagers;
     private static Utils utils;
     private static PermissionCache permissionCache;
-    public static ServerVersion serverVersion;
+    private static ServerVersion serverVersion;
 
-    private static final HashMap<Player, PlayerMenuUtility> playerMenuUtilityMap = new HashMap<>();
+    private static final HashMap<Player, PlayerMenuUtility> playerMenuUtility = new HashMap<>();
     private static boolean isMenu = false;
 
     private static String sVar = "0";
@@ -201,7 +201,7 @@ public class ExApi {
         return getParticle(name) != null ? getParticle(name) : def;
     }
 
-// menu ------------------------------------------------------------------------------------------------------
+    // menu ------------------------------------------------------------------------------------------------------------
 
     private void registerMenuListener(JavaPlugin plugin) {
         boolean isAlreadyRegistered = false;
@@ -215,12 +215,12 @@ public class ExApi {
         }
 
         if (!isAlreadyRegistered) {
-            plugin.getServer().getPluginManager().registerEvents(new MenuListener(playerMenuUtilityMap), plugin);
+            plugin.getServer().getPluginManager().registerEvents(new MenuListener(playerMenuUtility), plugin);
         }
     }
 
     @ToUse(value = "Método para abir menu")
-    public static void openMenuOf(@NotNull Class<? extends Menu> menuClass, Player player) throws MenuManagerException, MenuManagerNotSetupException {
+    public static void openMenuOf(@NotNull Class<? extends Menu<?>> menuClass, Player player) throws MenuManagerException, MenuManagerNotSetupException {
         try {
             menuClass.getConstructor(PlayerMenuUtility.class).newInstance(getPlayerMenuUtility(player)).open();
         } catch (InstantiationException var3) {
@@ -235,7 +235,7 @@ public class ExApi {
     }
 
     @ToUse(value = "Método para abir menu")
-    public static void openMenu(Class<? extends Menu> menuClass, Player player) {
+    public static void openMenu(Class<? extends Menu<?>> menuClass, Player player) {
         try {
             ExApi.openMenuOf(menuClass, player);
         } catch (MenuManagerNotSetupException | MenuManagerException e) {
@@ -244,13 +244,13 @@ public class ExApi {
         }
     }
 
-    public static void closeInventorys() {
+    public static void closeInventories() {
         if (!isMenu) return;
         for (Player player : plugin.getServer().getOnlinePlayers()) {
             Inventory topInventory = InventoryUtils.getTopInventory(player);
             if (topInventory.getHolder() instanceof Menu) {
                 player.closeInventory();
-                playerMenuUtilityMap.remove(player);
+                playerMenuUtility.remove(player);
             }
         }
     }
@@ -258,20 +258,20 @@ public class ExApi {
     public static PlayerMenuUtility getPlayerMenuUtility(Player player) throws MenuManagerNotSetupException {
         if (!isMenu) {
             throw new MenuManagerNotSetupException();
-        } else if (!playerMenuUtilityMap.containsKey(player)) {
+        } else if (!playerMenuUtility.containsKey(player)) {
             PlayerMenuUtility playerMenuUtility = new PlayerMenuUtility(player);
-            playerMenuUtilityMap.put(player, playerMenuUtility);
+            ExApi.playerMenuUtility.put(player, playerMenuUtility);
             return playerMenuUtility;
         } else {
-            return playerMenuUtilityMap.get(player);
+            return playerMenuUtility.get(player);
         }
     }
 
-    public static HashMap<Player, PlayerMenuUtility> getPlayerMenuUtilityMap() {
-        return playerMenuUtilityMap;
+    public static HashMap<Player, PlayerMenuUtility> getPlayerMenuUtility() {
+        return playerMenuUtility;
     }
 
-    // -------------------------------------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------------------------------------------
 
     private void setVersion() {
         String packageName = Bukkit.getServer().getClass().getPackage().getName();
@@ -305,6 +305,16 @@ public class ExApi {
         }
     }
 
+    public static boolean serverVersionGreaterEqualThan(@NotNull ServerVersion version) {
+        return serverVersion.ordinal() >= version.ordinal();
+    }
+
+    public static boolean serverVersionLessEqualThan(@NotNull ServerVersion version) {
+        return serverVersion.ordinal() <= version.ordinal();
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+
     @ToUse(value = "verificar si el plugin esta activo")
     public static boolean isPlugin(String pluginName) {
         Plugin plugin = ExApi.plugin.getServer().getPluginManager().getPlugin(pluginName);
@@ -321,7 +331,7 @@ public class ExApi {
         return ExApi.isPlugin(plugins.getName());
     }
 
-    public static boolean isIsMenu() {
+    public static boolean isMenu() {
         return isMenu;
     }
 
@@ -335,10 +345,6 @@ public class ExApi {
 
     public static PermissionCache getPermissionCache() {
         return permissionCache;
-    }
-
-    public static ServerVersion getServerVersion() {
-        return serverVersion;
     }
 
     @ToUse()

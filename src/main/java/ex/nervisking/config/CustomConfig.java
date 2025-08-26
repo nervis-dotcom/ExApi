@@ -38,6 +38,7 @@ public class CustomConfig {
         this.newFile = newFile;
         this.fileConfiguration = null;
         this.file = null;
+        this.registerConfig();
     }
 
     /**
@@ -97,7 +98,7 @@ public class CustomConfig {
         return this.fileName;
     }
 
-    public void registerConfig() {
+    private void registerConfig() {
         if (folderName != null) {
             file = new File(plugin.getDataFolder() + File.separator + folderName, fileName);
         } else {

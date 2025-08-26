@@ -33,7 +33,7 @@ public abstract class ExPlugin extends JavaPlugin {
     }
     @ToUse
     public void Reload() {
-        ExApi.closeInventorys();
+        ExApi.closeInventories();
     }
     protected abstract void Enable();
     protected abstract void Disable();
@@ -72,7 +72,7 @@ public abstract class ExPlugin extends JavaPlugin {
         if (cache != null) {
             this.cache.cancel();
         }
-        ExApi.closeInventorys();
+        ExApi.closeInventories();
         this.Disable();
     }
 

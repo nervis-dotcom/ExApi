@@ -57,7 +57,7 @@ public class Utils {
         text = replacePlaceholders(null, text);
         text = processText(text);
         boolean containsLegacyFormat = text.contains("&") || text.contains("§");
-        if (containsLegacyFormat && SERVER_VERSION < 16) {
+        if (containsLegacyFormat && ExApi.serverVersionLessEqualThan(ServerVersion.v1_15_R1)) { // SERVER_VERSION < 16
             return ChatColor.translateAlternateColorCodes('&', text);
         }
 
